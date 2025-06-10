@@ -1,10 +1,11 @@
+
 "use client";
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2 } from 'lucide-react';
+import { Loader2, Send } from 'lucide-react'; // Changed MessageSquareText to Send
 
 interface SosMessageScreenProps {
   userName: string;
@@ -13,6 +14,7 @@ interface SosMessageScreenProps {
   sosMessage: string | null;
   onGenerateSos: () => void;
   isLoading: boolean;
+  onSendViaWhatsApp?: (message: string) => void;
 }
 
 const emergencyTypeMap: Record<string, string> = {
@@ -29,8 +31,10 @@ export function SosMessageScreen({
   sosMessage,
   onGenerateSos,
   isLoading,
+  onSendViaWhatsApp,
 }: SosMessageScreenProps) {
   const displayEmergencyType = emergencyTypeMap[emergencyType] || emergencyType;
+  const canSendMessage = sosMessage && !sosMessage.startsWith("Erro") && !isLoading;
 
   return (
     <div className="flex flex-col items-center">
@@ -75,11 +79,20 @@ export function SosMessageScreen({
                 Gerar Mensagem SOS
             </Button>
           )}
-           {(sosMessage || isLoading) && ( // Show button to regenerate if there was an error or if user wants to try again
+           {(sosMessage || isLoading) && ( 
             <Button onClick={onGenerateSos} disabled={isLoading} className="w-full" variant="secondary">
                 {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 {sosMessage && sosMessage.startsWith("Erro") ? "Tentar Novamente" : "Gerar Novamente"}
             </Button>
+           )}
+           {canSendMessage && onSendViaWhatsApp && (
+             <Button
+               onClick={() => onSendViaWhatsApp(sosMessage!)}
+               className="w-full" // Uses default primary button style
+             >
+               <Send className="w-4 h-4 mr-2" />
+               Enviar via WhatsApp
+             </Button>
            )}
         </CardFooter>
       </Card>

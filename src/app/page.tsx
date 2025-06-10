@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -9,12 +10,13 @@ import { generateSosMessage, type GenerateSosMessageInput } from '@/ai/flows/gen
 import { useToast } from "@/hooks/use-toast";
 
 type AppStep = 'welcome' | 'emergency' | 'sos';
+const LOCAL_STORAGE_USER_NAME_KEY = 'LibrasTech_UserName';
 
 export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
   const [userName, setUserName] = useState<string>('');
   const [emergencyType, setEmergencyType] = useState<string>('');
-  const [location, setLocation] = useState<string>('Localização não informada'); // Placeholder for location
+  const [location, setLocation] = useState<string>('Localização não informada');
   const [sosMessage, setSosMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -22,13 +24,15 @@ export default function HomePage() {
 
   useEffect(() => {
     setIsMounted(true);
-    // Attempt to get location - simplified for now
+
+    const storedName = localStorage.getItem(LOCAL_STORAGE_USER_NAME_KEY);
+    if (storedName) {
+      setUserName(storedName);
+    }
+
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          // For privacy and simplicity, we'll use a generic location.
-          // In a real app, you'd use position.coords.latitude and position.coords.longitude
-          // and potentially reverse geocode it.
           setLocation('Proximidades da localização atual');
         },
         () => {
@@ -40,13 +44,15 @@ export default function HomePage() {
 
 
   const handleNameSave = (name: string) => {
-    setUserName(name);
+    const trimmedName = name.trim();
+    setUserName(trimmedName);
+    localStorage.setItem(LOCAL_STORAGE_USER_NAME_KEY, trimmedName);
     setCurrentStep('emergency');
   };
 
   const handleSelectEmergency = (type: string) => {
     setEmergencyType(type);
-    setSosMessage(null); // Clear previous message
+    setSosMessage(null); 
     setCurrentStep('sos');
   };
 
@@ -82,8 +88,29 @@ export default function HomePage() {
     setIsLoading(false);
   };
 
+  const handleSendViaWhatsApp = (message: string) => {
+    if (!message || message.startsWith("Erro")) {
+      toast({
+        title: "Mensagem Inválida",
+        description: "Não é possível enviar uma mensagem de erro ou vazia para o WhatsApp.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const phoneNumber = "5543999054151";
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank');
+    
+    toast({
+      title: "Abrindo WhatsApp",
+      description: "Sua mensagem está pronta para ser enviada.",
+    });
+  };
+
   const handleBack = () => {
-    setSosMessage(null); // Clear SOS message when going back
+    setSosMessage(null); 
     if (currentStep === 'sos') {
       setCurrentStep('emergency');
     } else if (currentStep === 'emergency') {
@@ -113,8 +140,6 @@ export default function HomePage() {
 
 
   if (!isMounted) {
-    // Optional: Render a loading state or null until mount to avoid hydration issues with localStorage/sessionStorage if used later.
-    // For now, simple null render.
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p>Carregando...</p>
@@ -144,6 +169,7 @@ export default function HomePage() {
           sosMessage={sosMessage}
           onGenerateSos={handleGenerateSos}
           isLoading={isLoading}
+          onSendViaWhatsApp={handleSendViaWhatsApp}
         />
       )}
     </AppLayout>
