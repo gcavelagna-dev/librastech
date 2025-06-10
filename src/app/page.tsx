@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { EmergencySelectionScreen } from '@/components/screens/EmergencySelectionScreen';
@@ -11,16 +11,65 @@ import { useToast } from "@/hooks/use-toast";
 
 type AppStep = 'welcome' | 'emergency' | 'sos';
 const LOCAL_STORAGE_USER_NAME_KEY = 'LibrasTech_UserName';
+const GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY'; // ATENÇÃO: Substitua pela sua API Key
 
 export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
   const [userName, setUserName] = useState<string>('');
   const [emergencyType, setEmergencyType] = useState<string>('');
   const [location, setLocation] = useState<string>('Obtendo localização...');
+  const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
   const [sosMessage, setSosMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
   const { toast } = useToast();
+
+  const fetchAddressFromCoordinates = useCallback(async (lat: number, lon: number) => {
+    if (GOOGLE_MAPS_API_KEY === 'YOUR_GOOGLE_MAPS_API_KEY') {
+      const coordsString = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+      setLocation(coordsString + ' (API Key do Google Maps não configurada para buscar endereço)');
+      toast({
+        title: "API Key Necessária",
+        description: "Configure sua API Key do Google Maps para obter o endereço.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=${GOOGLE_MAPS_API_KEY}`
+      );
+      const data = await response.json();
+
+      if (data.status === 'OK' && data.results && data.results.length > 0) {
+        const address = data.results[0].formatted_address;
+        setLocation(address);
+        toast({
+          title: "Endereço Obtido",
+          description: "Endereço aproximado encontrado.",
+        });
+      } else {
+        const coordsString = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+        setLocation(coordsString + ' (Endereço não encontrado)');
+        toast({
+          title: "Erro ao Buscar Endereço",
+          description: data.error_message || "Não foi possível converter coordenadas em endereço. Exibindo Lat/Lon.",
+          variant: "destructive",
+        });
+        console.error("Google Geocoding API error:", data.status, data.error_message);
+      }
+    } catch (error) {
+      console.error("Error fetching address:", error);
+      const coordsString = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+      setLocation(coordsString + ' (Erro na API)');
+      toast({
+        title: "Erro de Rede",
+        description: "Falha ao comunicar com a API de geocodificação.",
+        variant: "destructive",
+      });
+    }
+  }, [toast]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -35,11 +84,14 @@ export default function HomePage() {
         (position) => {
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
-          setLocation(`Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`);
+          setCoordinates({ lat, lon });
+          const coordsString = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+          setLocation(coordsString); // Define inicialmente com lat/lon
           toast({
-            title: "Localização Obtida",
-            description: "Latitude e longitude capturadas.",
+            title: "Coordenadas Obtidas",
+            description: "Latitude e longitude capturadas. Buscando endereço...",
           });
+          fetchAddressFromCoordinates(lat, lon);
         },
         () => {
           setLocation('Não foi possível obter a localização');
@@ -58,7 +110,7 @@ export default function HomePage() {
         variant: "destructive",
       });
     }
-  }, [toast]);
+  }, [toast, fetchAddressFromCoordinates]);
 
 
   const handleNameSave = (name: string) => {
@@ -70,7 +122,7 @@ export default function HomePage() {
 
   const handleSelectEmergency = (type: string) => {
     setEmergencyType(type);
-    setSosMessage(null); 
+    setSosMessage(null);
     setCurrentStep('sos');
   };
 
@@ -115,7 +167,7 @@ export default function HomePage() {
       });
       return;
     }
-    const phoneNumber = "5543999054151"; // Mantenha o número de telefone desejado
+    const phoneNumber = "5543999054151"; 
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
     
@@ -156,7 +208,6 @@ export default function HomePage() {
     }
   };
 
-
   if (!isMounted) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -188,6 +239,7 @@ export default function HomePage() {
           onGenerateSos={handleGenerateSos}
           isLoading={isLoading}
           onSendViaWhatsApp={handleSendViaWhatsApp}
+          coordinates={coordinates}
         />
       )}
     </AppLayout>

@@ -5,7 +5,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Send, Info } from 'lucide-react';
+import { Loader2, Send, Info, MapPin } from 'lucide-react';
 
 interface SosMessageScreenProps {
   userName: string;
@@ -15,6 +15,7 @@ interface SosMessageScreenProps {
   onGenerateSos: () => void;
   isLoading: boolean;
   onSendViaWhatsApp?: (message: string) => void;
+  coordinates: { lat: number; lon: number } | null;
 }
 
 const emergencyTypeMap: Record<string, string> = {
@@ -32,10 +33,66 @@ export function SosMessageScreen({
   onGenerateSos,
   isLoading,
   onSendViaWhatsApp,
+  coordinates,
 }: SosMessageScreenProps) {
   const displayEmergencyType = emergencyTypeMap[emergencyType] || emergencyType;
   const canSendMessage = sosMessage && !sosMessage.startsWith("Erro") && !isLoading;
-  const isLocationReady = location !== 'Obtendo localização...' && !location.startsWith('Não foi possível');
+  const isLocationLoading = location === 'Obtendo localização...';
+  const hasLocationError = location.startsWith('Não foi possível') || location === 'Geolocalização não suportada neste navegador';
+  const isLocationReady = !isLocationLoading && !hasLocationError && !location.includes('(API Key do Google Maps não configurada');
+
+  const getLocationDisplay = () => {
+    if (isLocationLoading) {
+      return (
+        <div className="flex items-center text-sm text-muted-foreground mt-1">
+          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          <span>{location}</span>
+        </div>
+      );
+    }
+    if (hasLocationError) {
+      return (
+        <div className="flex items-center text-sm text-destructive mt-1">
+          <Info className="w-4 h-4 mr-2" />
+          <span>{location}</span>
+        </div>
+      );
+    }
+    if (location.includes('(API Key do Google Maps não configurada')) {
+         return (
+            <>
+                <p>{location.split('(API Key')[0].trim()}</p>
+                <div className="flex items-center text-sm text-amber-600 dark:text-amber-500 mt-1">
+                    <Info className="w-4 h-4 mr-2" />
+                    <span>API Key do Google Maps não configurada para buscar endereço.</span>
+                </div>
+            </>
+         );
+    }
+     if (location.includes('(Endereço não encontrado)')) {
+         return (
+            <>
+                <p>{location.split('(Endereço não encontrado)')[0].trim()}</p>
+                <div className="flex items-center text-sm text-muted-foreground mt-1">
+                    <Info className="w-4 h-4 mr-2" />
+                    <span>Endereço não encontrado, exibindo coordenadas.</span>
+                </div>
+            </>
+         );
+    }
+    if (location.includes('(Erro na API)')) {
+        return (
+           <>
+               <p>{location.split('(Erro na API)')[0].trim()}</p>
+               <div className="flex items-center text-sm text-destructive mt-1">
+                   <Info className="w-4 h-4 mr-2" />
+                   <span>Erro ao buscar endereço, exibindo coordenadas.</span>
+               </div>
+           </>
+        );
+   }
+    return <p>{location}</p>;
+  };
 
   return (
     <div className="flex flex-col items-center">
@@ -52,63 +109,47 @@ export function SosMessageScreen({
             <p>{userName}</p>
           </div>
           <div>
-            <h3 className="font-semibold">Localização:</h3>
-            <p>{location}</p>
-            {!isLocationReady && location !== 'Geolocalização não suportada neste navegador' && (
-                <div className="flex items-center text-sm text-muted-foreground mt-1">
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    <span>{location}</span>
-                </div>
-            )}
-             {location === 'Geolocalização não suportada neste navegador' && (
-                <div className="flex items-center text-sm text-destructive mt-1">
-                    <Info className="w-4 h-4 mr-2" />
-                    <span>Geolocalização não suportada.</span>
-                </div>
-            )}
-             {location.startsWith('Não foi possível') && (
-                <div className="flex items-center text-sm text-destructive mt-1">
-                    <Info className="w-4 h-4 mr-2" />
-                    <span>Não foi possível obter a localização. Verifique as permissões.</span>
-                </div>
-            )}
+            <h3 className="font-semibold flex items-center">
+              <MapPin className="w-4 h-4 mr-1 text-primary" /> Localização:
+            </h3>
+            {getLocationDisplay()}
           </div>
           <div>
             <h3 className="font-semibold">Tipo de Emergência:</h3>
             <p>{displayEmergencyType}</p>
           </div>
 
-          {isLoading && (
+          {isLoading && !sosMessage && ( // Mostrar apenas se estiver carregando e não houver mensagem ainda
             <div className="flex items-center justify-center p-4">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
               <p className="ml-2">Gerando mensagem...</p>
             </div>
           )}
 
-          {sosMessage && !isLoading && (
-            <Alert variant={sosMessage.startsWith("Erro") ? "destructive" : "default"}>
-              <AlertTitle>{sosMessage.startsWith("Erro") ? "Erro" : "Mensagem SOS Gerada"}</AlertTitle>
+          {sosMessage && ( // Mostrar sempre que houver uma mensagem, mesmo durante o carregamento de uma nova
+            <Alert variant={sosMessage.startsWith("Erro") ? "destructive" : "default"} className="mt-4">
+              <AlertTitle>{sosMessage.startsWith("Erro") ? "Erro" : "Mensagem SOS"}</AlertTitle>
               <AlertDescription className="whitespace-pre-wrap">{sosMessage}</AlertDescription>
             </Alert>
           )}
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
-          {!sosMessage && !isLoading && (
-             <Button onClick={onGenerateSos} disabled={isLoading || !isLocationReady} className="w-full">
-                {isLoading || !isLocationReady ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                Gerar Mensagem SOS
-            </Button>
-          )}
-           {(sosMessage || isLoading) && ( 
-            <Button onClick={onGenerateSos} disabled={isLoading || !isLocationReady} className="w-full" variant="secondary">
-                {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                {(sosMessage && sosMessage.startsWith("Erro")) || !isLocationReady ? "Tentar Novamente" : "Gerar Novamente"}
-            </Button>
-           )}
+        <CardFooter className="flex flex-col space-y-2 pt-4">
+          <Button 
+            onClick={onGenerateSos} 
+            disabled={isLoading || !isLocationReady} 
+            className="w-full"
+            variant={sosMessage && !sosMessage.startsWith("Erro") ? "secondary" : "default"}
+          >
+            {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+            {sosMessage && !sosMessage.startsWith("Erro") ? "Gerar Novamente" : "Gerar Mensagem SOS"}
+            {(!sosMessage || sosMessage.startsWith("Erro")) && !isLocationReady && !isLoading && " (Aguardando Localização)"}
+          </Button>
+          
            {canSendMessage && onSendViaWhatsApp && (
              <Button
                onClick={() => onSendViaWhatsApp(sosMessage!)}
                className="w-full"
+               variant="default"
              >
                <Send className="w-4 h-4 mr-2" />
                Enviar via WhatsApp
