@@ -16,7 +16,7 @@ export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
   const [userName, setUserName] = useState<string>('');
   const [emergencyType, setEmergencyType] = useState<string>('');
-  const [location, setLocation] = useState<string>('Localização não informada');
+  const [location, setLocation] = useState<string>('Obtendo localização...');
   const [sosMessage, setSosMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -33,14 +33,32 @@ export default function HomePage() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setLocation('Proximidades da localização atual');
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          setLocation(`Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`);
+          toast({
+            title: "Localização Obtida",
+            description: "Latitude e longitude capturadas.",
+          });
         },
         () => {
           setLocation('Não foi possível obter a localização');
+          toast({
+            title: "Erro de Localização",
+            description: "Não foi possível obter sua localização. Verifique as permissões do navegador.",
+            variant: "destructive",
+          });
         }
       );
+    } else {
+      setLocation('Geolocalização não suportada neste navegador');
+      toast({
+        title: "Erro de Localização",
+        description: "Geolocalização não é suportada pelo seu navegador.",
+        variant: "destructive",
+      });
     }
-  }, []);
+  }, [toast]);
 
 
   const handleNameSave = (name: string) => {
@@ -57,10 +75,10 @@ export default function HomePage() {
   };
 
   const handleGenerateSos = async () => {
-    if (!userName || !location || !emergencyType) {
+    if (!userName || !location || !emergencyType || location === 'Obtendo localização...' || location.startsWith('Não foi possível')) {
       toast({
         title: "Erro de Validação",
-        description: "Nome, localização e tipo de emergência são necessários.",
+        description: "Nome e tipo de emergência são necessários. Aguarde a obtenção da localização.",
         variant: "destructive",
       });
       return;
@@ -97,7 +115,7 @@ export default function HomePage() {
       });
       return;
     }
-    const phoneNumber = "5543999054151";
+    const phoneNumber = "5543999054151"; // Mantenha o número de telefone desejado
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
     

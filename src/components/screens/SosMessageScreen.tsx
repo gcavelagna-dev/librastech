@@ -5,7 +5,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Send } from 'lucide-react'; // Changed MessageSquareText to Send
+import { Loader2, Send, Info } from 'lucide-react';
 
 interface SosMessageScreenProps {
   userName: string;
@@ -35,6 +35,7 @@ export function SosMessageScreen({
 }: SosMessageScreenProps) {
   const displayEmergencyType = emergencyTypeMap[emergencyType] || emergencyType;
   const canSendMessage = sosMessage && !sosMessage.startsWith("Erro") && !isLoading;
+  const isLocationReady = location !== 'Obtendo localização...' && !location.startsWith('Não foi possível');
 
   return (
     <div className="flex flex-col items-center">
@@ -51,8 +52,26 @@ export function SosMessageScreen({
             <p>{userName}</p>
           </div>
           <div>
-            <h3 className="font-semibold">Localização (Estimada):</h3>
+            <h3 className="font-semibold">Localização:</h3>
             <p>{location}</p>
+            {!isLocationReady && location !== 'Geolocalização não suportada neste navegador' && (
+                <div className="flex items-center text-sm text-muted-foreground mt-1">
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <span>{location}</span>
+                </div>
+            )}
+             {location === 'Geolocalização não suportada neste navegador' && (
+                <div className="flex items-center text-sm text-destructive mt-1">
+                    <Info className="w-4 h-4 mr-2" />
+                    <span>Geolocalização não suportada.</span>
+                </div>
+            )}
+             {location.startsWith('Não foi possível') && (
+                <div className="flex items-center text-sm text-destructive mt-1">
+                    <Info className="w-4 h-4 mr-2" />
+                    <span>Não foi possível obter a localização. Verifique as permissões.</span>
+                </div>
+            )}
           </div>
           <div>
             <h3 className="font-semibold">Tipo de Emergência:</h3>
@@ -75,20 +94,21 @@ export function SosMessageScreen({
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           {!sosMessage && !isLoading && (
-             <Button onClick={onGenerateSos} disabled={isLoading} className="w-full">
+             <Button onClick={onGenerateSos} disabled={isLoading || !isLocationReady} className="w-full">
+                {isLoading || !isLocationReady ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
                 Gerar Mensagem SOS
             </Button>
           )}
            {(sosMessage || isLoading) && ( 
-            <Button onClick={onGenerateSos} disabled={isLoading} className="w-full" variant="secondary">
+            <Button onClick={onGenerateSos} disabled={isLoading || !isLocationReady} className="w-full" variant="secondary">
                 {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                {sosMessage && sosMessage.startsWith("Erro") ? "Tentar Novamente" : "Gerar Novamente"}
+                {(sosMessage && sosMessage.startsWith("Erro")) || !isLocationReady ? "Tentar Novamente" : "Gerar Novamente"}
             </Button>
            )}
            {canSendMessage && onSendViaWhatsApp && (
              <Button
                onClick={() => onSendViaWhatsApp(sosMessage!)}
-               className="w-full" // Uses default primary button style
+               className="w-full"
              >
                <Send className="w-4 h-4 mr-2" />
                Enviar via WhatsApp
