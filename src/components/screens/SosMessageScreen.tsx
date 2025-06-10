@@ -39,7 +39,7 @@ export function SosMessageScreen({
   const canSendMessage = sosMessage && !sosMessage.startsWith("Erro") && !isLoading;
   const isLocationLoading = location === 'Obtendo localização...';
   const hasLocationError = location.startsWith('Não foi possível') || location === 'Geolocalização não suportada neste navegador';
-  const isLocationReady = !isLocationLoading && !hasLocationError && !location.includes('(API Key do Google Maps não configurada');
+  const isLocationReady = !isLocationLoading && !hasLocationError;
 
   const getLocationDisplay = () => {
     if (isLocationLoading) {
@@ -58,39 +58,6 @@ export function SosMessageScreen({
         </div>
       );
     }
-    if (location.includes('(API Key do Google Maps não configurada')) {
-         return (
-            <>
-                <p>{location.split('(API Key')[0].trim()}</p>
-                <div className="flex items-center text-sm text-amber-600 dark:text-amber-500 mt-1">
-                    <Info className="w-4 h-4 mr-2" />
-                    <span>API Key do Google Maps não configurada para buscar endereço.</span>
-                </div>
-            </>
-         );
-    }
-     if (location.includes('(Endereço não encontrado)')) {
-         return (
-            <>
-                <p>{location.split('(Endereço não encontrado)')[0].trim()}</p>
-                <div className="flex items-center text-sm text-muted-foreground mt-1">
-                    <Info className="w-4 h-4 mr-2" />
-                    <span>Endereço não encontrado, exibindo coordenadas.</span>
-                </div>
-            </>
-         );
-    }
-    if (location.includes('(Erro na API)')) {
-        return (
-           <>
-               <p>{location.split('(Erro na API)')[0].trim()}</p>
-               <div className="flex items-center text-sm text-destructive mt-1">
-                   <Info className="w-4 h-4 mr-2" />
-                   <span>Erro ao buscar endereço, exibindo coordenadas.</span>
-               </div>
-           </>
-        );
-   }
     return <p>{location}</p>;
   };
 
@@ -119,14 +86,14 @@ export function SosMessageScreen({
             <p>{displayEmergencyType}</p>
           </div>
 
-          {isLoading && !sosMessage && ( // Mostrar apenas se estiver carregando e não houver mensagem ainda
+          {isLoading && !sosMessage && ( 
             <div className="flex items-center justify-center p-4">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
               <p className="ml-2">Gerando mensagem...</p>
             </div>
           )}
 
-          {sosMessage && ( // Mostrar sempre que houver uma mensagem, mesmo durante o carregamento de uma nova
+          {sosMessage && ( 
             <Alert variant={sosMessage.startsWith("Erro") ? "destructive" : "default"} className="mt-4">
               <AlertTitle>{sosMessage.startsWith("Erro") ? "Erro" : "Mensagem SOS"}</AlertTitle>
               <AlertDescription className="whitespace-pre-wrap">{sosMessage}</AlertDescription>

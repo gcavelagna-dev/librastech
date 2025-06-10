@@ -11,7 +11,6 @@ import { useToast } from "@/hooks/use-toast";
 
 type AppStep = 'welcome' | 'emergency' | 'sos';
 const LOCAL_STORAGE_USER_NAME_KEY = 'LibrasTech_UserName';
-const GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY'; // ATENÇÃO: Substitua pela sua API Key
 
 export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
@@ -23,53 +22,6 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
   const { toast } = useToast();
-
-  const fetchAddressFromCoordinates = useCallback(async (lat: number, lon: number) => {
-    if (GOOGLE_MAPS_API_KEY === 'YOUR_GOOGLE_MAPS_API_KEY') {
-      const coordsString = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
-      setLocation(coordsString + ' (API Key do Google Maps não configurada para buscar endereço)');
-      toast({
-        title: "API Key Necessária",
-        description: "Configure sua API Key do Google Maps para obter o endereço.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=${GOOGLE_MAPS_API_KEY}`
-      );
-      const data = await response.json();
-
-      if (data.status === 'OK' && data.results && data.results.length > 0) {
-        const address = data.results[0].formatted_address;
-        setLocation(address);
-        toast({
-          title: "Endereço Obtido",
-          description: "Endereço aproximado encontrado.",
-        });
-      } else {
-        const coordsString = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
-        setLocation(coordsString + ' (Endereço não encontrado)');
-        toast({
-          title: "Erro ao Buscar Endereço",
-          description: data.error_message || "Não foi possível converter coordenadas em endereço. Exibindo Lat/Lon.",
-          variant: "destructive",
-        });
-        console.error("Google Geocoding API error:", data.status, data.error_message);
-      }
-    } catch (error) {
-      console.error("Error fetching address:", error);
-      const coordsString = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
-      setLocation(coordsString + ' (Erro na API)');
-      toast({
-        title: "Erro de Rede",
-        description: "Falha ao comunicar com a API de geocodificação.",
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -86,12 +38,11 @@ export default function HomePage() {
           const lon = position.coords.longitude;
           setCoordinates({ lat, lon });
           const coordsString = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
-          setLocation(coordsString); // Define inicialmente com lat/lon
+          setLocation(coordsString);
           toast({
-            title: "Coordenadas Obtidas",
-            description: "Latitude e longitude capturadas. Buscando endereço...",
+            title: "Localização Obtida",
+            description: `Coordenadas: ${coordsString}`,
           });
-          fetchAddressFromCoordinates(lat, lon);
         },
         () => {
           setLocation('Não foi possível obter a localização');
@@ -110,7 +61,7 @@ export default function HomePage() {
         variant: "destructive",
       });
     }
-  }, [toast, fetchAddressFromCoordinates]);
+  }, [toast]);
 
 
   const handleNameSave = (name: string) => {
@@ -127,10 +78,10 @@ export default function HomePage() {
   };
 
   const handleGenerateSos = async () => {
-    if (!userName || !location || !emergencyType || location === 'Obtendo localização...' || location.startsWith('Não foi possível')) {
+    if (!userName || !emergencyType || location === 'Obtendo localização...' || location.startsWith('Não foi possível')) {
       toast({
-        title: "Erro de Validação",
-        description: "Nome e tipo de emergência são necessários. Aguarde a obtenção da localização.",
+        title: "Dados Incompletos",
+        description: "Nome e tipo de emergência são obrigatórios. Aguarde a obtenção da localização ou verifique as permissões.",
         variant: "destructive",
       });
       return;
