@@ -7,11 +7,13 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { EmergencySelectionScreen } from '@/components/screens/EmergencySelectionScreen';
 import { SosMessageScreen } from '@/components/screens/SosMessageScreen';
+import { SettingsDialog } from '@/components/dialogs/SettingsDialog';
 import { generateSosMessage, type GenerateSosMessageInput } from '@/ai/flows/generate-sos-message';
 import { useToast } from "@/hooks/use-toast";
 
 type AppStep = 'welcome' | 'emergency' | 'sos';
 const LOCAL_STORAGE_USER_NAME_KEY = 'LibrasTech_UserName';
+const LOCAL_STORAGE_PHONE_NUMBER_KEY = 'LibrasTech_PhoneNumber';
 
 export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
@@ -22,6 +24,9 @@ export default function HomePage() {
   const [sosMessage, setSosMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isSettingsDialogVisible, setIsSettingsDialogVisible] = useState(false);
+  const [userPhoneNumber, setUserPhoneNumber] = useState<string>('');
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -30,6 +35,10 @@ export default function HomePage() {
     const storedName = localStorage.getItem(LOCAL_STORAGE_USER_NAME_KEY);
     if (storedName) {
       setUserName(storedName);
+    }
+    const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
+    if (storedPhoneNumber) {
+      setUserPhoneNumber(storedPhoneNumber);
     }
 
     if (navigator.geolocation) {
@@ -111,15 +120,17 @@ export default function HomePage() {
       });
       return;
     }
-    const phoneNumber = "5543999054151"; 
+    // Prioritize verified phone number for WhatsApp if available, otherwise use default
+    const defaultPhoneNumber = "5543999054151";
+    const targetPhoneNumber = userPhoneNumber || defaultPhoneNumber;
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodedMessage}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${targetPhoneNumber.replace(/\D/g, '')}&text=${encodedMessage}`;
     
     window.open(whatsappUrl, '_blank');
     
     toast({
       title: "Abrindo WhatsApp",
-      description: "Sua mensagem está pronta para ser enviada.",
+      description: `Sua mensagem está pronta para ser enviada para ${targetPhoneNumber}.`,
     });
   };
 
@@ -133,10 +144,15 @@ export default function HomePage() {
   };
   
   const handleConfig = () => {
-    console.log("Botão de Configurações clicado. Implementar funcionalidade aqui.");
+    setIsSettingsDialogVisible(true);
+  };
+
+  const handleSavePhoneNumber = (phoneNumber: string) => {
+    setUserPhoneNumber(phoneNumber);
+    localStorage.setItem(LOCAL_STORAGE_PHONE_NUMBER_KEY, phoneNumber);
     toast({
-      title: "Configurações",
-      description: "Funcionalidade de configurações ainda não implementada.",
+      title: "Número Salvo",
+      description: "Seu número de telefone foi salvo para futuras emergências.",
     });
   };
 
@@ -189,6 +205,12 @@ export default function HomePage() {
           />
         )}
       </AppLayout>
+      <SettingsDialog
+        isOpen={isSettingsDialogVisible}
+        onClose={() => setIsSettingsDialogVisible(false)}
+        onSavePhoneNumber={handleSavePhoneNumber}
+        currentPhoneNumber={userPhoneNumber}
+      />
     </>
   );
 }

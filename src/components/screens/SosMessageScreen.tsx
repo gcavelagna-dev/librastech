@@ -43,7 +43,8 @@ export function SosMessageScreen({
   const canSendMessage = sosMessage && !sosMessage.startsWith("Erro") && !isLoading;
   const isLocationLoading = location === 'Obtendo localização...';
   const hasLocationError = location.startsWith('Não foi possível') || location === 'Geolocalização não suportada neste navegador';
-  const isLocationReady = !isLocationLoading && !hasLocationError;
+  const isLocationReady = !isLocationLoading && !hasLocationError && coordinates !== null;
+
 
   const getLocationDisplay = () => {
     if (isLocationLoading) {
@@ -102,7 +103,7 @@ export function SosMessageScreen({
     const qrData = JSON.stringify({
       sosMessage,
       userName,
-      location,
+      location, // This will be "Lat: X, Lon: Y" if address resolution failed or was skipped
       emergencyType: displayEmergencyType,
       coordinates,
     });
@@ -152,7 +153,7 @@ export function SosMessageScreen({
           {qrCodeUrl && canSendMessage && (
             <div className="mt-4 p-4 border rounded-md flex flex-col items-center bg-card">
               <p className="text-sm text-center mb-2 text-muted-foreground">
-                Escaneie com seu celular para enviar via WhatsApp/SMS (requer app LibrasTech no celular).
+                Escaneie para enviar via WhatsApp/SMS (requer app LibrasTech no celular).
               </p>
               <Image src={qrCodeUrl} alt="QR Code para mensagem SOS" width={220} height={220} data-ai-hint="qr code" />
               <Button variant="outline" size="sm" onClick={() => setQrCodeUrl(null)} className="mt-3">
