@@ -8,6 +8,16 @@ import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { EmergencySelectionScreen } from '@/components/screens/EmergencySelectionScreen';
 import { SosMessageScreen } from '@/components/screens/SosMessageScreen';
 import { SettingsDialog } from '@/components/dialogs/SettingsDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { generateSosMessage, type GenerateSosMessageInput } from '@/ai/flows/generate-sos-message';
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,6 +36,7 @@ export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
   const [isSettingsDialogVisible, setIsSettingsDialogVisible] = useState(false);
   const [userPhoneNumber, setUserPhoneNumber] = useState<string>('');
+  const [showPhoneNumberPrompt, setShowPhoneNumberPrompt] = useState(false);
 
   const { toast } = useToast();
 
@@ -39,7 +50,10 @@ export default function HomePage() {
     const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
     if (storedPhoneNumber) {
       setUserPhoneNumber(storedPhoneNumber);
+    } else if (storedName) { // Only show prompt if name is set (past welcome) and phone is not
+      setShowPhoneNumberPrompt(true);
     }
+
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -75,6 +89,11 @@ export default function HomePage() {
     setUserName(trimmedName);
     localStorage.setItem(LOCAL_STORAGE_USER_NAME_KEY, trimmedName);
     setCurrentStep('emergency');
+    // Check if phone number is already set, if not, prompt after name save
+    const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
+    if (!storedPhoneNumber) {
+      setShowPhoneNumberPrompt(true);
+    }
   };
 
   const handleSelectEmergency = (type: string) => {
@@ -95,11 +114,11 @@ export default function HomePage() {
     setIsLoading(true);
     setSosMessage(null);
     try {
-      const input: GenerateSosMessageInput = { 
-        userName, 
-        location, 
+      const input: GenerateSosMessageInput = {
+        userName,
+        location,
         emergencyType,
-        ...(userPhoneNumber && { userPhoneNumber: userPhoneNumber.replace(/\D/g, '') }) // Inclui apenas se existir
+        ...(userPhoneNumber && { userPhoneNumber: userPhoneNumber.replace(/\D/g, '') })
       };
       const result = await generateSosMessage(input);
       setSosMessage(result.sosMessage);
@@ -125,14 +144,14 @@ export default function HomePage() {
       });
       return;
     }
-    
-    const defaultPhoneNumber = "5543999054151"; 
+
+    const defaultPhoneNumber = "5543999054151";
     const targetPhoneNumber = userPhoneNumber || defaultPhoneNumber;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${targetPhoneNumber.replace(/\D/g, '')}&text=${encodedMessage}`;
-    
+
     window.open(whatsappUrl, '_blank');
-    
+
     toast({
       title: "Abrindo WhatsApp",
       description: `Sua mensagem está pronta para ser enviada para ${targetPhoneNumber}.`,
@@ -140,14 +159,14 @@ export default function HomePage() {
   };
 
   const handleBack = () => {
-    setSosMessage(null); 
+    setSosMessage(null);
     if (currentStep === 'sos') {
       setCurrentStep('emergency');
     } else if (currentStep === 'emergency') {
       setCurrentStep('welcome');
     }
   };
-  
+
   const handleConfig = () => {
     setIsSettingsDialogVisible(true);
   };
@@ -159,6 +178,7 @@ export default function HomePage() {
       title: "Número Salvo",
       description: "Seu número de telefone foi salvo para futuras emergências.",
     });
+    setShowPhoneNumberPrompt(false); // Hide prompt if number is saved
   };
 
   const getScreenTitle = () => {
@@ -216,6 +236,23 @@ export default function HomePage() {
         onSavePhoneNumber={handleSavePhoneNumber}
         currentPhoneNumber={userPhoneNumber}
       />
+       <AlertDialog open={showPhoneNumberPrompt} onOpenChange={setShowPhoneNumberPrompt}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Adicionar Número de Telefone?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Adicionar seu número de telefone permite que ele seja incluído automaticamente nas mensagens SOS, agilizando o contato em uma emergência. Você também poderá usá-lo para enviar alertas via WhatsApp/SMS pelo celular (requer app LibrasTech no celular).
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowPhoneNumberPrompt(false)}>Lembrar Depois</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              setShowPhoneNumberPrompt(false);
+              setIsSettingsDialogVisible(true);
+            }}>Adicionar Agora</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
