@@ -60,7 +60,7 @@ export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenPro
               />
             </div>
             <p className="text-sm text-center text-muted-foreground px-4">
-              "Insira seu nome para podermos te ajudar com mais segurança."
+              Insira seu nome para podermos te ajudar com mais segurança.
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
