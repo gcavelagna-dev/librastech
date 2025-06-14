@@ -20,7 +20,6 @@ export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenPro
 
   useEffect(() => {
     setIsMounted(true);
-    // Se houver um nome inicial (do localStorage), atualiza o estado
     if (initialName) {
       setName(initialName);
     }
@@ -34,7 +33,7 @@ export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenPro
   };
 
   if (!isMounted) {
-    return null; // Ou um loading spinner
+    return null; 
   }
 
   return (
@@ -85,4 +84,3 @@ export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenPro
     </div>
   );
 }
-
