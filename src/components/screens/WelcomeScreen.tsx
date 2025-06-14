@@ -2,7 +2,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -41,24 +40,10 @@ export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenPro
         <CardHeader>
           <CardTitle className="text-2xl font-headline text-center">Bem-vindo ao LibrasTech</CardTitle>
           <CardDescription className="text-center">
-            Sua segurança é nossa prioridade.
+            Sua segurança é nossa prioridade. Por favor, insira seu nome abaixo.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex flex-col items-center space-y-2">
-            <Image
-              src="https://placehold.co/150x150.png"
-              alt="Personagem amigável fazendo um sinal em Libras"
-              width={120}
-              height={120}
-              className="rounded-full"
-              data-ai-hint="friendly character sign language accessible"
-            />
-            <p className="text-sm text-center text-muted-foreground px-4">
-              "Insira seu nome para podermos te ajudar com mais segurança."
-            </p>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Seu Nome</Label>
