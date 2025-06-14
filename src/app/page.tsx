@@ -2,12 +2,23 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { EmergencySelectionScreen } from '@/components/screens/EmergencySelectionScreen';
 import { SosMessageScreen } from '@/components/screens/SosMessageScreen';
 import { generateSosMessage, type GenerateSosMessageInput } from '@/ai/flows/generate-sos-message';
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Button } from '@/components/ui/button';
 
 type AppStep = 'welcome' | 'emergency' | 'sos';
 const LOCAL_STORAGE_USER_NAME_KEY = 'LibrasTech_UserName';
@@ -22,6 +33,10 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
   const { toast } = useToast();
+
+  const [isRegistrationQrVisible, setIsRegistrationQrVisible] = useState(false);
+  const [registrationQrDataUrl, setRegistrationQrDataUrl] = useState<string | null>(null);
+
 
   useEffect(() => {
     setIsMounted(true);
@@ -39,10 +54,6 @@ export default function HomePage() {
           setCoordinates({ lat, lon });
           const coordsString = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
           setLocation(coordsString);
-          toast({
-            title: "Localização Obtida",
-            description: `Coordenadas: ${coordsString}`,
-          });
         },
         () => {
           setLocation('Não foi possível obter a localização');
@@ -92,10 +103,6 @@ export default function HomePage() {
       const input: GenerateSosMessageInput = { userName, location, emergencyType };
       const result = await generateSosMessage(input);
       setSosMessage(result.sosMessage);
-      toast({
-        title: "Mensagem SOS Gerada",
-        description: "Sua mensagem de emergência foi criada.",
-      });
     } catch (error) {
       console.error("Error generating SOS message:", error);
       const errorMessage = "Erro ao gerar mensagem SOS. Verifique sua conexão e tente novamente.";
@@ -140,10 +147,11 @@ export default function HomePage() {
   };
   
   const handleConfig = () => {
-    toast({
-        title: "Configurações",
-        description: "Funcionalidade de configurações ainda não implementada.",
-    });
+    const sessionId = Date.now().toString(36) + Math.random().toString(36).substring(2);
+    const qrData = JSON.stringify({ action: "registerLibrasTechDevice", sessionId: sessionId });
+    const url = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qrData)}&size=250x250&margin=10&ecc=H`;
+    setRegistrationQrDataUrl(url);
+    setIsRegistrationQrVisible(true);
   };
 
   const getScreenTitle = () => {
@@ -168,31 +176,62 @@ export default function HomePage() {
   }
 
   return (
-    <AppLayout
-      title={getScreenTitle()}
-      showBack={currentStep !== 'welcome'}
-      onBack={handleBack}
-      onConfig={handleConfig}
-      showConfig={true}
-    >
-      {currentStep === 'welcome' && (
-        <WelcomeScreen onNameSave={handleNameSave} initialName={userName} />
-      )}
-      {currentStep === 'emergency' && (
-        <EmergencySelectionScreen onSelectEmergency={handleSelectEmergency} />
-      )}
-      {currentStep === 'sos' && (
-        <SosMessageScreen
-          userName={userName}
-          location={location}
-          emergencyType={emergencyType}
-          sosMessage={sosMessage}
-          onGenerateSos={handleGenerateSos}
-          isLoading={isLoading}
-          onSendViaWhatsApp={handleSendViaWhatsApp}
-          coordinates={coordinates}
-        />
-      )}
-    </AppLayout>
+    <>
+      <AppLayout
+        title={getScreenTitle()}
+        showBack={currentStep !== 'welcome'}
+        onBack={handleBack}
+        onConfig={handleConfig}
+        showConfig={true}
+      >
+        {currentStep === 'welcome' && (
+          <WelcomeScreen onNameSave={handleNameSave} initialName={userName} />
+        )}
+        {currentStep === 'emergency' && (
+          <EmergencySelectionScreen onSelectEmergency={handleSelectEmergency} />
+        )}
+        {currentStep === 'sos' && (
+          <SosMessageScreen
+            userName={userName}
+            location={location}
+            emergencyType={emergencyType}
+            sosMessage={sosMessage}
+            onGenerateSos={handleGenerateSos}
+            isLoading={isLoading}
+            onSendViaWhatsApp={handleSendViaWhatsApp}
+            coordinates={coordinates}
+          />
+        )}
+      </AppLayout>
+
+      <Dialog open={isRegistrationQrVisible} onOpenChange={setIsRegistrationQrVisible}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Registrar Dispositivo</DialogTitle>
+            <DialogDescription>
+              Escaneie este QR Code com o aplicativo LibrasTech no seu celular para conectar sua conta.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-center py-4">
+            {registrationQrDataUrl && (
+              <Image 
+                src={registrationQrDataUrl} 
+                alt="QR Code para registro de dispositivo" 
+                width={250} 
+                height={250}
+                data-ai-hint="qr code" 
+              />
+            )}
+          </div>
+          <DialogFooter className="sm:justify-center">
+            <DialogClose asChild>
+              <Button type="button" variant="secondary">
+                Fechar
+              </Button>
+            </DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
