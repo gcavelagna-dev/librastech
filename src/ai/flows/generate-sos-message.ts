@@ -2,7 +2,7 @@
 'use server';
 
 /**
- * @fileOverview Generates an SOS message containing the user's name and location.
+ * @fileOverview Generates an SOS message containing the user's name, location, and optionally phone number.
  *
  * - generateSosMessage - A function that generates the SOS message.
  * - GenerateSosMessageInput - The input type for the generateSosMessage function.
@@ -16,6 +16,7 @@ const GenerateSosMessageInputSchema = z.object({
   userName: z.string().describe('The name of the user sending the SOS message.'),
   location: z.string().describe('The current location of the user.'),
   emergencyType: z.string().describe('The type of emergency (e.g., Fire, Medical).'),
+  userPhoneNumber: z.string().optional().describe('The registered phone number of the user, if available.'),
 });
 export type GenerateSosMessageInput = z.infer<typeof GenerateSosMessageInputSchema>;
 
@@ -32,11 +33,15 @@ const prompt = ai.definePrompt({
   name: 'generateSosMessagePrompt',
   input: {schema: GenerateSosMessageInputSchema},
   output: {schema: GenerateSosMessageOutputSchema},
-  prompt: `Você está criando uma mensagem de SOS para o usuário {{userName}}. A mensagem deve incluir o nome do usuário, a localização atual e o tipo de emergência. A mensagem deve ser concisa e clara, em Português do Brasil.  Use no máximo 200 caracteres.
+  prompt: `Você está criando uma mensagem de SOS para o usuário {{userName}}.
+A mensagem deve incluir o nome do usuário, a localização atual e o tipo de emergência.
+{{#if userPhoneNumber}}Inclua também o número de telefone registrado: {{userPhoneNumber}}.{{/if}}
+A mensagem deve ser concisa e clara, em Português do Brasil. Use no máximo 250 caracteres.
 
 Nome do usuário: {{userName}}
 Localização: {{location}}
 Tipo de emergência: {{emergencyType}}
+{{#if userPhoneNumber}}Número de contato: {{userPhoneNumber}}{{/if}}
 
 Mensagem SOS:`,
 });

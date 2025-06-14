@@ -95,7 +95,12 @@ export default function HomePage() {
     setIsLoading(true);
     setSosMessage(null);
     try {
-      const input: GenerateSosMessageInput = { userName, location, emergencyType };
+      const input: GenerateSosMessageInput = { 
+        userName, 
+        location, 
+        emergencyType,
+        ...(userPhoneNumber && { userPhoneNumber: userPhoneNumber.replace(/\D/g, '') }) // Inclui apenas se existir
+      };
       const result = await generateSosMessage(input);
       setSosMessage(result.sosMessage);
     } catch (error) {
@@ -120,8 +125,8 @@ export default function HomePage() {
       });
       return;
     }
-    // Prioritize verified phone number for WhatsApp if available, otherwise use default
-    const defaultPhoneNumber = "5543999054151";
+    
+    const defaultPhoneNumber = "5543999054151"; 
     const targetPhoneNumber = userPhoneNumber || defaultPhoneNumber;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${targetPhoneNumber.replace(/\D/g, '')}&text=${encodedMessage}`;
