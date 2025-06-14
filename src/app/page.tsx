@@ -9,16 +9,6 @@ import { EmergencySelectionScreen } from '@/components/screens/EmergencySelectio
 import { SosMessageScreen } from '@/components/screens/SosMessageScreen';
 import { generateSosMessage, type GenerateSosMessageInput } from '@/ai/flows/generate-sos-message';
 import { useToast } from "@/hooks/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
-import { Button } from '@/components/ui/button';
 
 type AppStep = 'welcome' | 'emergency' | 'sos';
 const LOCAL_STORAGE_USER_NAME_KEY = 'LibrasTech_UserName';
@@ -33,10 +23,6 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
   const { toast } = useToast();
-
-  const [isRegistrationQrVisible, setIsRegistrationQrVisible] = useState(false);
-  const [registrationQrDataUrl, setRegistrationQrDataUrl] = useState<string | null>(null);
-
 
   useEffect(() => {
     setIsMounted(true);
@@ -147,11 +133,11 @@ export default function HomePage() {
   };
   
   const handleConfig = () => {
-    const sessionId = Date.now().toString(36) + Math.random().toString(36).substring(2);
-    const qrData = JSON.stringify({ action: "registerLibrasTechDevice", sessionId: sessionId });
-    const url = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qrData)}&size=250x250&margin=10&ecc=H`;
-    setRegistrationQrDataUrl(url);
-    setIsRegistrationQrVisible(true);
+    console.log("Botão de Configurações clicado. Implementar funcionalidade aqui.");
+    toast({
+      title: "Configurações",
+      description: "Funcionalidade de configurações ainda não implementada.",
+    });
   };
 
   const getScreenTitle = () => {
@@ -203,35 +189,6 @@ export default function HomePage() {
           />
         )}
       </AppLayout>
-
-      <Dialog open={isRegistrationQrVisible} onOpenChange={setIsRegistrationQrVisible}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Registrar Dispositivo</DialogTitle>
-            <DialogDescription>
-              Escaneie este QR Code com o aplicativo LibrasTech no seu celular para conectar sua conta.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center justify-center py-4">
-            {registrationQrDataUrl && (
-              <Image 
-                src={registrationQrDataUrl} 
-                alt="QR Code para registro de dispositivo" 
-                width={250} 
-                height={250}
-                data-ai-hint="qr code" 
-              />
-            )}
-          </div>
-          <DialogFooter className="sm:justify-center">
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">
-                Fechar
-              </Button>
-            </DialogClose>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
