@@ -1,11 +1,13 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Send, Info, MapPin } from 'lucide-react';
+import { Loader2, Send, Info, MapPin, ClipboardCopy, QrCode } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
 
 interface SosMessageScreenProps {
   userName: string;
@@ -24,7 +26,6 @@ const emergencyTypeMap: Record<string, string> = {
   PublicSafety: "Segurança Pública",
 };
 
-
 export function SosMessageScreen({
   userName,
   location,
@@ -35,6 +36,9 @@ export function SosMessageScreen({
   onSendViaWhatsApp,
   coordinates,
 }: SosMessageScreenProps) {
+  const { toast } = useToast();
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+
   const displayEmergencyType = emergencyTypeMap[emergencyType] || emergencyType;
   const canSendMessage = sosMessage && !sosMessage.startsWith("Erro") && !isLoading;
   const isLocationLoading = location === 'Obtendo localização...';
@@ -59,6 +63,51 @@ export function SosMessageScreen({
       );
     }
     return <p>{location}</p>;
+  };
+
+  const handleCopySosMessage = async () => {
+    if (!sosMessage || sosMessage.startsWith("Erro")) {
+      toast({
+        title: "Mensagem Inválida",
+        description: "Não há mensagem válida para copiar.",
+        variant: "destructive",
+      });
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(sosMessage);
+      toast({
+        title: "Copiado!",
+        description: "Mensagem SOS copiada para a área de transferência.",
+      });
+    } catch (err) {
+      toast({
+        title: "Erro ao Copiar",
+        description: "Não foi possível copiar a mensagem.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleShowQrCode = () => {
+    if (!canSendMessage || !sosMessage) {
+       toast({
+        title: "Gere a Mensagem Primeiro",
+        description: "Você precisa gerar uma mensagem SOS válida antes de mostrar o QR Code.",
+        variant: "destructive",
+      });
+      setQrCodeUrl(null);
+      return;
+    }
+    const qrData = JSON.stringify({
+      sosMessage,
+      userName,
+      location,
+      emergencyType: displayEmergencyType,
+      coordinates,
+    });
+    const url = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qrData)}&size=220x220&margin=10`;
+    setQrCodeUrl(url);
   };
 
   return (
@@ -95,9 +144,21 @@ export function SosMessageScreen({
 
           {sosMessage && ( 
             <Alert variant={sosMessage.startsWith("Erro") ? "destructive" : "default"} className="mt-4">
-              <AlertTitle>{sosMessage.startsWith("Erro") ? "Erro" : "Mensagem SOS"}</AlertTitle>
+              <AlertTitle>{sosMessage.startsWith("Erro") ? "Erro" : "Mensagem SOS Gerada"}</AlertTitle>
               <AlertDescription className="whitespace-pre-wrap">{sosMessage}</AlertDescription>
             </Alert>
+          )}
+
+          {qrCodeUrl && canSendMessage && (
+            <div className="mt-4 p-4 border rounded-md flex flex-col items-center bg-card">
+              <p className="text-sm text-center mb-2 text-muted-foreground">
+                Escaneie com seu celular para enviar via WhatsApp/SMS (requer app LibrasTech no celular).
+              </p>
+              <Image src={qrCodeUrl} alt="QR Code para mensagem SOS" width={220} height={220} data-ai-hint="qr code" />
+              <Button variant="outline" size="sm" onClick={() => setQrCodeUrl(null)} className="mt-3">
+                Fechar QR Code
+              </Button>
+            </div>
           )}
         </CardContent>
         <CardFooter className="flex flex-col space-y-2 pt-4">
@@ -112,16 +173,38 @@ export function SosMessageScreen({
             {(!sosMessage || sosMessage.startsWith("Erro")) && !isLocationReady && !isLoading && " (Aguardando Localização)"}
           </Button>
           
-           {canSendMessage && onSendViaWhatsApp && (
+          {canSendMessage && (
+            <div className="grid grid-cols-2 gap-2 w-full">
+              <Button
+                onClick={handleCopySosMessage}
+                variant="outline"
+                className="w-full"
+              >
+                <ClipboardCopy className="w-4 h-4 mr-2" />
+                Copiar
+              </Button>
+              {onSendViaWhatsApp && (
+                 <Button
+                   onClick={() => onSendViaWhatsApp(sosMessage!)}
+                   className="w-full"
+                   variant="default"
+                 >
+                   <Send className="w-4 h-4 mr-2" />
+                   WhatsApp
+                 </Button>
+               )}
+            </div>
+          )}
+          {canSendMessage && (
              <Button
-               onClick={() => onSendViaWhatsApp(sosMessage!)}
-               className="w-full"
-               variant="default"
-             >
-               <Send className="w-4 h-4 mr-2" />
-               Enviar via WhatsApp
-             </Button>
-           )}
+                onClick={handleShowQrCode}
+                variant="outline"
+                className="w-full"
+              >
+                <QrCode className="w-4 h-4 mr-2" />
+                {qrCodeUrl ? "Atualizar QR Code" : "QR Code para Celular"}
+              </Button>
+          )}
         </CardFooter>
       </Card>
     </div>
