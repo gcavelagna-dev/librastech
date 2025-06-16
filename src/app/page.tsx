@@ -3,7 +3,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import Script from 'next/script'; // Adicionado
+// Script import será removido se não for mais necessário após a remoção do Hand Talk
+// import Script from 'next/script'; 
 import { AppLayout } from '@/components/layout/AppLayout';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { EmergencySelectionScreen } from '@/components/screens/EmergencySelectionScreen';
@@ -253,16 +254,6 @@ export default function HomePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Script do Plugin Hand Talk Adicionado aqui */}
-      <Script src="https://plugin.handtalk.me/web/latest/handtalk.min.js" strategy="afterInteractive" />
-      <Script id="handtalk-init" strategy="afterInteractive">
-        {`
-          var ht = new HT({
-            token: "SEU_TOKEN_AQUI_FORNECIDO_PELA_HANDTALK" // IMPORTANTE: Substitua pelo seu token real
-          });
-        `}
-      </Script>
     </>
   );
 }
