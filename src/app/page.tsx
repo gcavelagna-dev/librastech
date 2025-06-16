@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import Script from 'next/script';
+// Script import for VLibras was here, will be removed
 import { AppLayout } from '@/components/layout/AppLayout';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { EmergencySelectionScreen } from '@/components/screens/EmergencySelectionScreen';
@@ -51,7 +51,7 @@ export default function HomePage() {
     const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
     if (storedPhoneNumber) {
       setUserPhoneNumber(storedPhoneNumber);
-    } else if (storedName) {
+    } else if (storedName) { // Only show prompt if name is set but phone isn't
       setShowPhoneNumberPrompt(true);
     }
 
@@ -145,7 +145,7 @@ export default function HomePage() {
       return;
     }
 
-    const defaultPhoneNumber = "5543999054151";
+    const defaultPhoneNumber = "5543999054151"; // Default emergency contact if user's isn't set
     const targetPhoneNumber = userPhoneNumber || defaultPhoneNumber;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${targetPhoneNumber.replace(/\D/g, '')}&text=${encodedMessage}`;
@@ -178,7 +178,7 @@ export default function HomePage() {
       title: "Número Salvo",
       description: "Seu número de telefone foi salvo para futuras emergências.",
     });
-    setShowPhoneNumberPrompt(false);
+    setShowPhoneNumberPrompt(false); // Hide the prompt once number is saved
   };
 
   const getScreenTitle = () => {
@@ -254,17 +254,7 @@ export default function HomePage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* VLibras Widget */}
-      <div vw="true" className="enabled">
-        <div vw-access-button="true" className="active"></div>
-        <div vw-plugin-wrapper="true">
-          <div className="vw-plugin-top-wrapper"></div>
-        </div>
-      </div>
-      <Script src="https://vlibras.gov.br/app/vlibras-plugin.js" strategy="afterInteractive" />
-      <Script id="vlibras-init" strategy="afterInteractive">
-        {`new window.VLibras.Widget('https://vlibras.gov.br/app');`}
-      </Script>
+      {/* VLibras Widget and Scripts Removed */}
     </>
   );
 }
