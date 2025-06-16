@@ -3,8 +3,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-// Script import será removido se não for mais necessário após a remoção do Hand Talk
-// import Script from 'next/script'; 
+import Script from 'next/script';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { EmergencySelectionScreen } from '@/components/screens/EmergencySelectionScreen';
@@ -52,7 +51,7 @@ export default function HomePage() {
     const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
     if (storedPhoneNumber) {
       setUserPhoneNumber(storedPhoneNumber);
-    } else if (storedName) { 
+    } else if (storedName) {
       setShowPhoneNumberPrompt(true);
     }
 
@@ -179,7 +178,7 @@ export default function HomePage() {
       title: "Número Salvo",
       description: "Seu número de telefone foi salvo para futuras emergências.",
     });
-    setShowPhoneNumberPrompt(false); 
+    setShowPhoneNumberPrompt(false);
   };
 
   const getScreenTitle = () => {
@@ -254,6 +253,18 @@ export default function HomePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* VLibras Widget */}
+      <div vw="true" className="enabled">
+        <div vw-access-button="true" className="active"></div>
+        <div vw-plugin-wrapper="true">
+          <div className="vw-plugin-top-wrapper"></div>
+        </div>
+      </div>
+      <Script src="https://vlibras.gov.br/app/vlibras-plugin.js" strategy="afterInteractive" />
+      <Script id="vlibras-init" strategy="afterInteractive">
+        {`new window.VLibras.Widget('https://vlibras.gov.br/app');`}
+      </Script>
     </>
   );
 }
