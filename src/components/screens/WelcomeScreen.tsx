@@ -41,19 +41,19 @@ export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenPro
         <CardHeader>
           <CardTitle className="text-2xl font-headline text-center">Bem-vindo ao LibrasTech</CardTitle>
           <CardDescription className="text-center">
-            Sua segurança é nossa prioridade.
+            Sua segurança é nossa prioridade. Insira seu nome para identificação em emergências.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col items-center space-y-3">
-            <div 
+            <div
               className="w-48 h-48 bg-gray-200 rounded-md flex items-center justify-center overflow-hidden"
               aria-label="Avatar sinalizando em Libras"
             >
-              <Image 
-                src="https://placehold.co/192x192.png" 
-                alt="Placeholder para avatar em Libras" 
-                width={192} 
+              <Image
+                src="https://placehold.co/192x192.png"
+                alt="Placeholder para avatar em Libras"
+                width={192}
                 height={192}
                 data-ai-hint="libras animation friendly accessible"
                 className="object-cover"
