@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
-import Script from 'next/script';
+// import Script from 'next/script'; // Removido
 
 export const metadata: Metadata = {
   title: 'LibrasTech',
@@ -23,15 +23,7 @@ export default function RootLayout({
       <body className="font-body antialiased">
         {children}
         <Toaster />
-        {/* Script do Plugin Hand Talk */}
-        <Script src="https://plugin.handtalk.me/web/latest/handtalk.min.js" strategy="afterInteractive" />
-        <Script id="handtalk-init" strategy="afterInteractive">
-          {`
-            var ht = new HT({
-              token: "SEU_TOKEN_AQUI_FORNECIDO_PELA_HANDTALK" // IMPORTANTE: Substitua pelo seu token real
-            });
-          `}
-        </Script>
+        {/* Script do Plugin Hand Talk Removido daqui */}
       </body>
     </html>
   );

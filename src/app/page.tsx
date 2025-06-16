@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
+import Script from 'next/script'; // Adicionado
 import { AppLayout } from '@/components/layout/AppLayout';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { EmergencySelectionScreen } from '@/components/screens/EmergencySelectionScreen';
@@ -50,7 +51,7 @@ export default function HomePage() {
     const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
     if (storedPhoneNumber) {
       setUserPhoneNumber(storedPhoneNumber);
-    } else if (storedName) { // Only show prompt if name is set (past welcome) and phone is not
+    } else if (storedName) { 
       setShowPhoneNumberPrompt(true);
     }
 
@@ -89,7 +90,6 @@ export default function HomePage() {
     setUserName(trimmedName);
     localStorage.setItem(LOCAL_STORAGE_USER_NAME_KEY, trimmedName);
     setCurrentStep('emergency');
-    // Check if phone number is already set, if not, prompt after name save
     const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
     if (!storedPhoneNumber) {
       setShowPhoneNumberPrompt(true);
@@ -178,7 +178,7 @@ export default function HomePage() {
       title: "Número Salvo",
       description: "Seu número de telefone foi salvo para futuras emergências.",
     });
-    setShowPhoneNumberPrompt(false); // Hide prompt if number is saved
+    setShowPhoneNumberPrompt(false); 
   };
 
   const getScreenTitle = () => {
@@ -253,6 +253,16 @@ export default function HomePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Script do Plugin Hand Talk Adicionado aqui */}
+      <Script src="https://plugin.handtalk.me/web/latest/handtalk.min.js" strategy="afterInteractive" />
+      <Script id="handtalk-init" strategy="afterInteractive">
+        {`
+          var ht = new HT({
+            token: "SEU_TOKEN_AQUI_FORNECIDO_PELA_HANDTALK" // IMPORTANTE: Substitua pelo seu token real
+          });
+        `}
+      </Script>
     </>
   );
 }
