@@ -3,7 +3,6 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-// Script import for VLibras was here, will be removed
 import { AppLayout } from '@/components/layout/AppLayout';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { EmergencySelectionScreen } from '@/components/screens/EmergencySelectionScreen';
@@ -28,6 +27,8 @@ const LOCAL_STORAGE_PHONE_NUMBER_KEY = 'LibrasTech_PhoneNumber';
 const LOCAL_STORAGE_DOCUMENT_TYPE_KEY = 'LibrasTech_DocumentType';
 const LOCAL_STORAGE_DOCUMENT_NUMBER_KEY = 'LibrasTech_DocumentNumber';
 const LOCAL_STORAGE_CITY_KEY = 'LibrasTech_City';
+const LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY = 'LibrasTech_TrustedContactName';
+const LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY = 'LibrasTech_TrustedContactPhone';
 
 
 export default function HomePage() {
@@ -37,6 +38,8 @@ export default function HomePage() {
   const [documentType, setDocumentType] = useState<string | undefined>(undefined);
   const [documentNumber, setDocumentNumber] = useState<string>('');
   const [city, setCity] = useState<string>('');
+  const [trustedContactName, setTrustedContactName] = useState<string>('');
+  const [trustedContactPhoneNumber, setTrustedContactPhoneNumber] = useState<string>('');
 
   const [emergencyType, setEmergencyType] = useState<string>('');
   const [location, setLocation] = useState<string>('Obtendo localização...');
@@ -67,6 +70,12 @@ export default function HomePage() {
     
     const storedCity = localStorage.getItem(LOCAL_STORAGE_CITY_KEY);
     if (storedCity) setCity(storedCity);
+
+    const storedTrustedName = localStorage.getItem(LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY);
+    if (storedTrustedName) setTrustedContactName(storedTrustedName);
+
+    const storedTrustedPhone = localStorage.getItem(LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY);
+    if (storedTrustedPhone) setTrustedContactPhoneNumber(storedTrustedPhone);
 
 
     if (navigator.geolocation) {
@@ -219,6 +228,33 @@ export default function HomePage() {
     });
     setShowPhoneNumberPrompt(false); 
   };
+  
+  const handleSaveTrustedContact = (name: string, phone: string) => {
+    const trimmedName = name.trim();
+    const trimmedPhone = phone.trim();
+
+    if (trimmedName) {
+      setTrustedContactName(trimmedName);
+      localStorage.setItem(LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY, trimmedName);
+    } else {
+      setTrustedContactName('');
+      localStorage.removeItem(LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY);
+    }
+
+    if (trimmedPhone) {
+      setTrustedContactPhoneNumber(trimmedPhone);
+      localStorage.setItem(LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY, trimmedPhone);
+    } else {
+      setTrustedContactPhoneNumber('');
+      localStorage.removeItem(LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY);
+    }
+    
+    toast({
+      title: "Contato de Confiança Salvo",
+      description: "As informações do seu contato de confiança foram atualizadas.",
+    });
+  };
+
 
   const getScreenTitle = () => {
     switch (currentStep) {
@@ -283,6 +319,9 @@ export default function HomePage() {
         onClose={() => setIsSettingsDialogVisible(false)}
         onSavePhoneNumber={handleSavePhoneNumber}
         currentPhoneNumber={userPhoneNumber}
+        currentTrustedContactName={trustedContactName}
+        currentTrustedContactPhoneNumber={trustedContactPhoneNumber}
+        onSaveTrustedContact={handleSaveTrustedContact}
       />
        <AlertDialog open={showPhoneNumberPrompt} onOpenChange={setShowPhoneNumberPrompt}>
         <AlertDialogContent>
