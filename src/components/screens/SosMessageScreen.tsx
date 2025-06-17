@@ -6,13 +6,16 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Send, Info, MapPin, ClipboardCopy, QrCode, Clock } from 'lucide-react';
+import { Loader2, Send, Info, MapPin, ClipboardCopy, QrCode, Clock, User, FileText, Building } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 interface SosMessageScreenProps {
   userName: string;
   location: string;
   emergencyType: string;
+  documentType?: string;
+  documentNumber?: string;
+  city?: string;
   sosMessage: string | null;
   onGenerateSos: () => void;
   isLoading: boolean;
@@ -31,6 +34,9 @@ export function SosMessageScreen({
   userName,
   location,
   emergencyType,
+  documentType,
+  documentNumber,
+  city,
   sosMessage,
   onGenerateSos,
   isLoading,
@@ -116,6 +122,9 @@ export function SosMessageScreen({
       location,
       emergencyType: displayEmergencyType,
       coordinates,
+      documentType,
+      documentNumber,
+      city,
     });
     const url = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qrData)}&size=220x220&margin=10`;
     setQrCodeUrl(url);
@@ -150,11 +159,23 @@ export function SosMessageScreen({
             Verifique seus dados e gere a mensagem de SOS.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           <div>
-            <h3 className="font-semibold">Nome:</h3>
+            <h3 className="font-semibold flex items-center"><User className="w-4 h-4 mr-1 text-primary"/>Nome:</h3>
             <p>{userName}</p>
           </div>
+          {documentType && documentNumber && (
+            <div>
+              <h3 className="font-semibold flex items-center"><FileText className="w-4 h-4 mr-1 text-primary"/>Documento:</h3>
+              <p>{documentType}: {documentNumber}</p>
+            </div>
+          )}
+          {city && (
+             <div>
+              <h3 className="font-semibold flex items-center"><Building className="w-4 h-4 mr-1 text-primary"/>Cidade:</h3>
+              <p>{city}</p>
+            </div>
+          )}
           <div>
             <h3 className="font-semibold flex items-center">
               <MapPin className="w-4 h-4 mr-1 text-primary" /> Localização:

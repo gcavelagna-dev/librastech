@@ -9,31 +9,43 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface WelcomeScreenProps {
-  onNameSave: (name: string) => void;
+  onNameSave: (name: string, documentType?: string, documentNumber?: string, city?: string) => void;
   initialName?: string;
+  initialDocumentType?: string;
+  initialDocumentNumber?: string;
+  initialCity?: string;
 }
 
-export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenProps) {
+export function WelcomeScreen({
+  onNameSave,
+  initialName = '',
+  initialDocumentType,
+  initialDocumentNumber = '',
+  initialCity = ''
+}: WelcomeScreenProps) {
   const [name, setName] = useState(initialName);
-  const [documentType, setDocumentType] = useState<string | undefined>(undefined);
-  const [documentNumber, setDocumentNumber] = useState('');
-  const [city, setCity] = useState('');
+  const [documentType, setDocumentType] = useState<string | undefined>(initialDocumentType);
+  const [documentNumber, setDocumentNumber] = useState(initialDocumentNumber);
+  const [city, setCity] = useState(initialCity);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    if (initialName) {
-      setName(initialName);
-    }
-  }, [initialName]);
+    if (initialName) setName(initialName);
+    if (initialDocumentType) setDocumentType(initialDocumentType);
+    if (initialDocumentNumber) setDocumentNumber(initialDocumentNumber);
+    if (initialCity) setCity(initialCity);
+  }, [initialName, initialDocumentType, initialDocumentNumber, initialCity]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
-      // For now, only the name is passed up.
-      // Document type, number, and city are managed locally.
-      // If you need to save them, we can adjust onNameSave or add a new callback.
-      onNameSave(name.trim());
+      onNameSave(
+        name.trim(),
+        documentType,
+        documentNumber.trim(),
+        city.trim()
+      );
     }
   };
 
@@ -78,11 +90,11 @@ export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenPro
                 aria-label="Tipo de Documento"
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="rg" id="rg" />
+                  <RadioGroupItem value="RG" id="rg" />
                   <Label htmlFor="rg">RG</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="cpf" id="cpf" />
+                  <RadioGroupItem value="CPF" id="cpf" />
                   <Label htmlFor="cpf">CPF</Label>
                 </div>
               </RadioGroup>

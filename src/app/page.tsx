@@ -25,11 +25,19 @@ import { useToast } from "@/hooks/use-toast";
 type AppStep = 'welcome' | 'emergency' | 'sos';
 const LOCAL_STORAGE_USER_NAME_KEY = 'LibrasTech_UserName';
 const LOCAL_STORAGE_PHONE_NUMBER_KEY = 'LibrasTech_PhoneNumber';
+const LOCAL_STORAGE_DOCUMENT_TYPE_KEY = 'LibrasTech_DocumentType';
+const LOCAL_STORAGE_DOCUMENT_NUMBER_KEY = 'LibrasTech_DocumentNumber';
+const LOCAL_STORAGE_CITY_KEY = 'LibrasTech_City';
 const SOS_COOLDOWN_MINUTES = 5;
 
 export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
   const [userName, setUserName] = useState<string>('');
+  const [userPhoneNumber, setUserPhoneNumber] = useState<string>('');
+  const [documentType, setDocumentType] = useState<string | undefined>(undefined);
+  const [documentNumber, setDocumentNumber] = useState<string>('');
+  const [city, setCity] = useState<string>('');
+
   const [emergencyType, setEmergencyType] = useState<string>('');
   const [location, setLocation] = useState<string>('Obtendo localização...');
   const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
@@ -37,7 +45,6 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isSettingsDialogVisible, setIsSettingsDialogVisible] = useState(false);
-  const [userPhoneNumber, setUserPhoneNumber] = useState<string>('');
   const [showPhoneNumberPrompt, setShowPhoneNumberPrompt] = useState(false);
 
   const [nextSosAllowedTime, setNextSosAllowedTime] = useState<number | null>(null);
@@ -50,15 +57,20 @@ export default function HomePage() {
     setIsMounted(true);
 
     const storedName = localStorage.getItem(LOCAL_STORAGE_USER_NAME_KEY);
-    if (storedName) {
-      setUserName(storedName);
-    }
+    if (storedName) setUserName(storedName);
+
     const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
-    if (storedPhoneNumber) {
-      setUserPhoneNumber(storedPhoneNumber);
-    } else if (storedName) { 
-      setShowPhoneNumberPrompt(true);
-    }
+    if (storedPhoneNumber) setUserPhoneNumber(storedPhoneNumber);
+    else if (storedName) setShowPhoneNumberPrompt(true);
+
+    const storedDocType = localStorage.getItem(LOCAL_STORAGE_DOCUMENT_TYPE_KEY);
+    if (storedDocType) setDocumentType(storedDocType);
+
+    const storedDocNumber = localStorage.getItem(LOCAL_STORAGE_DOCUMENT_NUMBER_KEY);
+    if (storedDocNumber) setDocumentNumber(storedDocNumber);
+    
+    const storedCity = localStorage.getItem(LOCAL_STORAGE_CITY_KEY);
+    if (storedCity) setCity(storedCity);
 
 
     if (navigator.geolocation) {
@@ -101,21 +113,43 @@ export default function HomePage() {
 
       if (timeLeftInSeconds <= 0) {
         setNextSosAllowedTime(null); 
-        // Intervalo é limpo no return do useEffect
       }
     };
 
-    updateTimer(); // Chamada inicial
+    updateTimer(); 
     const intervalId = setInterval(updateTimer, 1000);
 
     return () => clearInterval(intervalId);
   }, [nextSosAllowedTime]);
 
 
-  const handleNameSave = (name: string) => {
+  const handleNameSave = (name: string, docType?: string, docNumber?: string, userCity?: string) => {
     const trimmedName = name.trim();
     setUserName(trimmedName);
     localStorage.setItem(LOCAL_STORAGE_USER_NAME_KEY, trimmedName);
+
+    if (docType) {
+      setDocumentType(docType);
+      localStorage.setItem(LOCAL_STORAGE_DOCUMENT_TYPE_KEY, docType);
+    } else {
+      localStorage.removeItem(LOCAL_STORAGE_DOCUMENT_TYPE_KEY);
+      setDocumentType(undefined);
+    }
+    if (docNumber) {
+      setDocumentNumber(docNumber);
+      localStorage.setItem(LOCAL_STORAGE_DOCUMENT_NUMBER_KEY, docNumber);
+    } else {
+      localStorage.removeItem(LOCAL_STORAGE_DOCUMENT_NUMBER_KEY);
+      setDocumentNumber('');
+    }
+    if (userCity) {
+      setCity(userCity);
+      localStorage.setItem(LOCAL_STORAGE_CITY_KEY, userCity);
+    } else {
+      localStorage.removeItem(LOCAL_STORAGE_CITY_KEY);
+      setCity('');
+    }
+
     setCurrentStep('emergency');
     const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
     if (!storedPhoneNumber) {
@@ -125,13 +159,12 @@ export default function HomePage() {
 
   const handleSelectEmergency = (type: string) => {
     setEmergencyType(type);
-    setSosMessage(null); // Limpa mensagem anterior para permitir nova geração se não houver cooldown
+    setSosMessage(null); 
     setCurrentStep('sos');
   };
 
   const handleGenerateSos = async () => {
     if (cooldownTimeLeft > 0) {
-      // O botão já deve estar desabilitado, mas esta é uma segurança adicional
       const minutes = Math.floor(cooldownTimeLeft / 60);
       const seconds = cooldownTimeLeft % 60;
       const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
@@ -158,12 +191,14 @@ export default function HomePage() {
         userName,
         location,
         emergencyType,
-        ...(userPhoneNumber && { userPhoneNumber: userPhoneNumber.replace(/\D/g, '') })
+        ...(userPhoneNumber && { userPhoneNumber: userPhoneNumber.replace(/\D/g, '') }),
+        ...(documentType && { documentType }),
+        ...(documentNumber && { documentNumber }),
+        ...(city && { city }),
       };
       const result = await generateSosMessage(input);
       setSosMessage(result.sosMessage);
 
-      // Iniciar cooldown após geração bem-sucedida
       if (!result.sosMessage.startsWith("Erro")) {
         const cooldownEndTime = Date.now() + SOS_COOLDOWN_MINUTES * 60 * 1000;
         setNextSosAllowedTime(cooldownEndTime);
@@ -206,8 +241,6 @@ export default function HomePage() {
   };
 
   const handleBack = () => {
-    // Não resetar cooldown ao voltar, ele continua contando
-    // setSosMessage(null); // A mensagem gerada pode continuar visível
     if (currentStep === 'sos') {
       setCurrentStep('emergency');
     } else if (currentStep === 'emergency') {
@@ -260,7 +293,13 @@ export default function HomePage() {
         showConfig={true}
       >
         {currentStep === 'welcome' && (
-          <WelcomeScreen onNameSave={handleNameSave} initialName={userName} />
+          <WelcomeScreen
+            onNameSave={handleNameSave}
+            initialName={userName}
+            initialDocumentType={documentType}
+            initialDocumentNumber={documentNumber}
+            initialCity={city}
+          />
         )}
         {currentStep === 'emergency' && (
           <EmergencySelectionScreen onSelectEmergency={handleSelectEmergency} />
@@ -270,6 +309,9 @@ export default function HomePage() {
             userName={userName}
             location={location}
             emergencyType={emergencyType}
+            documentType={documentType}
+            documentNumber={documentNumber}
+            city={city}
             sosMessage={sosMessage}
             onGenerateSos={handleGenerateSos}
             isLoading={isLoading}
