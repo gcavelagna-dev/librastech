@@ -17,6 +17,7 @@ export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenPro
   const [name, setName] = useState(initialName);
   const [documentType, setDocumentType] = useState<string | undefined>(undefined);
   const [documentNumber, setDocumentNumber] = useState('');
+  const [city, setCity] = useState('');
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenPro
     e.preventDefault();
     if (name.trim()) {
       // For now, only the name is passed up.
-      // Document type and number are managed locally.
+      // Document type, number, and city are managed locally.
       // If you need to save them, we can adjust onNameSave or add a new callback.
       onNameSave(name.trim());
     }
@@ -104,9 +105,25 @@ export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenPro
               </p>
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full" 
+            <div className="space-y-2">
+              <Label htmlFor="city">Cidade</Label>
+              <Input
+                id="city"
+                type="text"
+                placeholder="Digite sua cidade"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="text-base"
+                aria-describedby="city-helper-text"
+              />
+              <p id="city-helper-text" className="text-xs text-muted-foreground px-1">
+                Sua cidade pode ser útil para os serviços de emergência.
+              </p>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
               disabled={!name.trim() || (!!documentType && !documentNumber.trim())}
             >
               Salvar e Continuar
