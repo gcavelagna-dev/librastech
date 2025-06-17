@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
-import { Smartphone, Send, CheckCircle, UserCog, Phone } from 'lucide-react';
+import { Smartphone, Send, CheckCircle, UserCog, Phone, XCircle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface SettingsDialogProps {
@@ -49,14 +49,16 @@ export function SettingsDialog({
   const { toast } = useToast();
 
   useEffect(() => {
-    setPhoneNumber(currentPhoneNumber);
-    setIsVerified(!!currentPhoneNumber); 
-    setIsCodeSent(false); 
-    setSmsCode(''); 
+    // Reset state when dialog opens or currentPhoneNumber changes externally
+    if (isOpen) {
+      setPhoneNumber(currentPhoneNumber);
+      setIsVerified(!!currentPhoneNumber); 
+      setIsCodeSent(false); 
+      setSmsCode(''); 
 
-    setTrustedName(currentTrustedContactName);
-    setTrustedPhone(currentTrustedContactPhoneNumber);
-
+      setTrustedName(currentTrustedContactName);
+      setTrustedPhone(currentTrustedContactPhoneNumber);
+    }
   }, [currentPhoneNumber, currentTrustedContactName, currentTrustedContactPhoneNumber, isOpen]);
   
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,14 +126,15 @@ export function SettingsDialog({
     await new Promise(resolve => setTimeout(resolve, 1500)); 
 
     if (smsCode === "123456") { 
-      onSavePhoneNumber(phoneNumber);
+      onSavePhoneNumber(phoneNumber); // This will update currentPhoneNumber via prop
       setIsVerified(true);
+      setIsCodeSent(false); // Code has been used
+      setSmsCode('');
       toast({
         title: "Número Verificado!",
         description: "Seu número de telefone foi verificado e salvo.",
         variant: "default", 
       });
-      // Do not close dialog on user phone verification, allow saving trusted contact
     } else {
       toast({
         title: "Código Inválido",
@@ -141,6 +144,17 @@ export function SettingsDialog({
       setIsVerified(false);
     }
     setIsVerifying(false);
+  };
+  
+  const handleCancelVerification = () => {
+    setPhoneNumber(currentPhoneNumber); // Reset to the last saved/verified number
+    setIsCodeSent(false);
+    setSmsCode('');
+    setIsVerified(!!currentPhoneNumber); // Re-evaluate verified status based on currentPhoneNumber
+    toast({
+      title: "Verificação Cancelada",
+      description: "A tentativa de verificação do novo número foi cancelada.",
+    });
   };
 
   const handleSaveTrustedInfo = () => {
@@ -170,10 +184,10 @@ export function SettingsDialog({
           <DialogDescription>
             Confirme seu número para agilizar o envio de mensagens SOS via WhatsApp ou SMS pelo celular (requer app LibrasTech no celular).
           </DialogDescription>
-          {isVerified && currentPhoneNumber && (
+          {isVerified && currentPhoneNumber && ( // Show verified status only if it matches the currentPhoneNumber in props
              <div className="p-3 bg-green-100 border border-green-300 rounded-md text-sm text-green-700 flex items-center">
                <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
-               <span>Seu número verificado: {currentPhoneNumber}</span>
+               <span>Seu número verificado: {phoneNumber}</span>
              </div>
           )}
 
@@ -185,14 +199,14 @@ export function SettingsDialog({
               placeholder="(XX) XXXXX-XXXX"
               value={phoneNumber}
               onChange={handlePhoneNumberChange}
-              disabled={isCodeSent || isVerifying || isVerified}
+              disabled={isCodeSent || isVerifying || (isVerified && phoneNumber === currentPhoneNumber) } 
             />
           </div>
 
           {!isCodeSent && !isVerified && (
-            <Button onClick={handleSendSmsCode} className="w-full" disabled={isVerifying || phoneNumber.replace(/\D/g, '').length < 10}>
+            <Button onClick={handleSendSmsCode} className="w-full" disabled={isVerifying || phoneNumber.replace(/\D/g, '').length < 10 || phoneNumber === currentPhoneNumber}>
               {isVerifying ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" /> : <Send className="w-4 h-4 mr-2" />}
-              Enviar Código de Verificação
+              {currentPhoneNumber && currentPhoneNumber === phoneNumber ? 'Número já verificado' : 'Enviar Código de Verificação'}
             </Button>
           )}
           
@@ -209,13 +223,16 @@ export function SettingsDialog({
                   disabled={isVerifying}
                 />
               </div>
-              <Button onClick={handleVerifySmsCode} className="w-full" disabled={isVerifying || smsCode.length === 0}>
-                {isVerifying ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" /> : <CheckCircle className="w-4 h-4 mr-2" />}
-                Verificar Código
-              </Button>
-               <Button variant="link" size="sm" onClick={() => { setIsCodeSent(false); setSmsCode(''); }} disabled={isVerifying}>
-                Alterar número ou reenviar código
-              </Button>
+              <div className="flex space-x-2">
+                <Button onClick={handleVerifySmsCode} className="flex-1" disabled={isVerifying || smsCode.length === 0}>
+                  {isVerifying ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+                  Verificar Código
+                </Button>
+                <Button variant="outline" onClick={handleCancelVerification} disabled={isVerifying} className="flex-1">
+                  <XCircle className="w-4 h-4 mr-2" />
+                  Cancelar Verificação
+                </Button>
+              </div>
             </>
           )}
         </div>
@@ -271,3 +288,4 @@ export function SettingsDialog({
     </Dialog>
   );
 }
+
