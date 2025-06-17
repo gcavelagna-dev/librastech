@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 type AppStep = 'welcome' | 'emergency' | 'sos';
 const LOCAL_STORAGE_USER_NAME_KEY = 'LibrasTech_UserName';
 const LOCAL_STORAGE_PHONE_NUMBER_KEY = 'LibrasTech_PhoneNumber';
+const SOS_COOLDOWN_MINUTES = 5;
 
 export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
@@ -39,6 +40,10 @@ export default function HomePage() {
   const [userPhoneNumber, setUserPhoneNumber] = useState<string>('');
   const [showPhoneNumberPrompt, setShowPhoneNumberPrompt] = useState(false);
 
+  const [nextSosAllowedTime, setNextSosAllowedTime] = useState<number | null>(null);
+  const [cooldownTimeLeft, setCooldownTimeLeft] = useState<number>(0); // in seconds
+
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -51,7 +56,7 @@ export default function HomePage() {
     const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
     if (storedPhoneNumber) {
       setUserPhoneNumber(storedPhoneNumber);
-    } else if (storedName) { // Only show prompt if name is set but phone isn't
+    } else if (storedName) { 
       setShowPhoneNumberPrompt(true);
     }
 
@@ -84,6 +89,28 @@ export default function HomePage() {
     }
   }, [toast]);
 
+  useEffect(() => {
+    if (!nextSosAllowedTime) {
+      setCooldownTimeLeft(0);
+      return;
+    }
+
+    const updateTimer = () => {
+      const timeLeftInSeconds = Math.max(0, Math.ceil((nextSosAllowedTime - Date.now()) / 1000));
+      setCooldownTimeLeft(timeLeftInSeconds);
+
+      if (timeLeftInSeconds <= 0) {
+        setNextSosAllowedTime(null); 
+        // Intervalo é limpo no return do useEffect
+      }
+    };
+
+    updateTimer(); // Chamada inicial
+    const intervalId = setInterval(updateTimer, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [nextSosAllowedTime]);
+
 
   const handleNameSave = (name: string) => {
     const trimmedName = name.trim();
@@ -98,11 +125,24 @@ export default function HomePage() {
 
   const handleSelectEmergency = (type: string) => {
     setEmergencyType(type);
-    setSosMessage(null);
+    setSosMessage(null); // Limpa mensagem anterior para permitir nova geração se não houver cooldown
     setCurrentStep('sos');
   };
 
   const handleGenerateSos = async () => {
+    if (cooldownTimeLeft > 0) {
+      // O botão já deve estar desabilitado, mas esta é uma segurança adicional
+      const minutes = Math.floor(cooldownTimeLeft / 60);
+      const seconds = cooldownTimeLeft % 60;
+      const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      toast({
+        title: "Aguarde o Cooldown",
+        description: `Você precisa esperar ${timeString} para gerar uma nova mensagem.`,
+        variant: "default",
+      });
+      return;
+    }
+
     if (!userName || !emergencyType || location === 'Obtendo localização...' || location.startsWith('Não foi possível')) {
       toast({
         title: "Dados Incompletos",
@@ -112,7 +152,7 @@ export default function HomePage() {
       return;
     }
     setIsLoading(true);
-    setSosMessage(null);
+    setSosMessage(null); 
     try {
       const input: GenerateSosMessageInput = {
         userName,
@@ -122,6 +162,13 @@ export default function HomePage() {
       };
       const result = await generateSosMessage(input);
       setSosMessage(result.sosMessage);
+
+      // Iniciar cooldown após geração bem-sucedida
+      if (!result.sosMessage.startsWith("Erro")) {
+        const cooldownEndTime = Date.now() + SOS_COOLDOWN_MINUTES * 60 * 1000;
+        setNextSosAllowedTime(cooldownEndTime);
+      }
+
     } catch (error) {
       console.error("Error generating SOS message:", error);
       const errorMessage = "Erro ao gerar mensagem SOS. Verifique sua conexão e tente novamente.";
@@ -145,7 +192,7 @@ export default function HomePage() {
       return;
     }
 
-    const defaultPhoneNumber = "5543999054151"; // Default emergency contact if user's isn't set
+    const defaultPhoneNumber = "5543999054151"; 
     const targetPhoneNumber = userPhoneNumber || defaultPhoneNumber;
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${targetPhoneNumber.replace(/\D/g, '')}&text=${encodedMessage}`;
@@ -159,7 +206,8 @@ export default function HomePage() {
   };
 
   const handleBack = () => {
-    setSosMessage(null);
+    // Não resetar cooldown ao voltar, ele continua contando
+    // setSosMessage(null); // A mensagem gerada pode continuar visível
     if (currentStep === 'sos') {
       setCurrentStep('emergency');
     } else if (currentStep === 'emergency') {
@@ -178,7 +226,7 @@ export default function HomePage() {
       title: "Número Salvo",
       description: "Seu número de telefone foi salvo para futuras emergências.",
     });
-    setShowPhoneNumberPrompt(false); // Hide the prompt once number is saved
+    setShowPhoneNumberPrompt(false); 
   };
 
   const getScreenTitle = () => {
@@ -227,6 +275,7 @@ export default function HomePage() {
             isLoading={isLoading}
             onSendViaWhatsApp={handleSendViaWhatsApp}
             coordinates={coordinates}
+            cooldownTimeLeft={cooldownTimeLeft}
           />
         )}
       </AppLayout>
@@ -253,8 +302,6 @@ export default function HomePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* VLibras Widget and Scripts Removed */}
     </>
   );
 }

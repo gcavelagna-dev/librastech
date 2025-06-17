@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Send, Info, MapPin, ClipboardCopy, QrCode } from 'lucide-react';
+import { Loader2, Send, Info, MapPin, ClipboardCopy, QrCode, Clock } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 interface SosMessageScreenProps {
@@ -18,6 +18,7 @@ interface SosMessageScreenProps {
   isLoading: boolean;
   onSendViaWhatsApp?: (message: string) => void;
   coordinates: { lat: number; lon: number } | null;
+  cooldownTimeLeft?: number;
 }
 
 const emergencyTypeMap: Record<string, string> = {
@@ -35,16 +36,25 @@ export function SosMessageScreen({
   isLoading,
   onSendViaWhatsApp,
   coordinates,
+  cooldownTimeLeft = 0,
 }: SosMessageScreenProps) {
   const { toast } = useToast();
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
 
   const displayEmergencyType = emergencyTypeMap[emergencyType] || emergencyType;
-  const canSendMessage = sosMessage && !sosMessage.startsWith("Erro") && !isLoading;
+  
+  const isCooldownActive = cooldownTimeLeft > 0;
+  const canSendMessage = sosMessage && !sosMessage.startsWith("Erro") && !isLoading && !isCooldownActive;
+
   const isLocationLoading = location === 'Obtendo localização...';
   const hasLocationError = location.startsWith('Não foi possível') || location === 'Geolocalização não suportada neste navegador';
   const isLocationReady = !isLocationLoading && !hasLocationError && coordinates !== null;
 
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
 
   const getLocationDisplay = () => {
     if (isLocationLoading) {
@@ -103,13 +113,33 @@ export function SosMessageScreen({
     const qrData = JSON.stringify({
       sosMessage,
       userName,
-      location, // This will be "Lat: X, Lon: Y" if address resolution failed or was skipped
+      location,
       emergencyType: displayEmergencyType,
       coordinates,
     });
     const url = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qrData)}&size=220x220&margin=10`;
     setQrCodeUrl(url);
   };
+
+  const isGenerateButtonDisabled = isLoading || !isLocationReady || isCooldownActive;
+
+  const getGenerateButtonContent = () => {
+    if (isCooldownActive) {
+      return { text: `Aguarde ${formatTime(cooldownTimeLeft)}`, icon: <Clock className="w-4 h-4 mr-2 animate-pulse" /> };
+    }
+    if (isLoading) {
+      return { text: "Gerando mensagem...", icon: <Loader2 className="w-4 h-4 mr-2 animate-spin" /> };
+    }
+    
+    let baseText = (sosMessage && !sosMessage.startsWith("Erro")) ? "Gerar Novamente" : "Gerar Mensagem SOS";
+    let locationStatus = "";
+    if ((!sosMessage || sosMessage.startsWith("Erro")) && !isLocationReady) {
+      locationStatus = " (Aguardando Localização)";
+    }
+    return { text: `${baseText}${locationStatus}`, icon: null };
+  };
+
+  const generateButtonContent = getGenerateButtonContent();
 
   return (
     <div className="flex flex-col items-center">
@@ -136,7 +166,7 @@ export function SosMessageScreen({
             <p>{displayEmergencyType}</p>
           </div>
 
-          {isLoading && !sosMessage && ( 
+          {isLoading && !sosMessage && !isCooldownActive && ( 
             <div className="flex items-center justify-center p-4">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
               <p className="ml-2">Gerando mensagem...</p>
@@ -165,13 +195,12 @@ export function SosMessageScreen({
         <CardFooter className="flex flex-col space-y-2 pt-4">
           <Button 
             onClick={onGenerateSos} 
-            disabled={isLoading || !isLocationReady} 
+            disabled={isGenerateButtonDisabled} 
             className="w-full"
-            variant={sosMessage && !sosMessage.startsWith("Erro") ? "secondary" : "default"}
+            variant={(sosMessage && !sosMessage.startsWith("Erro") && !isCooldownActive) ? "secondary" : "default"}
           >
-            {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-            {sosMessage && !sosMessage.startsWith("Erro") ? "Gerar Novamente" : "Gerar Mensagem SOS"}
-            {(!sosMessage || sosMessage.startsWith("Erro")) && !isLocationReady && !isLoading && " (Aguardando Localização)"}
+            {generateButtonContent.icon}
+            {generateButtonContent.text}
           </Button>
           
           {canSendMessage && (
