@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface WelcomeScreenProps {
   onNameSave: (name: string) => void;
@@ -14,6 +15,8 @@ interface WelcomeScreenProps {
 
 export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenProps) {
   const [name, setName] = useState(initialName);
+  const [documentType, setDocumentType] = useState<string | undefined>(undefined);
+  const [documentNumber, setDocumentNumber] = useState('');
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -26,6 +29,9 @@ export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenPro
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
+      // For now, only the name is passed up.
+      // Document type and number are managed locally.
+      // If you need to save them, we can adjust onNameSave or add a new callback.
       onNameSave(name.trim());
     }
   };
@@ -40,18 +46,13 @@ export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenPro
         <CardHeader>
           <CardTitle className="text-2xl font-headline text-center">Bem-vindo ao LibrasTech</CardTitle>
           <CardDescription className="text-center">
-            Sua segurança é nossa prioridade. Insira seu nome para identificação em emergências.
+            Sua segurança é nossa prioridade. Insira seus dados para identificação em emergências.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex flex-col items-center space-y-3">
-            <p className="text-sm text-center text-muted-foreground px-4 pt-4">
-              Insira seu nome para podermos te ajudar com mais segurança.
-            </p>
-          </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Seu Nome</Label>
+              <Label htmlFor="name">Seu Nome Completo</Label>
               <Input
                 id="name"
                 type="text"
@@ -66,7 +67,48 @@ export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenPro
                 Seu nome será usado para personalizar as mensagens de emergência.
               </p>
             </div>
-            <Button type="submit" className="w-full" disabled={!name.trim()}>
+
+            <div className="space-y-2">
+              <Label>Tipo de Documento</Label>
+              <RadioGroup
+                onValueChange={setDocumentType}
+                value={documentType}
+                className="flex space-x-4"
+                aria-label="Tipo de Documento"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="rg" id="rg" />
+                  <Label htmlFor="rg">RG</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="cpf" id="cpf" />
+                  <Label htmlFor="cpf">CPF</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="documentNumber">Número do Documento</Label>
+              <Input
+                id="documentNumber"
+                type="text"
+                placeholder="Digite o número do documento"
+                value={documentNumber}
+                onChange={(e) => setDocumentNumber(e.target.value)}
+                className="text-base"
+                disabled={!documentType}
+                aria-describedby="document-helper-text"
+              />
+               <p id="document-helper-text" className="text-xs text-muted-foreground px-1">
+                Seu documento pode ajudar na identificação pelas autoridades.
+              </p>
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={!name.trim() || (!!documentType && !documentNumber.trim())}
+            >
               Salvar e Continuar
             </Button>
           </form>
@@ -78,4 +120,3 @@ export function WelcomeScreen({ onNameSave, initialName = '' }: WelcomeScreenPro
     </div>
   );
 }
-
