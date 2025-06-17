@@ -28,7 +28,7 @@ const LOCAL_STORAGE_PHONE_NUMBER_KEY = 'LibrasTech_PhoneNumber';
 const LOCAL_STORAGE_DOCUMENT_TYPE_KEY = 'LibrasTech_DocumentType';
 const LOCAL_STORAGE_DOCUMENT_NUMBER_KEY = 'LibrasTech_DocumentNumber';
 const LOCAL_STORAGE_CITY_KEY = 'LibrasTech_City';
-const SOS_COOLDOWN_MINUTES = 5;
+
 
 export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
@@ -46,10 +46,6 @@ export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
   const [isSettingsDialogVisible, setIsSettingsDialogVisible] = useState(false);
   const [showPhoneNumberPrompt, setShowPhoneNumberPrompt] = useState(false);
-
-  const [nextSosAllowedTime, setNextSosAllowedTime] = useState<number | null>(null);
-  const [cooldownTimeLeft, setCooldownTimeLeft] = useState<number>(0); // in seconds
-
 
   const { toast } = useToast();
 
@@ -101,27 +97,6 @@ export default function HomePage() {
     }
   }, [toast]);
 
-  useEffect(() => {
-    if (!nextSosAllowedTime) {
-      setCooldownTimeLeft(0);
-      return;
-    }
-
-    const updateTimer = () => {
-      const timeLeftInSeconds = Math.max(0, Math.ceil((nextSosAllowedTime - Date.now()) / 1000));
-      setCooldownTimeLeft(timeLeftInSeconds);
-
-      if (timeLeftInSeconds <= 0) {
-        setNextSosAllowedTime(null); 
-      }
-    };
-
-    updateTimer(); 
-    const intervalId = setInterval(updateTimer, 1000);
-
-    return () => clearInterval(intervalId);
-  }, [nextSosAllowedTime]);
-
 
   const handleNameSave = (name: string, docType?: string, docNumber?: string, userCity?: string) => {
     const trimmedName = name.trim();
@@ -164,18 +139,6 @@ export default function HomePage() {
   };
 
   const handleGenerateSos = async () => {
-    if (cooldownTimeLeft > 0) {
-      const minutes = Math.floor(cooldownTimeLeft / 60);
-      const seconds = cooldownTimeLeft % 60;
-      const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      toast({
-        title: "Aguarde o Cooldown",
-        description: `Você precisa esperar ${timeString} para gerar uma nova mensagem.`,
-        variant: "default",
-      });
-      return;
-    }
-
     if (!userName || !emergencyType || location === 'Obtendo localização...' || location.startsWith('Não foi possível')) {
       toast({
         title: "Dados Incompletos",
@@ -198,11 +161,6 @@ export default function HomePage() {
       };
       const result = await generateSosMessage(input);
       setSosMessage(result.sosMessage);
-
-      if (!result.sosMessage.startsWith("Erro")) {
-        const cooldownEndTime = Date.now() + SOS_COOLDOWN_MINUTES * 60 * 1000;
-        setNextSosAllowedTime(cooldownEndTime);
-      }
 
     } catch (error) {
       console.error("Error generating SOS message:", error);
@@ -317,7 +275,6 @@ export default function HomePage() {
             isLoading={isLoading}
             onSendViaWhatsApp={handleSendViaWhatsApp}
             coordinates={coordinates}
-            cooldownTimeLeft={cooldownTimeLeft}
           />
         )}
       </AppLayout>
