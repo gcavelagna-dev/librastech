@@ -1,12 +1,12 @@
 
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Send, Info, MapPin, ClipboardCopy, QrCode, User, FileText, Building } from 'lucide-react';
+import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 interface SosMessageScreenProps {
@@ -43,7 +43,6 @@ export function SosMessageScreen({
   coordinates,
 }: SosMessageScreenProps) {
   const { toast } = useToast();
-  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
 
   const displayEmergencyType = emergencyTypeMap[emergencyType] || emergencyType;
   
@@ -95,30 +94,6 @@ export function SosMessageScreen({
         variant: "destructive",
       });
     }
-  };
-
-  const handleShowQrCode = () => {
-    if (!canSendMessage || !sosMessage) {
-       toast({
-        title: "Gere a Mensagem Primeiro",
-        description: "Você precisa gerar uma mensagem SOS válida antes de mostrar o QR Code.",
-        variant: "destructive",
-      });
-      setQrCodeUrl(null);
-      return;
-    }
-    const qrData = JSON.stringify({
-      sosMessage,
-      userName,
-      location,
-      emergencyType: displayEmergencyType,
-      coordinates,
-      documentType,
-      documentNumber,
-      city,
-    });
-    const url = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qrData)}&size=220x220&margin=10`;
-    setQrCodeUrl(url);
   };
 
   const isGenerateButtonDisabled = isLoading || !isLocationReady;
@@ -189,17 +164,6 @@ export function SosMessageScreen({
             </Alert>
           )}
 
-          {qrCodeUrl && canSendMessage && (
-            <div className="mt-4 p-4 border rounded-md flex flex-col items-center bg-card">
-              <p className="text-sm text-center mb-2 text-muted-foreground">
-                Escaneie para enviar via WhatsApp/SMS (requer app LibrasTech no celular).
-              </p>
-              <Image src={qrCodeUrl} alt="QR Code para mensagem SOS" width={220} height={220} data-ai-hint="qr code" />
-              <Button variant="outline" size="sm" onClick={() => setQrCodeUrl(null)} className="mt-3">
-                Fechar QR Code
-              </Button>
-            </div>
-          )}
         </CardContent>
         <CardFooter className="flex flex-col space-y-2 pt-4">
           <Button 
@@ -233,16 +197,6 @@ export function SosMessageScreen({
                  </Button>
                )}
             </div>
-          )}
-          {canSendMessage && (
-             <Button
-                onClick={handleShowQrCode}
-                variant="outline"
-                className="w-full"
-              >
-                <QrCode className="w-4 h-4 mr-2" />
-                {qrCodeUrl ? "Atualizar QR Code" : "QR Code para Celular"}
-              </Button>
           )}
         </CardFooter>
       </Card>
