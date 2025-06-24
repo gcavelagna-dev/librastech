@@ -17,21 +17,24 @@ const emergencyTypes = [
     name: 'Incêndio/Resgate', 
     icon: Flame, 
     dataAiHint: "fire flames",
-    tooltipText: "Para incêndios, desabamentos, resgate em locais de difícil acesso."
+    tooltipText: "Para incêndios, desabamentos, resgate em locais de difícil acesso.",
+    colorClass: "text-accent"
   },
   { 
     id: 'Medical', 
     name: 'Médica', 
     icon: HeartPulse, 
     dataAiHint: "medical cross",
-    tooltipText: "Para emergências médicas, acidentes, necessidade de ambulância."
+    tooltipText: "Para emergências médicas, acidentes, necessidade de ambulância.",
+    colorClass: "text-destructive"
   },
   { 
     id: 'PublicSafety', 
     name: 'Segurança Pública', 
     icon: ShieldAlert, 
     dataAiHint: "police shield",
-    tooltipText: "Para situações de perigo, assaltos, violência, perturbação da ordem."
+    tooltipText: "Para situações de perigo, assaltos, violência, perturbação da ordem.",
+    colorClass: "text-primary"
   },
 ];
 
@@ -56,7 +59,7 @@ export function EmergencySelectionScreen({ onSelectEmergency }: EmergencySelecti
                     onClick={() => onSelectEmergency(emergency.id)}
                     data-ai-hint={emergency.dataAiHint}
                   >
-                    <emergency.icon className="w-12 h-12 mb-2 text-primary" />
+                    <emergency.icon className={`w-12 h-12 mb-2 ${emergency.colorClass}`} />
                     <span className="font-semibold">{emergency.name}</span>
                   </Button>
                 </TooltipTrigger>
