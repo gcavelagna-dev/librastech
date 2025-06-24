@@ -2,11 +2,10 @@
 "use client";
 
 import React from 'react';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building, VenetianMask, Cake } from 'lucide-react';
+import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building, VenetianMask, Cake, Siren } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 interface SosMessageScreenProps {
@@ -23,7 +22,6 @@ interface SosMessageScreenProps {
   onGenerateSos: () => void;
   isLoading: boolean;
   onSendViaWhatsApp?: (message: string) => void;
-  coordinates: { lat: number; lon: number } | null;
 }
 
 const emergencyTypeMap: Record<string, string> = {
@@ -46,7 +44,6 @@ export function SosMessageScreen({
   onGenerateSos,
   isLoading,
   onSendViaWhatsApp,
-  coordinates,
 }: SosMessageScreenProps) {
   const { toast } = useToast();
 
@@ -56,7 +53,7 @@ export function SosMessageScreen({
 
   const isLocationLoading = location === 'Obtendo localização...';
   const hasLocationError = location.startsWith('Não foi possível') || location === 'Geolocalização não suportada neste navegador';
-  const isLocationReady = !isLocationLoading && !hasLocationError && coordinates !== null;
+  const isLocationReady = !isLocationLoading && !hasLocationError;
 
   const getLocationDisplay = () => {
     if (isLocationLoading) {
@@ -75,7 +72,7 @@ export function SosMessageScreen({
         </div>
       );
     }
-    return <p>{location}</p>;
+    return <p className="text-foreground">{location}</p>;
   };
 
   const handleCopySosMessage = async () => {
@@ -104,69 +101,68 @@ export function SosMessageScreen({
 
   const isGenerateButtonDisabled = isLoading || !isLocationReady;
 
-  const getGenerateButtonContent = () => {
-    if (isLoading) {
-      return { text: "Gerando mensagem...", icon: <Loader2 className="w-4 h-4 mr-2 animate-spin" /> };
-    }
-    
-    let baseText = (sosMessage && !sosMessage.startsWith("Erro")) ? "Gerar Novamente" : "Gerar Mensagem SOS";
-    let locationStatus = "";
-    if ((!sosMessage || sosMessage.startsWith("Erro")) && !isLocationReady) {
-      locationStatus = " (Aguardando Localização)";
-    }
-    return { text: `${baseText}${locationStatus}`, icon: null };
+  const getGenerateButtonText = () => {
+    if (isLoading) return "Gerando mensagem...";
+    if (sosMessage && !sosMessage.startsWith("Erro")) return "Gerar Novamente";
+    if (!isLocationReady) return "Aguardando Localização...";
+    return "Gerar Mensagem SOS";
   };
 
-  const generateButtonContent = getGenerateButtonContent();
 
   return (
     <div className="flex flex-col items-center">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-headline text-center">Mensagem SOS</CardTitle>
-          <CardDescription className="text-center">
-            Verifique seus dados e gere a mensagem de SOS.
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-headline">Revisão Final</CardTitle>
+          <CardDescription>
+            Confirme seus dados e gere a mensagem de SOS.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <div>
-            <h3 className="font-semibold flex items-center"><User className="w-4 h-4 mr-1 text-primary"/>Nome:</h3>
-            <p>{userName}</p>
-          </div>
-          {gender && (
-            <div>
-              <h3 className="font-semibold flex items-center"><VenetianMask className="w-4 h-4 mr-1 text-primary"/>Sexo:</h3>
-              <p>{gender}</p>
+        <CardContent className="space-y-4 text-sm">
+           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <h3 className="font-semibold flex items-center text-muted-foreground"><User className="w-4 h-4 mr-1.5"/>Nome:</h3>
+                <p className="text-foreground">{userName}</p>
+              </div>
+               <div className="space-y-1">
+                <h3 className="font-semibold flex items-center text-muted-foreground"><Cake className="w-4 h-4 mr-1.5"/>Nascimento:</h3>
+                <p className="text-foreground">{dateOfBirth || 'N/A'}</p>
+              </div>
             </div>
-          )}
-           {dateOfBirth && (
-            <div>
-              <h3 className="font-semibold flex items-center"><Cake className="w-4 h-4 mr-1 text-primary"/>Data de Nascimento:</h3>
-              <p>{dateOfBirth}</p>
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+               {gender && (
+                <div className="space-y-1">
+                  <h3 className="font-semibold flex items-center text-muted-foreground"><VenetianMask className="w-4 h-4 mr-1.5"/>Sexo:</h3>
+                  <p className="text-foreground">{gender}</p>
+                </div>
+              )}
+              {documentType && documentNumber && (
+                <div className="space-y-1">
+                  <h3 className="font-semibold flex items-center text-muted-foreground"><FileText className="w-4 h-4 mr-1.5"/>Documento:</h3>
+                  <p className="text-foreground">{documentType}: {documentNumber}</p>
+                </div>
+              )}
+               {city && (
+                 <div className="space-y-1">
+                  <h3 className="font-semibold flex items-center text-muted-foreground"><Building className="w-4 h-4 mr-1.5"/>Cidade:</h3>
+                  <p className="text-foreground">{city}</p>
+                </div>
+              )}
             </div>
-          )}
-          {documentType && documentNumber && (
-            <div>
-              <h3 className="font-semibold flex items-center"><FileText className="w-4 h-4 mr-1 text-primary"/>Documento:</h3>
-              <p>{documentType}: {documentNumber}</p>
+
+            <div className="space-y-1">
+                <h3 className="font-semibold flex items-center text-muted-foreground">
+                    <MapPin className="w-4 h-4 mr-1.5" /> Localização:
+                </h3>
+                {getLocationDisplay()}
             </div>
-          )}
-          {city && (
-             <div>
-              <h3 className="font-semibold flex items-center"><Building className="w-4 h-4 mr-1 text-primary"/>Cidade:</h3>
-              <p>{city}</p>
+
+             <div className="space-y-1">
+                <h3 className="font-semibold flex items-center text-muted-foreground">
+                    <Siren className="w-4 h-4 mr-1.5 text-destructive" /> Emergência:
+                </h3>
+                <p className="text-foreground font-medium">{displayEmergencyType}: <span className="font-normal">{subEmergencyType}</span></p>
             </div>
-          )}
-          <div>
-            <h3 className="font-semibold flex items-center">
-              <MapPin className="w-4 h-4 mr-1 text-primary" /> Localização:
-            </h3>
-            {getLocationDisplay()}
-          </div>
-          <div>
-            <h3 className="font-semibold">Tipo de Emergência:</h3>
-            <p>{displayEmergencyType}: {subEmergencyType}</p>
-          </div>
 
           {isLoading && !sosMessage && ( 
             <div className="flex items-center justify-center p-4">
@@ -178,7 +174,7 @@ export function SosMessageScreen({
           {sosMessage && ( 
             <Alert variant={sosMessage.startsWith("Erro") ? "destructive" : "default"} className="mt-4">
               <AlertTitle>{sosMessage.startsWith("Erro") ? "Erro" : "Mensagem SOS Gerada"}</AlertTitle>
-              <AlertDescription className="whitespace-pre-wrap">{sosMessage}</AlertDescription>
+              <AlertDescription className="whitespace-pre-wrap text-base">{sosMessage}</AlertDescription>
             </Alert>
           )}
 
@@ -190,8 +186,8 @@ export function SosMessageScreen({
             className="w-full"
             variant={(sosMessage && !sosMessage.startsWith("Erro")) ? "secondary" : "default"}
           >
-            {generateButtonContent.icon}
-            {generateButtonContent.text}
+            {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            {getGenerateButtonText()}
           </Button>
           
           {canSendMessage && (
@@ -207,8 +203,7 @@ export function SosMessageScreen({
               {onSendViaWhatsApp && (
                  <Button
                    onClick={() => onSendViaWhatsApp(sosMessage!)}
-                   className="w-full"
-                   variant="default"
+                   className="w-full bg-green-500 hover:bg-green-600 text-white"
                  >
                    <Send className="w-4 h-4 mr-2" />
                    WhatsApp

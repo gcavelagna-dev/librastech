@@ -95,20 +95,33 @@ export function SettingsDialog({
       return;
     }
     onSavePhoneNumber(phoneNumber);
-    // A toast de sucesso é exibida pelo componente pai (page.tsx)
   };
   
   const handleSaveTrustedInfo = () => {
+    const rawTrustedPhone = trustedPhone.replace(/\D/g, '');
+    if (rawTrustedPhone.length > 0 && rawTrustedPhone.length < 10) {
+       toast({
+        title: "Número do Contato Inválido",
+        description: "O número do contato de confiança parece ser inválido. Por favor, inclua o DDD.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!trustedName.trim() && !trustedPhone.trim()) {
+        onSaveTrustedContact(trustedName, trustedPhone); // Permite limpar os campos
+        return;
+    }
+    
+    if (!trustedName.trim() || !trustedPhone.trim()) {
       toast({
         title: "Dados Incompletos",
-        description: "Preencha o nome ou telefone do contato de confiança para salvar.",
+        description: "Para salvar um contato de confiança, preencha tanto o nome quanto o telefone.",
         variant: "destructive",
       });
       return;
     }
     onSaveTrustedContact(trustedName, trustedPhone);
-    // A toast de sucesso é exibida pelo componente pai (page.tsx)
   };
 
   return (
@@ -120,14 +133,11 @@ export function SettingsDialog({
           </DialogTitle>
         </DialogHeader>
 
-        {/* Appearance Section */}
         <div className="space-y-4 py-2">
-            <DialogHeader>
-                <DialogTitle className="flex items-center text-base">
-                    {currentTheme === 'dark' ? <Moon className="w-5 h-5 mr-2" /> : <Sun className="w-5 h-5 mr-2" />}
-                    Aparência
-                </DialogTitle>
-            </DialogHeader>
+            <DialogTitle className="flex items-center text-base font-semibold">
+                {currentTheme === 'dark' ? <Moon className="w-5 h-5 mr-2" /> : <Sun className="w-5 h-5 mr-2" />}
+                Aparência
+            </DialogTitle>
             <div className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
                 <Label htmlFor="dark-mode" className="flex flex-col space-y-1">
                     <span>Modo Noturno</span>
@@ -146,19 +156,16 @@ export function SettingsDialog({
 
         <Separator className="my-2" />
 
-        {/* User Phone Number Section */}
         <div className="space-y-4 py-2">
-           <DialogHeader>
-            <DialogTitle className="flex items-center text-base">
+            <DialogTitle className="flex items-center text-base font-semibold">
               <Smartphone className="w-5 h-5 mr-2" /> Número de Telefone
             </DialogTitle>
-            <DialogDescription>
-              Adicione seu número para incluí-lo nas mensagens de emergência.
+            <DialogDescription className="text-sm text-muted-foreground">
+              Adicione seu número para incluí-lo automaticamente nas mensagens de emergência.
             </DialogDescription>
-          </DialogHeader>
           
           <div className="space-y-1">
-            <Label htmlFor="phoneNumber">Seu Número de Telefone (com DDD)</Label>
+            <Label htmlFor="phoneNumber">Seu Telefone (com DDD)</Label>
             <Input
               id="phoneNumber"
               type="tel"
@@ -175,19 +182,16 @@ export function SettingsDialog({
 
         <Separator className="my-2" />
 
-        {/* Trusted Contact Section */}
         <div className="space-y-4 py-2">
-          <DialogHeader>
-            <DialogTitle className="flex items-center text-base">
+            <DialogTitle className="flex items-center text-base font-semibold">
               <UserCog className="w-5 h-5 mr-2" /> Contato de Confiança
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-sm text-muted-foreground">
               Adicione uma pessoa para ser notificada em caso de emergência (opcional).
             </DialogDescription>
-          </DialogHeader>
           
           <div className="space-y-1">
-            <Label htmlFor="trustedName">Nome do Contato de Confiança</Label>
+            <Label htmlFor="trustedName">Nome do Contato</Label>
             <Input
               id="trustedName"
               type="text"
@@ -197,7 +201,7 @@ export function SettingsDialog({
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="trustedPhone">Telefone do Contato de Confiança (com DDD)</Label>
+            <Label htmlFor="trustedPhone">Telefone do Contato (com DDD)</Label>
             <Input
               id="trustedPhone"
               type="tel"

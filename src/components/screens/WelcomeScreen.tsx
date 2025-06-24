@@ -53,7 +53,6 @@ export function WelcomeScreen({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // A verificação do botão desabilitado já garante que os dados estão preenchidos
     onNameSave(
       name.trim(),
       gender,
@@ -72,15 +71,15 @@ export function WelcomeScreen({
     <div className="flex flex-col items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl font-headline text-center">Bem-vindo ao LibrasTech</CardTitle>
+          <CardTitle className="text-2xl font-headline text-center">Bem-vindo(a) ao LibrasTech</CardTitle>
           <CardDescription className="text-center">
-            Sua segurança é nossa prioridade. Preencha todos os seus dados para uma identificação completa em emergências.
+            Sua segurança é nossa prioridade. Preencha seus dados para uma identificação rápida em emergências.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Seu Nome Completo</Label>
+              <Label htmlFor="name">Nome Completo</Label>
               <Input
                 id="name"
                 type="text"
@@ -88,7 +87,6 @@ export function WelcomeScreen({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="text-base"
                 aria-describedby="name-helper-text"
               />
               <p id="name-helper-text" className="text-xs text-muted-foreground px-1">
@@ -96,23 +94,43 @@ export function WelcomeScreen({
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label>Sexo</Label>
-              <RadioGroup
-                onValueChange={setGender}
-                value={gender}
-                className="flex space-x-4"
-                aria-label="Sexo"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Feminino" id="feminino" />
-                  <Label htmlFor="feminino">Feminino</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="Masculino" id="masculino" />
-                  <Label htmlFor="masculino">Masculino</Label>
-                </div>
-              </RadioGroup>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+               <div className="space-y-2">
+                <Label>Sexo</Label>
+                <RadioGroup
+                  onValueChange={setGender}
+                  value={gender}
+                  className="flex space-x-4 pt-2"
+                  aria-label="Sexo"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Feminino" id="feminino" />
+                    <Label htmlFor="feminino">Feminino</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Masculino" id="masculino" />
+                    <Label htmlFor="masculino">Masculino</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              <div className="space-y-2">
+                <Label>Tipo de Documento</Label>
+                <RadioGroup
+                  onValueChange={setDocumentType}
+                  value={documentType}
+                  className="flex space-x-4 pt-2"
+                  aria-label="Tipo de Documento"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="RG" id="rg" />
+                    <Label htmlFor="rg">RG</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="CPF" id="cpf" />
+                    <Label htmlFor="cpf">CPF</Label>
+                  </div>
+                </RadioGroup>
+              </div>
             </div>
             
             <div className="space-y-2">
@@ -145,78 +163,62 @@ export function WelcomeScreen({
                 </PopoverContent>
               </Popover>
                <p id="dob-helper-text" className="text-xs text-muted-foreground px-1">
-                Sua idade pode ser uma informação crucial em uma emergência.
+                Sua idade pode ser uma informação crucial para o socorro.
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label>Tipo de Documento</Label>
-              <RadioGroup
-                onValueChange={setDocumentType}
-                value={documentType}
-                className="flex space-x-4"
-                aria-label="Tipo de Documento"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="RG" id="rg" />
-                  <Label htmlFor="rg">RG</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="CPF" id="cpf" />
-                  <Label htmlFor="cpf">CPF</Label>
-                </div>
-              </RadioGroup>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="documentNumber">Número do Documento</Label>
+                <Input
+                  id="documentNumber"
+                  type="text"
+                  placeholder="Apenas números"
+                  value={documentNumber}
+                  onChange={(e) => setDocumentNumber(e.target.value)}
+                  disabled={!documentType}
+                  required
+                  aria-describedby="document-helper-text"
+                />
+                 <p id="document-helper-text" className="text-xs text-muted-foreground px-1">
+                  Ajuda na identificação oficial.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="city">Cidade</Label>
+                <Input
+                  id="city"
+                  type="text"
+                  placeholder="Sua cidade"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                  aria-describedby="city-helper-text"
+                />
+                <p id="city-helper-text" className="text-xs text-muted-foreground px-1">
+                   Útil para os serviços de emergência.
+                </p>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="documentNumber">Número do Documento</Label>
-              <Input
-                id="documentNumber"
-                type="text"
-                placeholder="Digite o número do documento"
-                value={documentNumber}
-                onChange={(e) => setDocumentNumber(e.target.value)}
-                className="text-base"
-                disabled={!documentType}
-                aria-describedby="document-helper-text"
-              />
-               <p id="document-helper-text" className="text-xs text-muted-foreground px-1">
-                Seu documento pode ajudar na identificação pelas autoridades.
-              </p>
+            <div className="!mt-6">
+                 <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={!name.trim() || !gender || !documentType || !documentNumber.trim() || !city.trim() || !dateOfBirth}
+                    >
+                    Salvar e Continuar
+                </Button>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="city">Cidade</Label>
-              <Input
-                id="city"
-                type="text"
-                placeholder="Digite sua cidade"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="text-base"
-                aria-describedby="city-helper-text"
-              />
-              <p id="city-helper-text" className="text-xs text-muted-foreground px-1">
-                Sua cidade pode ser útil para os serviços de emergência.
-              </p>
-            </div>
-
-            <div className="flex items-center justify-center text-center text-xs text-muted-foreground p-3 mt-4 rounded-lg bg-muted/50 border border-dashed">
+          </form>
+        </CardContent>
+         <CardFooter className="flex flex-col items-start gap-2 text-sm text-muted-foreground">
+             <div className="flex items-center text-center text-xs p-3 rounded-lg bg-muted/50 border border-dashed">
                 <Lock size={14} className="mr-2 shrink-0" />
                 <span>Suas informações são confidenciais e usadas apenas para gerar a mensagem de emergência.</span>
             </div>
-
-            <Button
-              type="submit"
-              className="w-full !mt-6"
-              disabled={!name.trim() || !gender || !documentType || !documentNumber.trim() || !city.trim() || !dateOfBirth}
-            >
-              Salvar e Continuar
-            </Button>
-          </form>
-        </CardContent>
-        <CardFooter>
-          {/* Pode adicionar algo no rodapé se necessário */}
         </CardFooter>
       </Card>
     </div>

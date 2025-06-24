@@ -12,9 +12,9 @@ interface SubEmergencySelectionScreenProps {
 }
 
 const subEmergencyOptions: Record<string, string[]> = {
-  Fire: ["Incêndio", "Desabamento", "Resgate em altura", "Afogamento", "Vazamento de gás", "Outros"],
-  Medical: ["Acidente de trânsito", "Engasgo", "Infarto / Dor no peito", "Convulsão", "Mal súbito", "Outros"],
-  PublicSafety: ["Roubo / Furto", "Violência doméstica", "Agressão", "Sequestro", "Perturbação da ordem", "Outros"],
+  Fire: ["Incêndio em vegetação", "Incêndio em edificação", "Desabamento", "Resgate em altura", "Afogamento", "Vazamento de gás", "Outros"],
+  Medical: ["Acidente de trânsito", "Engasgo", "Infarto / Dor no peito", "Convulsão", "Queda", "Mal súbito", "Outros"],
+  PublicSafety: ["Roubo / Furto", "Violência doméstica", "Agressão", "Sequestro", "Perturbação da ordem", "Atitude suspeita", "Outros"],
 };
 
 const emergencyTypeMap: Record<string, string> = {
@@ -30,23 +30,23 @@ export function SubEmergencySelectionScreen({ emergencyType, onSelectSubEmergenc
 
   return (
     <div className="flex flex-col items-center">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md text-center">
         <CardHeader>
-          <CardTitle className="text-2xl font-headline text-center">Qual o tipo de emergência "{displayEmergencyType}"?</CardTitle>
-          <CardDescription className="text-center">
-            Selecione a opção que melhor descreve a situação para um atendimento mais rápido e eficaz.
+          <CardTitle className="text-2xl font-headline">Detalhes da emergência</CardTitle>
+          <CardDescription>
+            Qual destas opções melhor descreve a situação de <span className="font-semibold text-foreground">"{displayEmergencyType}"</span>?
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-6 pt-0">
           {options.map((option) => (
             <Button
               key={option}
               variant="outline"
-              className="w-full h-auto py-4 text-base justify-between hover:bg-accent/10"
+              className="w-full h-auto py-3 text-base justify-between hover:bg-accent/10 hover:border-primary/50 transition-all duration-200"
               onClick={() => onSelectSubEmergency(option)}
             >
-              <span>{option}</span>
-              <ArrowRight className="w-5 h-5 text-primary" />
+              <span className="text-left">{option}</span>
+              <ArrowRight className="w-5 h-5 text-primary ml-2" />
             </Button>
           ))}
         </CardContent>

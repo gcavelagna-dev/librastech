@@ -1,8 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
+import React, { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { EmergencySelectionScreen } from '@/components/screens/EmergencySelectionScreen';
@@ -41,7 +40,7 @@ export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
   const [userName, setUserName] = useState<string>('');
   const [gender, setGender] = useState<string | undefined>(undefined);
-  const [dateOfBirth, setDateOfBirth] = useState<string>(''); // Storing as ISO string
+  const [dateOfBirth, setDateOfBirth] = useState<string>(''); 
   const [userPhoneNumber, setUserPhoneNumber] = useState<string>('');
   const [documentType, setDocumentType] = useState<string | undefined>(undefined);
   const [documentNumber, setDocumentNumber] = useState<string>('');
@@ -52,7 +51,6 @@ export default function HomePage() {
   const [emergencyType, setEmergencyType] = useState<string>('');
   const [subEmergencyType, setSubEmergencyType] = useState<string>('');
   const [location, setLocation] = useState<string>('Obtendo localização...');
-  const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
   const [sosMessage, setSosMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -67,7 +65,11 @@ export default function HomePage() {
     setIsMounted(true);
 
     const storedName = localStorage.getItem(LOCAL_STORAGE_USER_NAME_KEY);
-    if (storedName) setUserName(storedName);
+    if (storedName) {
+      setUserName(storedName);
+      // Only proceed if the user is already set up
+      setCurrentStep('emergency');
+    }
 
     const storedGender = localStorage.getItem(LOCAL_STORAGE_GENDER_KEY);
     if (storedGender) setGender(storedGender);
@@ -97,6 +99,8 @@ export default function HomePage() {
     const storedTheme = localStorage.getItem(LOCAL_STORAGE_THEME_KEY) as Theme | null;
     if (storedTheme) {
       setTheme(storedTheme);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark');
     }
 
 
@@ -105,7 +109,6 @@ export default function HomePage() {
         (position) => {
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
-          setCoordinates({ lat, lon });
           const coordsString = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
           setLocation(coordsString);
         },
@@ -116,7 +119,8 @@ export default function HomePage() {
             description: "Não foi possível obter sua localização. Verifique as permissões do navegador.",
             variant: "destructive",
           });
-        }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
       setLocation('Geolocalização não suportada neste navegador');
@@ -183,7 +187,6 @@ export default function HomePage() {
       localStorage.removeItem(LOCAL_STORAGE_DATE_OF_BIRTH_KEY);
       setDateOfBirth('');
     }
-
 
     setCurrentStep('emergency');
     const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
@@ -267,6 +270,7 @@ export default function HomePage() {
   };
 
   const handleBack = () => {
+    setSosMessage(null);
     if (currentStep === 'sos') {
       setCurrentStep('sub-emergency');
     } else if (currentStep === 'sub-emergency') {
@@ -294,43 +298,47 @@ export default function HomePage() {
     const trimmedName = name.trim();
     const trimmedPhone = phone.trim();
 
-    if (trimmedName) {
+    if (trimmedName && trimmedPhone) {
       setTrustedContactName(trimmedName);
       localStorage.setItem(LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY, trimmedName);
-    } else {
-      setTrustedContactName('');
-      localStorage.removeItem(LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY);
-    }
-
-    if (trimmedPhone) {
       setTrustedContactPhoneNumber(trimmedPhone);
       localStorage.setItem(LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY, trimmedPhone);
+       toast({
+        title: "Contato de Confiança Salvo",
+        description: "As informações do seu contato de confiança foram atualizadas.",
+      });
+    } else if (!trimmedName && !trimmedPhone) {
+        setTrustedContactName('');
+        localStorage.removeItem(LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY);
+        setTrustedContactPhoneNumber('');
+        localStorage.removeItem(LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY);
+        toast({
+            title: "Contato de Confiança Removido",
+            description: "As informações do seu contato de confiança foram removidas.",
+        });
     } else {
-      setTrustedContactPhoneNumber('');
-      localStorage.removeItem(LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY);
+        toast({
+            title: "Dados Incompletos",
+            description: "Para salvar um contato de confiança, é necessário preencher tanto o nome quanto o telefone.",
+            variant: "destructive"
+        });
     }
-    
-    toast({
-      title: "Contato de Confiança Salvo",
-      description: "As informações do seu contato de confiança foram atualizadas.",
-    });
   };
   
   const handleThemeChange = (newTheme: Theme) => {
     setTheme(newTheme);
   };
 
-
   const getScreenTitle = () => {
     switch (currentStep) {
       case 'welcome':
-        return 'LibrasTech - Bem-vindo(a)';
+        return 'Cadastro Rápido';
       case 'emergency':
-        return 'LibrasTech - Emergência';
+        return 'Tipo de Emergência';
       case 'sub-emergency':
-        return 'LibrasTech - Detalhes';
+        return 'Detalhes da Emergência';
       case 'sos':
-        return 'LibrasTech - Mensagem SOS';
+        return 'Mensagem de Socorro';
       default:
         return 'LibrasTech';
     }
@@ -338,7 +346,7 @@ export default function HomePage() {
 
   if (!isMounted) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-background">
         <p>Carregando...</p>
       </div>
     );
@@ -348,7 +356,7 @@ export default function HomePage() {
     <>
       <AppLayout
         title={getScreenTitle()}
-        showBack={currentStep !== 'welcome'}
+        showBack={currentStep !== 'welcome' && (currentStep !== 'emergency' || !!localStorage.getItem(LOCAL_STORAGE_USER_NAME_KEY))}
         onBack={handleBack}
         onConfig={handleConfig}
         showConfig={true}
@@ -388,7 +396,6 @@ export default function HomePage() {
             onGenerateSos={handleGenerateSos}
             isLoading={isLoading}
             onSendViaWhatsApp={handleSendViaWhatsApp}
-            coordinates={coordinates}
           />
         )}
       </AppLayout>
@@ -408,7 +415,7 @@ export default function HomePage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Adicionar Número de Telefone?</AlertDialogTitle>
             <AlertDialogDescription>
-              Adicionar seu número de telefone permite que ele seja incluído automaticamente nas mensagens SOS, agilizando o contato em uma emergência. Você também poderá usá-lo para enviar alertas via WhatsApp/SMS pelo celular (requer app LibrasTech no celular).
+              Adicionar seu número de telefone permite que ele seja incluído automaticamente nas mensagens SOS, agilizando o contato em uma emergência.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
