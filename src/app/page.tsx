@@ -24,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 type AppStep = 'welcome' | 'emergency' | 'sos';
 const LOCAL_STORAGE_USER_NAME_KEY = 'LibrasTech_UserName';
 const LOCAL_STORAGE_GENDER_KEY = 'LibrasTech_Gender';
+const LOCAL_STORAGE_DATE_OF_BIRTH_KEY = 'LibrasTech_DateOfBirth';
 const LOCAL_STORAGE_PHONE_NUMBER_KEY = 'LibrasTech_PhoneNumber';
 const LOCAL_STORAGE_DOCUMENT_TYPE_KEY = 'LibrasTech_DocumentType';
 const LOCAL_STORAGE_DOCUMENT_NUMBER_KEY = 'LibrasTech_DocumentNumber';
@@ -36,6 +37,7 @@ export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
   const [userName, setUserName] = useState<string>('');
   const [gender, setGender] = useState<string | undefined>(undefined);
+  const [dateOfBirth, setDateOfBirth] = useState<string>(''); // Storing as ISO string
   const [userPhoneNumber, setUserPhoneNumber] = useState<string>('');
   const [documentType, setDocumentType] = useState<string | undefined>(undefined);
   const [documentNumber, setDocumentNumber] = useState<string>('');
@@ -62,6 +64,9 @@ export default function HomePage() {
 
     const storedGender = localStorage.getItem(LOCAL_STORAGE_GENDER_KEY);
     if (storedGender) setGender(storedGender);
+
+    const storedDob = localStorage.getItem(LOCAL_STORAGE_DATE_OF_BIRTH_KEY);
+    if (storedDob) setDateOfBirth(storedDob);
 
     const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
     if (storedPhoneNumber) setUserPhoneNumber(storedPhoneNumber);
@@ -112,7 +117,7 @@ export default function HomePage() {
   }, [toast]);
 
 
-  const handleNameSave = (name: string, userGender?: string, docType?: string, docNumber?: string, userCity?: string) => {
+  const handleNameSave = (name: string, userGender?: string, docType?: string, docNumber?: string, userCity?: string, dob?: Date) => {
     const trimmedName = name.trim();
     setUserName(trimmedName);
     localStorage.setItem(LOCAL_STORAGE_USER_NAME_KEY, trimmedName);
@@ -147,6 +152,16 @@ export default function HomePage() {
       setCity('');
     }
 
+    if (dob) {
+      const dobISOString = dob.toISOString();
+      setDateOfBirth(dobISOString);
+      localStorage.setItem(LOCAL_STORAGE_DATE_OF_BIRTH_KEY, dobISOString);
+    } else {
+      localStorage.removeItem(LOCAL_STORAGE_DATE_OF_BIRTH_KEY);
+      setDateOfBirth('');
+    }
+
+
     setCurrentStep('emergency');
     const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
     if (!storedPhoneNumber) {
@@ -177,6 +192,7 @@ export default function HomePage() {
         location,
         emergencyType,
         ...(gender && { gender }),
+        ...(dateOfBirth && { dateOfBirth: new Date(dateOfBirth).toLocaleDateString('pt-BR') }),
         ...(userPhoneNumber && { userPhoneNumber: userPhoneNumber.replace(/\D/g, '') }),
         ...(documentType && { documentType }),
         ...(documentNumber && { documentNumber }),
@@ -308,6 +324,7 @@ export default function HomePage() {
             initialDocumentType={documentType}
             initialDocumentNumber={documentNumber}
             initialCity={city}
+            initialDateOfBirth={dateOfBirth}
           />
         )}
         {currentStep === 'emergency' && (
@@ -322,6 +339,7 @@ export default function HomePage() {
             documentType={documentType}
             documentNumber={documentNumber}
             city={city}
+            dateOfBirth={dateOfBirth ? new Date(dateOfBirth).toLocaleDateString('pt-BR') : undefined}
             sosMessage={sosMessage}
             onGenerateSos={handleGenerateSos}
             isLoading={isLoading}

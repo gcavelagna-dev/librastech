@@ -7,14 +7,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { ptBR } from 'date-fns/locale';
 
 interface WelcomeScreenProps {
-  onNameSave: (name: string, gender?: string, documentType?: string, documentNumber?: string, city?: string) => void;
+  onNameSave: (name: string, gender?: string, documentType?: string, documentNumber?: string, city?: string, dateOfBirth?: Date) => void;
   initialName?: string;
   initialGender?: string;
   initialDocumentType?: string;
   initialDocumentNumber?: string;
   initialCity?: string;
+  initialDateOfBirth?: string;
 }
 
 export function WelcomeScreen({
@@ -23,13 +30,15 @@ export function WelcomeScreen({
   initialGender,
   initialDocumentType,
   initialDocumentNumber = '',
-  initialCity = ''
+  initialCity = '',
+  initialDateOfBirth
 }: WelcomeScreenProps) {
   const [name, setName] = useState(initialName);
   const [gender, setGender] = useState<string | undefined>(initialGender);
   const [documentType, setDocumentType] = useState<string | undefined>(initialDocumentType);
   const [documentNumber, setDocumentNumber] = useState(initialDocumentNumber);
   const [city, setCity] = useState(initialCity);
+  const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -39,7 +48,8 @@ export function WelcomeScreen({
     if (initialDocumentType) setDocumentType(initialDocumentType);
     if (initialDocumentNumber) setDocumentNumber(initialDocumentNumber);
     if (initialCity) setCity(initialCity);
-  }, [initialName, initialGender, initialDocumentType, initialDocumentNumber, initialCity]);
+    if (initialDateOfBirth) setDateOfBirth(new Date(initialDateOfBirth));
+  }, [initialName, initialGender, initialDocumentType, initialDocumentNumber, initialCity, initialDateOfBirth]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +59,8 @@ export function WelcomeScreen({
       gender,
       documentType,
       documentNumber.trim(),
-      city.trim()
+      city.trim(),
+      dateOfBirth
     );
   };
 
@@ -102,6 +113,40 @@ export function WelcomeScreen({
                   <Label htmlFor="masculino">Masculino</Label>
                 </div>
               </RadioGroup>
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Data de Nascimento</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !dateOfBirth && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateOfBirth ? format(dateOfBirth, "PPP", { locale: ptBR }) : <span>Escolha uma data</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={dateOfBirth}
+                    onSelect={setDateOfBirth}
+                    initialFocus
+                    captionLayout="dropdown-buttons"
+                    fromYear={1920}
+                    toYear={new Date().getFullYear()}
+                    locale={ptBR}
+                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                  />
+                </PopoverContent>
+              </Popover>
+               <p id="dob-helper-text" className="text-xs text-muted-foreground px-1">
+                Sua idade pode ser uma informação crucial em uma emergência.
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -159,7 +204,7 @@ export function WelcomeScreen({
             <Button
               type="submit"
               className="w-full"
-              disabled={!name.trim() || !gender || !documentType || !documentNumber.trim() || !city.trim()}
+              disabled={!name.trim() || !gender || !documentType || !documentNumber.trim() || !city.trim() || !dateOfBirth}
             >
               Salvar e Continuar
             </Button>

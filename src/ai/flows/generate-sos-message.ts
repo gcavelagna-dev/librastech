@@ -19,6 +19,7 @@ const GenerateSosMessageInputSchema = z.object({
   location: z.string().describe('The current location of the user.'),
   emergencyType: z.string().describe('The type of emergency (e.g., Fire, Medical).'),
   gender: z.string().optional().describe('The gender of the user.'),
+  dateOfBirth: z.string().optional().describe("A data de nascimento do usuário no formato dd/MM/yyyy."),
   userPhoneNumber: z.string().optional().describe('The registered phone number of the user, if available.'),
   documentType: z.string().optional().describe('The type of document provided by the user (e.g., RG, CPF).'),
   documentNumber: z.string().optional().describe('The number of the document provided by the user.'),
@@ -42,6 +43,7 @@ const prompt = ai.definePrompt({
   prompt: `Você está criando uma mensagem de SOS para o usuário {{userName}}.
 A mensagem deve incluir o nome do usuário, a localização atual e o tipo de emergência.
 {{#if gender}}Sexo: {{gender}}.{{/if}}
+{{#if dateOfBirth}}Data de Nascimento: {{dateOfBirth}}.{{/if}}
 {{#if userPhoneNumber}}Inclua também o número de telefone registrado: {{userPhoneNumber}}.{{/if}}
 {{#if documentType}}Tipo de Documento: {{documentType}}.{{/if}}
 {{#if documentNumber}}Número do Documento: {{documentNumber}}.{{/if}}
@@ -52,6 +54,7 @@ Nome do usuário: {{userName}}
 Localização: {{location}}
 Tipo de emergência: {{emergencyType}}
 {{#if gender}}Sexo: {{gender}}{{/if}}
+{{#if dateOfBirth}}Data de Nascimento: {{dateOfBirth}}{{/if}}
 {{#if userPhoneNumber}}Número de contato: {{userPhoneNumber}}{{/if}}
 {{#if documentType}}Documento: {{documentType}} - {{documentNumber}}{{/if}}
 {{#if city}}Cidade: {{city}}{{/if}}

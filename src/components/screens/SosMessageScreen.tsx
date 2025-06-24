@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building, VenetianMask } from 'lucide-react';
+import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building, VenetianMask, Cake } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 interface SosMessageScreenProps {
@@ -17,6 +17,7 @@ interface SosMessageScreenProps {
   documentType?: string;
   documentNumber?: string;
   city?: string;
+  dateOfBirth?: string;
   sosMessage: string | null;
   onGenerateSos: () => void;
   isLoading: boolean;
@@ -38,6 +39,7 @@ export function SosMessageScreen({
   documentType,
   documentNumber,
   city,
+  dateOfBirth,
   sosMessage,
   onGenerateSos,
   isLoading,
@@ -133,6 +135,12 @@ export function SosMessageScreen({
             <div>
               <h3 className="font-semibold flex items-center"><VenetianMask className="w-4 h-4 mr-1 text-primary"/>Sexo:</h3>
               <p>{gender}</p>
+            </div>
+          )}
+           {dateOfBirth && (
+            <div>
+              <h3 className="font-semibold flex items-center"><Cake className="w-4 h-4 mr-1 text-primary"/>Data de Nascimento:</h3>
+              <p>{dateOfBirth}</p>
             </div>
           )}
           {documentType && documentNumber && (
