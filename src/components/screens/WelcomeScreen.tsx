@@ -43,15 +43,14 @@ export function WelcomeScreen({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim()) {
-      onNameSave(
-        name.trim(),
-        gender,
-        documentType,
-        documentNumber.trim(),
-        city.trim()
-      );
-    }
+    // A verificação do botão desabilitado já garante que os dados estão preenchidos
+    onNameSave(
+      name.trim(),
+      gender,
+      documentType,
+      documentNumber.trim(),
+      city.trim()
+    );
   };
 
   if (!isMounted) {
@@ -64,7 +63,7 @@ export function WelcomeScreen({
         <CardHeader>
           <CardTitle className="text-2xl font-headline text-center">Bem-vindo ao LibrasTech</CardTitle>
           <CardDescription className="text-center">
-            Sua segurança é nossa prioridade. Insira seus dados para identificação em emergências.
+            Sua segurança é nossa prioridade. Preencha todos os seus dados para uma identificação completa em emergências.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -160,7 +159,7 @@ export function WelcomeScreen({
             <Button
               type="submit"
               className="w-full"
-              disabled={!name.trim() || (!!documentType && !documentNumber.trim())}
+              disabled={!name.trim() || !gender || !documentType || !documentNumber.trim() || !city.trim()}
             >
               Salvar e Continuar
             </Button>
