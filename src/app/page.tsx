@@ -23,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 
 type AppStep = 'welcome' | 'emergency' | 'sos';
 const LOCAL_STORAGE_USER_NAME_KEY = 'LibrasTech_UserName';
+const LOCAL_STORAGE_GENDER_KEY = 'LibrasTech_Gender';
 const LOCAL_STORAGE_PHONE_NUMBER_KEY = 'LibrasTech_PhoneNumber';
 const LOCAL_STORAGE_DOCUMENT_TYPE_KEY = 'LibrasTech_DocumentType';
 const LOCAL_STORAGE_DOCUMENT_NUMBER_KEY = 'LibrasTech_DocumentNumber';
@@ -34,6 +35,7 @@ const LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY = 'LibrasTech_TrustedContactPhone'
 export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
   const [userName, setUserName] = useState<string>('');
+  const [gender, setGender] = useState<string | undefined>(undefined);
   const [userPhoneNumber, setUserPhoneNumber] = useState<string>('');
   const [documentType, setDocumentType] = useState<string | undefined>(undefined);
   const [documentNumber, setDocumentNumber] = useState<string>('');
@@ -57,6 +59,9 @@ export default function HomePage() {
 
     const storedName = localStorage.getItem(LOCAL_STORAGE_USER_NAME_KEY);
     if (storedName) setUserName(storedName);
+
+    const storedGender = localStorage.getItem(LOCAL_STORAGE_GENDER_KEY);
+    if (storedGender) setGender(storedGender);
 
     const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
     if (storedPhoneNumber) setUserPhoneNumber(storedPhoneNumber);
@@ -107,10 +112,18 @@ export default function HomePage() {
   }, [toast]);
 
 
-  const handleNameSave = (name: string, docType?: string, docNumber?: string, userCity?: string) => {
+  const handleNameSave = (name: string, userGender?: string, docType?: string, docNumber?: string, userCity?: string) => {
     const trimmedName = name.trim();
     setUserName(trimmedName);
     localStorage.setItem(LOCAL_STORAGE_USER_NAME_KEY, trimmedName);
+
+    if (userGender) {
+      setGender(userGender);
+      localStorage.setItem(LOCAL_STORAGE_GENDER_KEY, userGender);
+    } else {
+      localStorage.removeItem(LOCAL_STORAGE_GENDER_KEY);
+      setGender(undefined);
+    }
 
     if (docType) {
       setDocumentType(docType);
@@ -163,6 +176,7 @@ export default function HomePage() {
         userName,
         location,
         emergencyType,
+        ...(gender && { gender }),
         ...(userPhoneNumber && { userPhoneNumber: userPhoneNumber.replace(/\D/g, '') }),
         ...(documentType && { documentType }),
         ...(documentNumber && { documentNumber }),
@@ -290,6 +304,7 @@ export default function HomePage() {
           <WelcomeScreen
             onNameSave={handleNameSave}
             initialName={userName}
+            initialGender={gender}
             initialDocumentType={documentType}
             initialDocumentNumber={documentNumber}
             initialCity={city}
@@ -303,6 +318,7 @@ export default function HomePage() {
             userName={userName}
             location={location}
             emergencyType={emergencyType}
+            gender={gender}
             documentType={documentType}
             documentNumber={documentNumber}
             city={city}

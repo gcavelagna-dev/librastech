@@ -9,8 +9,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface WelcomeScreenProps {
-  onNameSave: (name: string, documentType?: string, documentNumber?: string, city?: string) => void;
+  onNameSave: (name: string, gender?: string, documentType?: string, documentNumber?: string, city?: string) => void;
   initialName?: string;
+  initialGender?: string;
   initialDocumentType?: string;
   initialDocumentNumber?: string;
   initialCity?: string;
@@ -19,11 +20,13 @@ interface WelcomeScreenProps {
 export function WelcomeScreen({
   onNameSave,
   initialName = '',
+  initialGender,
   initialDocumentType,
   initialDocumentNumber = '',
   initialCity = ''
 }: WelcomeScreenProps) {
   const [name, setName] = useState(initialName);
+  const [gender, setGender] = useState<string | undefined>(initialGender);
   const [documentType, setDocumentType] = useState<string | undefined>(initialDocumentType);
   const [documentNumber, setDocumentNumber] = useState(initialDocumentNumber);
   const [city, setCity] = useState(initialCity);
@@ -32,16 +35,18 @@ export function WelcomeScreen({
   useEffect(() => {
     setIsMounted(true);
     if (initialName) setName(initialName);
+    if (initialGender) setGender(initialGender);
     if (initialDocumentType) setDocumentType(initialDocumentType);
     if (initialDocumentNumber) setDocumentNumber(initialDocumentNumber);
     if (initialCity) setCity(initialCity);
-  }, [initialName, initialDocumentType, initialDocumentNumber, initialCity]);
+  }, [initialName, initialGender, initialDocumentType, initialDocumentNumber, initialCity]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
       onNameSave(
         name.trim(),
+        gender,
         documentType,
         documentNumber.trim(),
         city.trim()
@@ -79,6 +84,25 @@ export function WelcomeScreen({
               <p id="name-helper-text" className="text-xs text-muted-foreground px-1">
                 Seu nome será usado para personalizar as mensagens de emergência.
               </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Sexo</Label>
+              <RadioGroup
+                onValueChange={setGender}
+                value={gender}
+                className="flex space-x-4"
+                aria-label="Sexo"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Feminino" id="feminino" />
+                  <Label htmlFor="feminino">Feminino</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="Masculino" id="masculino" />
+                  <Label htmlFor="masculino">Masculino</Label>
+                </div>
+              </RadioGroup>
             </div>
 
             <div className="space-y-2">

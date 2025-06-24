@@ -6,13 +6,14 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building } from 'lucide-react';
+import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building, VenetianMask } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 interface SosMessageScreenProps {
   userName: string;
   location: string;
   emergencyType: string;
+  gender?: string;
   documentType?: string;
   documentNumber?: string;
   city?: string;
@@ -33,6 +34,7 @@ export function SosMessageScreen({
   userName,
   location,
   emergencyType,
+  gender,
   documentType,
   documentNumber,
   city,
@@ -127,6 +129,12 @@ export function SosMessageScreen({
             <h3 className="font-semibold flex items-center"><User className="w-4 h-4 mr-1 text-primary"/>Nome:</h3>
             <p>{userName}</p>
           </div>
+          {gender && (
+            <div>
+              <h3 className="font-semibold flex items-center"><VenetianMask className="w-4 h-4 mr-1 text-primary"/>Sexo:</h3>
+              <p>{gender}</p>
+            </div>
+          )}
           {documentType && documentNumber && (
             <div>
               <h3 className="font-semibold flex items-center"><FileText className="w-4 h-4 mr-1 text-primary"/>Documento:</h3>
