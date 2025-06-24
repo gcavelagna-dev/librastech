@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Lock } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
@@ -201,9 +201,14 @@ export function WelcomeScreen({
               </p>
             </div>
 
+            <div className="flex items-center justify-center text-center text-xs text-muted-foreground p-3 mt-4 rounded-lg bg-muted/50 border border-dashed">
+                <Lock size={14} className="mr-2 shrink-0" />
+                <span>Suas informações são confidenciais e usadas apenas para gerar a mensagem de emergência.</span>
+            </div>
+
             <Button
               type="submit"
-              className="w-full"
+              className="w-full !mt-6"
               disabled={!name.trim() || !gender || !documentType || !documentNumber.trim() || !city.trim() || !dateOfBirth}
             >
               Salvar e Continuar
