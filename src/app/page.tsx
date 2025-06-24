@@ -23,6 +23,8 @@ import { generateSosMessage, type GenerateSosMessageInput } from '@/ai/flows/gen
 import { useToast } from "@/hooks/use-toast";
 
 type AppStep = 'welcome' | 'emergency' | 'sub-emergency' | 'sos';
+type Theme = 'light' | 'dark';
+
 const LOCAL_STORAGE_USER_NAME_KEY = 'LibrasTech_UserName';
 const LOCAL_STORAGE_GENDER_KEY = 'LibrasTech_Gender';
 const LOCAL_STORAGE_DATE_OF_BIRTH_KEY = 'LibrasTech_DateOfBirth';
@@ -32,6 +34,7 @@ const LOCAL_STORAGE_DOCUMENT_NUMBER_KEY = 'LibrasTech_DocumentNumber';
 const LOCAL_STORAGE_CITY_KEY = 'LibrasTech_City';
 const LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY = 'LibrasTech_TrustedContactName';
 const LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY = 'LibrasTech_TrustedContactPhone';
+const LOCAL_STORAGE_THEME_KEY = 'LibrasTech_Theme';
 
 
 export default function HomePage() {
@@ -55,6 +58,8 @@ export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
   const [isSettingsDialogVisible, setIsSettingsDialogVisible] = useState(false);
   const [showPhoneNumberPrompt, setShowPhoneNumberPrompt] = useState(false);
+  const [theme, setTheme] = useState<Theme>('light');
+
 
   const { toast } = useToast();
 
@@ -89,6 +94,11 @@ export default function HomePage() {
     const storedTrustedPhone = localStorage.getItem(LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY);
     if (storedTrustedPhone) setTrustedContactPhoneNumber(storedTrustedPhone);
 
+    const storedTheme = localStorage.getItem(LOCAL_STORAGE_THEME_KEY) as Theme | null;
+    if (storedTheme) {
+      setTheme(storedTheme);
+    }
+
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -117,6 +127,17 @@ export default function HomePage() {
       });
     }
   }, [toast]);
+
+  useEffect(() => {
+    if (isMounted) {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+      localStorage.setItem(LOCAL_STORAGE_THEME_KEY, theme);
+    }
+  }, [theme, isMounted]);
 
 
   const handleNameSave = (name: string, userGender?: string, docType?: string, docNumber?: string, userCity?: string, dob?: Date) => {
@@ -294,6 +315,10 @@ export default function HomePage() {
       description: "As informações do seu contato de confiança foram atualizadas.",
     });
   };
+  
+  const handleThemeChange = (newTheme: Theme) => {
+    setTheme(newTheme);
+  };
 
 
   const getScreenTitle = () => {
@@ -375,6 +400,8 @@ export default function HomePage() {
         currentTrustedContactName={trustedContactName}
         currentTrustedContactPhoneNumber={trustedContactPhoneNumber}
         onSaveTrustedContact={handleSaveTrustedContact}
+        currentTheme={theme}
+        onThemeChange={handleThemeChange}
       />
        <AlertDialog open={showPhoneNumberPrompt} onOpenChange={setShowPhoneNumberPrompt}>
         <AlertDialogContent>
