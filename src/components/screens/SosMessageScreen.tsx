@@ -13,6 +13,7 @@ interface SosMessageScreenProps {
   userName: string;
   location: string;
   emergencyType: string;
+  subEmergencyType: string;
   gender?: string;
   documentType?: string;
   documentNumber?: string;
@@ -35,6 +36,7 @@ export function SosMessageScreen({
   userName,
   location,
   emergencyType,
+  subEmergencyType,
   gender,
   documentType,
   documentNumber,
@@ -163,7 +165,7 @@ export function SosMessageScreen({
           </div>
           <div>
             <h3 className="font-semibold">Tipo de Emergência:</h3>
-            <p>{displayEmergencyType}</p>
+            <p>{displayEmergencyType}: {subEmergencyType}</p>
           </div>
 
           {isLoading && !sosMessage && ( 

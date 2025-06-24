@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { WelcomeScreen } from '@/components/screens/WelcomeScreen';
 import { EmergencySelectionScreen } from '@/components/screens/EmergencySelectionScreen';
+import { SubEmergencySelectionScreen } from '@/components/screens/SubEmergencySelectionScreen';
 import { SosMessageScreen } from '@/components/screens/SosMessageScreen';
 import { SettingsDialog } from '@/components/dialogs/SettingsDialog';
 import {
@@ -21,7 +22,7 @@ import {
 import { generateSosMessage, type GenerateSosMessageInput } from '@/ai/flows/generate-sos-message';
 import { useToast } from "@/hooks/use-toast";
 
-type AppStep = 'welcome' | 'emergency' | 'sos';
+type AppStep = 'welcome' | 'emergency' | 'sub-emergency' | 'sos';
 const LOCAL_STORAGE_USER_NAME_KEY = 'LibrasTech_UserName';
 const LOCAL_STORAGE_GENDER_KEY = 'LibrasTech_Gender';
 const LOCAL_STORAGE_DATE_OF_BIRTH_KEY = 'LibrasTech_DateOfBirth';
@@ -46,6 +47,7 @@ export default function HomePage() {
   const [trustedContactPhoneNumber, setTrustedContactPhoneNumber] = useState<string>('');
 
   const [emergencyType, setEmergencyType] = useState<string>('');
+  const [subEmergencyType, setSubEmergencyType] = useState<string>('');
   const [location, setLocation] = useState<string>('Obtendo localização...');
   const [coordinates, setCoordinates] = useState<{ lat: number; lon: number } | null>(null);
   const [sosMessage, setSosMessage] = useState<string | null>(null);
@@ -171,12 +173,17 @@ export default function HomePage() {
 
   const handleSelectEmergency = (type: string) => {
     setEmergencyType(type);
+    setCurrentStep('sub-emergency');
+  };
+
+  const handleSelectSubEmergency = (subType: string) => {
+    setSubEmergencyType(subType);
     setSosMessage(null); 
     setCurrentStep('sos');
   };
 
   const handleGenerateSos = async () => {
-    if (!userName || !emergencyType || location === 'Obtendo localização...' || location.startsWith('Não foi possível')) {
+    if (!userName || !emergencyType || !subEmergencyType || location === 'Obtendo localização...' || location.startsWith('Não foi possível')) {
       toast({
         title: "Dados Incompletos",
         description: "Nome e tipo de emergência são obrigatórios. Aguarde a obtenção da localização ou verifique as permissões.",
@@ -191,6 +198,7 @@ export default function HomePage() {
         userName,
         location,
         emergencyType,
+        subEmergencyType,
         ...(gender && { gender }),
         ...(dateOfBirth && { dateOfBirth: new Date(dateOfBirth).toLocaleDateString('pt-BR') }),
         ...(userPhoneNumber && { userPhoneNumber: userPhoneNumber.replace(/\D/g, '') }),
@@ -239,7 +247,9 @@ export default function HomePage() {
 
   const handleBack = () => {
     if (currentStep === 'sos') {
-      setCurrentStep('emergency');
+      setCurrentStep('sub-emergency');
+    } else if (currentStep === 'sub-emergency') {
+        setCurrentStep('emergency');
     } else if (currentStep === 'emergency') {
       setCurrentStep('welcome');
     }
@@ -292,6 +302,8 @@ export default function HomePage() {
         return 'LibrasTech - Bem-vindo(a)';
       case 'emergency':
         return 'LibrasTech - Emergência';
+      case 'sub-emergency':
+        return 'LibrasTech - Detalhes';
       case 'sos':
         return 'LibrasTech - Mensagem SOS';
       default:
@@ -330,11 +342,18 @@ export default function HomePage() {
         {currentStep === 'emergency' && (
           <EmergencySelectionScreen onSelectEmergency={handleSelectEmergency} />
         )}
+        {currentStep === 'sub-emergency' && (
+           <SubEmergencySelectionScreen 
+             emergencyType={emergencyType}
+             onSelectSubEmergency={handleSelectSubEmergency}
+           />
+        )}
         {currentStep === 'sos' && (
           <SosMessageScreen
             userName={userName}
             location={location}
             emergencyType={emergencyType}
+            subEmergencyType={subEmergencyType}
             gender={gender}
             documentType={documentType}
             documentNumber={documentNumber}

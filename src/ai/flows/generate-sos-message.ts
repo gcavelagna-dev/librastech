@@ -18,6 +18,7 @@ const GenerateSosMessageInputSchema = z.object({
   userName: z.string().describe('The name of the user sending the SOS message.'),
   location: z.string().describe('The current location of the user.'),
   emergencyType: z.string().describe('The type of emergency (e.g., Fire, Medical).'),
+  subEmergencyType: z.string().describe('The specific sub-type of the emergency (e.g., Roubo, Incêndio).'),
   gender: z.string().optional().describe('The gender of the user.'),
   dateOfBirth: z.string().optional().describe("A data de nascimento do usuário no formato dd/MM/yyyy."),
   userPhoneNumber: z.string().optional().describe('The registered phone number of the user, if available.'),
@@ -36,12 +37,18 @@ export async function generateSosMessage(input: GenerateSosMessageInput): Promis
   return generateSosMessageFlow(input);
 }
 
+const emergencyTypeMap: Record<string, string> = {
+  Fire: "Incêndio/Resgate",
+  Medical: "Médica",
+  PublicSafety: "Segurança Pública",
+};
+
 const prompt = ai.definePrompt({
   name: 'generateSosMessagePrompt',
   input: {schema: GenerateSosMessageInputSchema},
   output: {schema: GenerateSosMessageOutputSchema},
   prompt: `Você está criando uma mensagem de SOS para o usuário {{userName}}.
-A mensagem deve incluir o nome do usuário, a localização atual e o tipo de emergência.
+A mensagem deve incluir o nome do usuário, a localização atual e o tipo de emergência detalhado.
 {{#if gender}}Sexo: {{gender}}.{{/if}}
 {{#if dateOfBirth}}Data de Nascimento: {{dateOfBirth}}.{{/if}}
 {{#if userPhoneNumber}}Inclua também o número de telefone registrado: {{userPhoneNumber}}.{{/if}}
@@ -52,7 +59,7 @@ A mensagem deve ser concisa e clara, em Português do Brasil. Use no máximo 250
 
 Nome do usuário: {{userName}}
 Localização: {{location}}
-Tipo de emergência: {{emergencyType}}
+Tipo de emergência: {{emergencyType}} - {{subEmergencyType}}
 {{#if gender}}Sexo: {{gender}}{{/if}}
 {{#if dateOfBirth}}Data de Nascimento: {{dateOfBirth}}{{/if}}
 {{#if userPhoneNumber}}Número de contato: {{userPhoneNumber}}{{/if}}
@@ -68,8 +75,13 @@ const generateSosMessageFlow = ai.defineFlow(
     inputSchema: GenerateSosMessageInputSchema,
     outputSchema: GenerateSosMessageOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    const translatedEmergencyType = emergencyTypeMap[input.emergencyType] || input.emergencyType;
+    const processedInput = {
+      ...input,
+      emergencyType: translatedEmergencyType,
+    };
+    const {output} = await prompt(processedInput);
     return output!;
   }
 );
