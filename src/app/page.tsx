@@ -250,22 +250,49 @@ export default function HomePage() {
     if (!message || message.startsWith("Erro")) {
       toast({
         title: "Mensagem Inválida",
-        description: "Não é possível enviar uma mensagem de erro ou vazia para o WhatsApp.",
+        description: "Não é possível enviar uma mensagem de erro ou vazia.",
         variant: "destructive",
       });
       return;
     }
 
-    const defaultPhoneNumber = "5543999054151"; 
-    const targetPhoneNumber = userPhoneNumber || defaultPhoneNumber;
+    const emergencyPhoneNumber = "5543999054151"; // Central de emergência simulada
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${targetPhoneNumber.replace(/\D/g, '')}&text=${encodedMessage}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${emergencyPhoneNumber.replace(/\D/g, '')}&text=${encodedMessage}`;
 
     window.open(whatsappUrl, '_blank');
 
     toast({
       title: "Abrindo WhatsApp",
-      description: `Sua mensagem está pronta para ser enviada para ${targetPhoneNumber}.`,
+      description: `Sua mensagem está pronta para ser enviada para o serviço de emergência.`,
+    });
+  };
+
+  const handleSendToTrustedContact = (message: string) => {
+    if (!trustedContactPhoneNumber) {
+      toast({
+        title: "Erro",
+        description: "Nenhum contato de confiança cadastrado.",
+        variant: "destructive",
+      });
+      return;
+    }
+     if (!message || message.startsWith("Erro")) {
+      toast({
+        title: "Mensagem Inválida",
+        description: "Não é possível enviar uma mensagem de erro ou vazia.",
+        variant: "destructive",
+      });
+      return;
+    }
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${trustedContactPhoneNumber.replace(/\D/g, '')}&text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank');
+    
+    toast({
+        title: "Notificando Contato",
+        description: `Sua mensagem está pronta para ser enviada para ${trustedContactName}.`,
     });
   };
 
@@ -396,6 +423,8 @@ export default function HomePage() {
             onGenerateSos={handleGenerateSos}
             isLoading={isLoading}
             onSendViaWhatsApp={handleSendViaWhatsApp}
+            trustedContactPhoneNumber={trustedContactPhoneNumber}
+            onSendToTrustedContact={handleSendToTrustedContact}
           />
         )}
       </AppLayout>
