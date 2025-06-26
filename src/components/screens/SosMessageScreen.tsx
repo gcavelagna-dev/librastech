@@ -5,7 +5,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building, VenetianMask, Cake, Siren, Users } from 'lucide-react';
+import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building, VenetianMask, Cake, Siren } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 interface SosMessageScreenProps {
@@ -22,8 +22,6 @@ interface SosMessageScreenProps {
   onGenerateSos: () => void;
   isLoading: boolean;
   onSendViaWhatsApp?: (message: string) => void;
-  trustedContactPhoneNumber?: string;
-  onSendToTrustedContact?: (message: string) => void;
 }
 
 const emergencyTypeMap: Record<string, string> = {
@@ -46,8 +44,6 @@ export function SosMessageScreen({
   onGenerateSos,
   isLoading,
   onSendViaWhatsApp,
-  trustedContactPhoneNumber,
-  onSendToTrustedContact,
 }: SosMessageScreenProps) {
   const { toast } = useToast();
 
@@ -195,33 +191,20 @@ export function SosMessageScreen({
           </Button>
           
           {canSendMessage && (
-            <div className="flex flex-col gap-2 w-full">
-                <div className="grid grid-cols-2 gap-2 w-full">
-                    <Button onClick={handleCopySosMessage} variant="outline" className="w-full">
-                        <ClipboardCopy className="w-4 h-4 mr-2" />
-                        Copiar
-                    </Button>
-                    {onSendViaWhatsApp && (
-                        <Button
-                        onClick={() => onSendViaWhatsApp(sosMessage!)}
-                        className="w-full bg-green-500 hover:bg-green-600 text-white"
-                        >
-                        <Send className="w-4 h-4 mr-2" />
-                        Enviar p/ Emergência
-                        </Button>
-                    )}
-                </div>
-
-                {onSendToTrustedContact && trustedContactPhoneNumber && (
-                    <Button
-                        onClick={() => onSendToTrustedContact(sosMessage!)}
-                        variant="secondary"
-                        className="w-full"
-                    >
-                        <Users className="w-4 h-4 mr-2" />
-                        Notificar Contato
-                    </Button>
-                )}
+            <div className="grid grid-cols-2 gap-2 w-full">
+              <Button onClick={handleCopySosMessage} variant="outline" className="w-full">
+                <ClipboardCopy className="w-4 h-4 mr-2" />
+                Copiar
+              </Button>
+              {onSendViaWhatsApp && (
+                <Button
+                  onClick={() => onSendViaWhatsApp(sosMessage!)}
+                  className="w-full bg-green-500 hover:bg-green-600 text-white"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Enviar via WhatsApp
+                </Button>
+              )}
             </div>
           )}
         </CardFooter>

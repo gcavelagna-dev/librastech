@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -261,39 +260,6 @@ export default function HomePage() {
     const whatsappUrl = `https://api.whatsapp.com/send?phone=${emergencyPhoneNumber.replace(/\D/g, '')}&text=${encodedMessage}`;
 
     window.open(whatsappUrl, '_blank');
-
-    toast({
-      title: "Abrindo WhatsApp",
-      description: `Sua mensagem está pronta para ser enviada para o serviço de emergência.`,
-    });
-  };
-
-  const handleSendToTrustedContact = (message: string) => {
-    if (!trustedContactPhoneNumber) {
-      toast({
-        title: "Erro",
-        description: "Nenhum contato de confiança cadastrado.",
-        variant: "destructive",
-      });
-      return;
-    }
-     if (!message || message.startsWith("Erro")) {
-      toast({
-        title: "Mensagem Inválida",
-        description: "Não é possível enviar uma mensagem de erro ou vazia.",
-        variant: "destructive",
-      });
-      return;
-    }
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${trustedContactPhoneNumber.replace(/\D/g, '')}&text=${encodedMessage}`;
-    
-    window.open(whatsappUrl, '_blank');
-    
-    toast({
-        title: "Notificando Contato",
-        description: `Sua mensagem está pronta para ser enviada para ${trustedContactName}.`,
-    });
   };
 
   const handleBack = () => {
@@ -423,8 +389,6 @@ export default function HomePage() {
             onGenerateSos={handleGenerateSos}
             isLoading={isLoading}
             onSendViaWhatsApp={handleSendViaWhatsApp}
-            trustedContactPhoneNumber={trustedContactPhoneNumber}
-            onSendToTrustedContact={handleSendToTrustedContact}
           />
         )}
       </AppLayout>
