@@ -170,7 +170,7 @@ export function WelcomeScreen({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="documentNumber">Número do Documento</Label>
+                <Label htmlFor="documentNumber">Número do Documento (Opcional)</Label>
                 <Input
                   id="documentNumber"
                   type="text"
@@ -178,7 +178,6 @@ export function WelcomeScreen({
                   value={documentNumber}
                   onChange={(e) => setDocumentNumber(e.target.value)}
                   disabled={!documentType}
-                  required
                   aria-describedby="document-helper-text"
                 />
                  <p id="document-helper-text" className="text-xs text-muted-foreground px-1">
@@ -187,14 +186,13 @@ export function WelcomeScreen({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="city">Cidade</Label>
+                <Label htmlFor="city">Cidade (Opcional)</Label>
                 <Input
                   id="city"
                   type="text"
                   placeholder="Sua cidade"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
-                  required
                   aria-describedby="city-helper-text"
                 />
                 <p id="city-helper-text" className="text-xs text-muted-foreground px-1">
@@ -207,7 +205,7 @@ export function WelcomeScreen({
                  <Button
                     type="submit"
                     className="w-full"
-                    disabled={!name.trim() || !gender || !documentType || !documentNumber.trim() || !city.trim() || !dateOfBirth}
+                    disabled={!name.trim() || !gender || !dateOfBirth}
                     >
                     Salvar e Continuar
                 </Button>
