@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -22,6 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 
 type AppStep = 'welcome' | 'emergency' | 'sub-emergency' | 'sos';
 type Theme = 'light' | 'dark';
+type TrustedContact = { name: string; phone: string };
 
 const LOCAL_STORAGE_USER_NAME_KEY = 'LibrasTech_UserName';
 const LOCAL_STORAGE_GENDER_KEY = 'LibrasTech_Gender';
@@ -30,10 +32,12 @@ const LOCAL_STORAGE_PHONE_NUMBER_KEY = 'LibrasTech_PhoneNumber';
 const LOCAL_STORAGE_DOCUMENT_TYPE_KEY = 'LibrasTech_DocumentType';
 const LOCAL_STORAGE_DOCUMENT_NUMBER_KEY = 'LibrasTech_DocumentNumber';
 const LOCAL_STORAGE_CITY_KEY = 'LibrasTech_City';
-const LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY = 'LibrasTech_TrustedContactName';
-const LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY = 'LibrasTech_TrustedContactPhone';
+const LOCAL_STORAGE_TRUSTED_CONTACTS_KEY = 'LibrasTech_TrustedContacts';
 const LOCAL_STORAGE_THEME_KEY = 'LibrasTech_Theme';
 
+// Deprecated keys for migration
+const OLD_LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY = 'LibrasTech_TrustedContactName';
+const OLD_LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY = 'LibrasTech_TrustedContactPhone';
 
 export default function HomePage() {
   const [currentStep, setCurrentStep] = useState<AppStep>('welcome');
@@ -44,8 +48,7 @@ export default function HomePage() {
   const [documentType, setDocumentType] = useState<string | undefined>(undefined);
   const [documentNumber, setDocumentNumber] = useState<string>('');
   const [city, setCity] = useState<string>('');
-  const [trustedContactName, setTrustedContactName] = useState<string>('');
-  const [trustedContactPhoneNumber, setTrustedContactPhoneNumber] = useState<string>('');
+  const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>([]);
 
   const [emergencyType, setEmergencyType] = useState<string>('');
   const [subEmergencyType, setSubEmergencyType] = useState<string>('');
@@ -88,12 +91,22 @@ export default function HomePage() {
     
     const storedCity = localStorage.getItem(LOCAL_STORAGE_CITY_KEY);
     if (storedCity) setCity(storedCity);
-
-    const storedTrustedName = localStorage.getItem(LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY);
-    if (storedTrustedName) setTrustedContactName(storedTrustedName);
-
-    const storedTrustedPhone = localStorage.getItem(LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY);
-    if (storedTrustedPhone) setTrustedContactPhoneNumber(storedTrustedPhone);
+    
+    // Handle trusted contacts (new array format with migration from old format)
+    const storedContacts = localStorage.getItem(LOCAL_STORAGE_TRUSTED_CONTACTS_KEY);
+    if (storedContacts) {
+      setTrustedContacts(JSON.parse(storedContacts));
+    } else {
+      const oldName = localStorage.getItem(OLD_LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY);
+      const oldPhone = localStorage.getItem(OLD_LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY);
+      if (oldName && oldPhone) {
+        const migratedContacts = [{ name: oldName, phone: oldPhone }];
+        setTrustedContacts(migratedContacts);
+        localStorage.setItem(LOCAL_STORAGE_TRUSTED_CONTACTS_KEY, JSON.stringify(migratedContacts));
+        localStorage.removeItem(OLD_LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY);
+        localStorage.removeItem(OLD_LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY);
+      }
+    }
 
     const storedTheme = localStorage.getItem(LOCAL_STORAGE_THEME_KEY) as Theme | null;
     if (storedTheme) {
@@ -245,7 +258,7 @@ export default function HomePage() {
     setIsLoading(false);
   };
 
-  const handleSendViaWhatsApp = (message: string) => {
+  const handleSendToEmergency = (message: string) => {
     if (!message || message.startsWith("Erro")) {
       toast({
         title: "Mensagem Inválida",
@@ -261,6 +274,21 @@ export default function HomePage() {
 
     window.open(whatsappUrl, '_blank');
   };
+
+  const handleSendToTrustedContact = (phone: string, message: string) => {
+     if (!message || message.startsWith("Erro")) {
+      toast({
+        title: "Mensagem Inválida",
+        description: "Gere uma mensagem SOS válida antes de enviar.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone.replace(/\D/g, '')}&text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
+  }
 
   const handleBack = () => {
     setSosMessage(null);
@@ -287,34 +315,20 @@ export default function HomePage() {
     setShowPhoneNumberPrompt(false); 
   };
   
-  const handleSaveTrustedContact = (name: string, phone: string) => {
-    const trimmedName = name.trim();
-    const trimmedPhone = phone.trim();
-
-    if (trimmedName && trimmedPhone) {
-      setTrustedContactName(trimmedName);
-      localStorage.setItem(LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY, trimmedName);
-      setTrustedContactPhoneNumber(trimmedPhone);
-      localStorage.setItem(LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY, trimmedPhone);
-       toast({
-        title: "Contato de Confiança Salvo",
-        description: "As informações do seu contato de confiança foram atualizadas.",
+  const handleSaveTrustedContacts = (contacts: TrustedContact[]) => {
+    setTrustedContacts(contacts);
+    if (contacts.length > 0) {
+      localStorage.setItem(LOCAL_STORAGE_TRUSTED_CONTACTS_KEY, JSON.stringify(contacts));
+      toast({
+        title: "Contatos de Confiança Salvos",
+        description: "As informações dos seus contatos de confiança foram atualizadas.",
       });
-    } else if (!trimmedName && !trimmedPhone) {
-        setTrustedContactName('');
-        localStorage.removeItem(LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY);
-        setTrustedContactPhoneNumber('');
-        localStorage.removeItem(LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY);
-        toast({
-            title: "Contato de Confiança Removido",
-            description: "As informações do seu contato de confiança foram removidas.",
-        });
     } else {
-        toast({
-            title: "Dados Incompletos",
-            description: "Para salvar um contato de confiança, é necessário preencher tanto o nome quanto o telefone.",
-            variant: "destructive"
-        });
+      localStorage.removeItem(LOCAL_STORAGE_TRUSTED_CONTACTS_KEY);
+      toast({
+        title: "Contatos de Confiança Removidos",
+        description: "Todas as informações de contato de confiança foram removidas.",
+      });
     }
   };
   
@@ -388,7 +402,9 @@ export default function HomePage() {
             sosMessage={sosMessage}
             onGenerateSos={handleGenerateSos}
             isLoading={isLoading}
-            onSendViaWhatsApp={handleSendViaWhatsApp}
+            onSendToEmergency={handleSendToEmergency}
+            onSendToTrustedContact={handleSendToTrustedContact}
+            trustedContacts={trustedContacts}
           />
         )}
       </AppLayout>
@@ -397,9 +413,8 @@ export default function HomePage() {
         onClose={() => setIsSettingsDialogVisible(false)}
         onSavePhoneNumber={handleSavePhoneNumber}
         currentPhoneNumber={userPhoneNumber}
-        currentTrustedContactName={trustedContactName}
-        currentTrustedContactPhoneNumber={trustedContactPhoneNumber}
-        onSaveTrustedContact={handleSaveTrustedContact}
+        currentTrustedContacts={trustedContacts}
+        onSaveTrustedContacts={handleSaveTrustedContacts}
         currentTheme={theme}
         onThemeChange={handleThemeChange}
       />

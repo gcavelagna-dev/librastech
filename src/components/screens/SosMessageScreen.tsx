@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building, VenetianMask, Cake, Siren } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { Separator } from '@/components/ui/separator';
 
 interface SosMessageScreenProps {
   userName: string;
@@ -21,7 +22,9 @@ interface SosMessageScreenProps {
   sosMessage: string | null;
   onGenerateSos: () => void;
   isLoading: boolean;
-  onSendViaWhatsApp?: (message: string) => void;
+  onSendToEmergency: (message: string) => void;
+  onSendToTrustedContact: (phone: string, message: string) => void;
+  trustedContacts: { name: string; phone: string }[];
 }
 
 const emergencyTypeMap: Record<string, string> = {
@@ -43,7 +46,9 @@ export function SosMessageScreen({
   sosMessage,
   onGenerateSos,
   isLoading,
-  onSendViaWhatsApp,
+  onSendToEmergency,
+  onSendToTrustedContact,
+  trustedContacts,
 }: SosMessageScreenProps) {
   const { toast } = useToast();
 
@@ -191,19 +196,39 @@ export function SosMessageScreen({
           </Button>
           
           {canSendMessage && (
-            <div className="grid grid-cols-2 gap-2 w-full">
-              <Button onClick={handleCopySosMessage} variant="outline" className="w-full">
-                <ClipboardCopy className="w-4 h-4 mr-2" />
-                Copiar
-              </Button>
-              {onSendViaWhatsApp && (
+            <div className="flex flex-col gap-2 w-full">
+              <div className="grid grid-cols-2 gap-2 w-full">
+                <Button onClick={handleCopySosMessage} variant="outline" className="w-full">
+                  <ClipboardCopy className="w-4 h-4 mr-2" />
+                  Copiar
+                </Button>
                 <Button
-                  onClick={() => onSendViaWhatsApp(sosMessage!)}
+                  onClick={() => onSendToEmergency(sosMessage!)}
                   className="w-full bg-green-500 hover:bg-green-600 text-white"
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  Enviar via WhatsApp
+                  Enviar p/ Emergência
                 </Button>
+              </div>
+
+              {trustedContacts.length > 0 && (
+                <div className="w-full space-y-2 pt-2">
+                  <Separator />
+                  <h4 className="text-sm font-medium text-center text-muted-foreground pt-1">Notificar Contatos de Confiança</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+                    {trustedContacts.map((contact, index) => (
+                      <Button
+                        key={index}
+                        variant="secondary"
+                        onClick={() => onSendToTrustedContact(contact.phone, sosMessage!)}
+                        disabled={!canSendMessage}
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        {contact.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           )}

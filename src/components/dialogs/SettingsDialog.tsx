@@ -20,15 +20,15 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 
 type Theme = 'light' | 'dark';
+type TrustedContact = { name: string; phone: string };
 
 interface SettingsDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onSavePhoneNumber: (phoneNumber: string) => void;
   currentPhoneNumber: string;
-  currentTrustedContactName: string;
-  currentTrustedContactPhoneNumber: string;
-  onSaveTrustedContact: (name: string, phone: string) => void;
+  currentTrustedContacts: TrustedContact[];
+  onSaveTrustedContacts: (contacts: TrustedContact[]) => void;
   currentTheme: Theme;
   onThemeChange: (theme: Theme) => void;
 }
@@ -38,25 +38,26 @@ export function SettingsDialog({
   onClose, 
   onSavePhoneNumber, 
   currentPhoneNumber,
-  currentTrustedContactName,
-  currentTrustedContactPhoneNumber,
-  onSaveTrustedContact,
+  currentTrustedContacts,
+  onSaveTrustedContacts,
   currentTheme,
   onThemeChange
 }: SettingsDialogProps) {
   const [phoneNumber, setPhoneNumber] = useState(currentPhoneNumber);
-  const [trustedName, setTrustedName] = useState(currentTrustedContactName);
-  const [trustedPhone, setTrustedPhone] = useState(currentTrustedContactPhoneNumber);
+  const [contacts, setContacts] = useState<TrustedContact[]>([]);
 
   const { toast } = useToast();
 
   useEffect(() => {
     if (isOpen) {
       setPhoneNumber(currentPhoneNumber);
-      setTrustedName(currentTrustedContactName);
-      setTrustedPhone(currentTrustedContactPhoneNumber);
+      const paddedContacts = [...currentTrustedContacts];
+      while (paddedContacts.length < 5) {
+        paddedContacts.push({ name: '', phone: '' });
+      }
+      setContacts(paddedContacts);
     }
-  }, [currentPhoneNumber, currentTrustedContactName, currentTrustedContactPhoneNumber, isOpen]);
+  }, [currentPhoneNumber, currentTrustedContacts, isOpen]);
   
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let input = e.target.value.replace(/\D/g, '');
@@ -71,7 +72,13 @@ export function SettingsDialog({
     setPhoneNumber(input);
   };
 
-  const handleTrustedPhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleContactChange = (index: number, field: 'name' | 'phone', value: string) => {
+    const newContacts = [...contacts];
+    newContacts[index] = { ...newContacts[index], [field]: value };
+    setContacts(newContacts);
+  };
+
+  const handleTrustedPhoneInputChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
     let input = e.target.value.replace(/\D/g, '');
     if (input.length > 11) input = input.substring(0, 11);
 
@@ -81,7 +88,7 @@ export function SettingsDialog({
     if (input.length > 9) {
       input = `${input.substring(0, 9)}-${input.substring(9)}`;
     }
-    setTrustedPhone(input);
+    handleContactChange(index, 'phone', input);
   };
 
   const handleSavePhone = () => {
@@ -98,30 +105,29 @@ export function SettingsDialog({
   };
   
   const handleSaveTrustedInfo = () => {
-    const rawTrustedPhone = trustedPhone.replace(/\D/g, '');
-    if (rawTrustedPhone.length > 0 && rawTrustedPhone.length < 10) {
-       toast({
-        title: "Número do Contato Inválido",
-        description: "O número do contato de confiança parece ser inválido. Por favor, inclua o DDD.",
-        variant: "destructive",
-      });
-      return;
+    const validContacts = contacts.filter(c => c.name.trim() !== '' || c.phone.trim() !== '');
+
+    for (const contact of validContacts) {
+        if (!contact.name.trim() || !contact.phone.trim()) {
+            toast({
+                title: "Dados Incompletos",
+                description: `Para o contato ${contact.name || 'desconhecido'}, é necessário preencher tanto o nome quanto o telefone.`,
+                variant: "destructive"
+            });
+            return;
+        }
+        const rawPhone = contact.phone.replace(/\D/g, '');
+        if (rawPhone.length < 10) {
+           toast({
+            title: "Número do Contato Inválido",
+            description: `O número para "${contact.name}" parece inválido. Por favor, inclua o DDD.`,
+            variant: "destructive",
+          });
+          return;
+        }
     }
 
-    if (!trustedName.trim() && !trustedPhone.trim()) {
-        onSaveTrustedContact(trustedName, trustedPhone); // Permite limpar os campos
-        return;
-    }
-    
-    if (!trustedName.trim() || !trustedPhone.trim()) {
-      toast({
-        title: "Dados Incompletos",
-        description: "Para salvar um contato de confiança, preencha tanto o nome quanto o telefone.",
-        variant: "destructive",
-      });
-      return;
-    }
-    onSaveTrustedContact(trustedName, trustedPhone);
+    onSaveTrustedContacts(validContacts);
   };
 
   return (
@@ -184,36 +190,44 @@ export function SettingsDialog({
 
         <div className="space-y-4 py-2">
             <DialogTitle className="flex items-center text-base font-semibold">
-              <UserCog className="w-5 h-5 mr-2" /> Contato de Confiança
+              <UserCog className="w-5 h-5 mr-2" /> Contatos de Confiança
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              Adicione uma pessoa para ser notificada em caso de emergência (opcional).
+              Adicione até 5 pessoas para serem notificadas em caso de emergência.
             </DialogDescription>
+
+            <div className="space-y-4 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+              {contacts.map((contact, index) => (
+                <div key={index} className="p-3 border rounded-lg space-y-2 bg-muted/50">
+                  <h4 className="text-sm font-semibold text-muted-foreground">Contato {index + 1}</h4>
+                   <div className="space-y-1">
+                      <Label htmlFor={`trustedName-${index}`}>Nome do Contato</Label>
+                      <Input
+                        id={`trustedName-${index}`}
+                        type="text"
+                        placeholder="Nome completo"
+                        value={contact.name}
+                        onChange={(e) => handleContactChange(index, 'name', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor={`trustedPhone-${index}`}>Telefone (com DDD)</Label>
+                      <Input
+                        id={`trustedPhone-${index}`}
+                        type="tel"
+                        placeholder="(XX) XXXXX-XXXX"
+                        value={contact.phone}
+                        onChange={(e) => handleTrustedPhoneInputChange(index, e)}
+                      />
+                    </div>
+                </div>
+              ))}
+            </div>
           
-          <div className="space-y-1">
-            <Label htmlFor="trustedName">Nome do Contato</Label>
-            <Input
-              id="trustedName"
-              type="text"
-              placeholder="Nome completo do contato"
-              value={trustedName}
-              onChange={(e) => setTrustedName(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="trustedPhone">Telefone do Contato (com DDD)</Label>
-            <Input
-              id="trustedPhone"
-              type="tel"
-              placeholder="(XX) XXXXX-XXXX"
-              value={trustedPhone}
-              onChange={handleTrustedPhoneChange}
-            />
-          </div>
-          <Button onClick={handleSaveTrustedInfo} className="w-full" variant="secondary">
-            <CheckCircle className="w-4 h-4 mr-2" />
-            Salvar Contato de Confiança
-          </Button>
+            <Button onClick={handleSaveTrustedInfo} className="w-full" variant="secondary">
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Salvar Contatos de Confiança
+            </Button>
         </div>
 
 
