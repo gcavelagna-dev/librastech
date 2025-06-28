@@ -81,7 +81,7 @@ export function EmergencySelectionScreen({ onSelectEmergency }: EmergencySelecti
                     onClick={() => onSelectEmergency(emergency.id)}
                     data-ai-hint={emergency.dataAiHint}
                   >
-                    <emergency.icon className={`w-16 h-16 mb-2 ${emergency.colorClass}`} />
+                    <emergency.icon className={`w-20 h-20 mb-2 ${emergency.colorClass}`} />
                     <span className="font-semibold">{emergency.name}</span>
                   </Button>
                 </TooltipTrigger>
