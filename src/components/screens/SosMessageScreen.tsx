@@ -28,9 +28,9 @@ interface SosMessageScreenProps {
 }
 
 const emergencyTypeMap: Record<string, string> = {
-  Fire: "Incêndio/Resgate",
-  Medical: "Médica",
-  PublicSafety: "Segurança Pública",
+  Fire: "Bombeiros",
+  Medical: "SAMU",
+  PublicSafety: "Polícia Militar",
 };
 
 export function SosMessageScreen({

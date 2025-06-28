@@ -18,9 +18,9 @@ const subEmergencyOptions: Record<string, string[]> = {
 };
 
 const emergencyTypeMap: Record<string, string> = {
-  Fire: "Incêndio/Resgate",
-  Medical: "Médica",
-  PublicSafety: "Segurança Pública",
+  Fire: "Bombeiros",
+  Medical: "SAMU",
+  PublicSafety: "Polícia Militar",
 };
 
 
@@ -34,7 +34,7 @@ export function SubEmergencySelectionScreen({ emergencyType, onSelectSubEmergenc
         <CardHeader>
           <CardTitle className="text-2xl font-headline">Detalhes da emergência</CardTitle>
           <CardDescription>
-            Qual destas opções melhor descreve a situação de <span className="font-semibold text-foreground">"{displayEmergencyType}"</span>?
+            Qual destas opções melhor descreve a situação para os <span className="font-semibold text-foreground">"{displayEmergencyType}"</span>?
           </CardDescription>
         </CardHeader>
         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-6 pt-0">

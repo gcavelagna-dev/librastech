@@ -5,35 +5,57 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Flame, HeartPulse, ShieldAlert } from 'lucide-react';
+import { Ambulance, Siren } from 'lucide-react';
 
 interface EmergencySelectionScreenProps {
   onSelectEmergency: (type: string) => void;
 }
 
+const FireTruckIcon = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    strokeWidth="2"
+    stroke="currentColor"
+    fill="none"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="5" cy="17" r="2"></circle>
+    <circle cx="17" cy="17" r="2"></circle>
+    <path d="M7 17h8"></path>
+    <path d="M7 12h11a2 2 0 0 1 2 2v2"></path>
+    <path d="M7 12v-5h4"></path>
+    <path d="M11 7l3 -3l3 3"></path>
+  </svg>
+);
+
 const emergencyTypes = [
   { 
     id: 'Fire', 
-    name: 'Incêndio/Resgate', 
-    icon: Flame, 
-    dataAiHint: "fire flames",
-    tooltipText: "Para incêndios, desabamentos, resgate em locais de difícil acesso.",
+    name: 'Bombeiros', 
+    icon: FireTruckIcon,
+    dataAiHint: "fire truck",
+    tooltipText: "Para incêndios, desabamentos, resgates e afogamentos.",
     colorClass: "text-accent"
   },
   { 
     id: 'Medical', 
-    name: 'Médica', 
-    icon: HeartPulse, 
-    dataAiHint: "medical cross",
-    tooltipText: "Para emergências médicas, acidentes, necessidade de ambulância.",
+    name: 'SAMU', 
+    icon: Ambulance, 
+    dataAiHint: "ambulance medical",
+    tooltipText: "Para emergências médicas, acidentes e mal súbito.",
     colorClass: "text-destructive"
   },
   { 
     id: 'PublicSafety', 
-    name: 'Segurança Pública', 
-    icon: ShieldAlert, 
-    dataAiHint: "police shield",
-    tooltipText: "Para situações de perigo, assaltos, violência, perturbação da ordem.",
+    name: 'Polícia Militar', 
+    icon: Siren, 
+    dataAiHint: "police siren",
+    tooltipText: "Para crimes, violência, assaltos e perturbação da ordem.",
     colorClass: "text-primary"
   },
 ];
