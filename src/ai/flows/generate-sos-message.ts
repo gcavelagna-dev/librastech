@@ -30,6 +30,7 @@ const GenerateSosMessageInputSchema = z.object({
   bloodType: z.string().optional().describe('The blood type of the user.'),
   sendDocumentsConfirmed: z.boolean().optional().describe('Whether the user confirmed sending document info.'),
   isDeaf: z.boolean().optional().describe('Whether the user is deaf.'),
+  isDesktop: z.boolean().optional().describe('Whether the user is on a desktop device.'),
 });
 export type GenerateSosMessageInput = z.infer<typeof GenerateSosMessageInputSchema>;
 
@@ -60,7 +61,7 @@ A mensagem deve ser concisa e clara, em Português do Brasil. Use no máximo 300
 Exemplo de dados:
 {{#if isDeaf}}- Alerta: Vítima surda.{{/if}}
 - Nome do usuário: {{userName}}
-- Localização: {{location}}
+- Localização: {{#if isDesktop}}aproximadamente {{/if}}{{location}}
 {{#if latitude}}- Localização no mapa: https://www.google.com/maps?q={{latitude}},{{longitude}}{{/if}}
 - Tipo de emergência: {{emergencyType}} - {{subEmergencyType}}
 {{#if userPhoneNumber}}- Número de contato: {{userPhoneNumber}}{{/if}}

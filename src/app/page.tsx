@@ -21,6 +21,7 @@ import {
 import { generateSosMessage, type GenerateSosMessageInput } from '@/ai/flows/generate-sos-message';
 import { reverseGeocode } from '@/ai/flows/reverse-geocode-flow';
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 type AppStep = 'welcome' | 'emergency' | 'sub-emergency' | 'sos';
 type TrustedContact = { name: string; phone: string };
@@ -67,7 +68,7 @@ export default function HomePage() {
   const [isSettingsDialogVisible, setIsSettingsDialogVisible] = useState(false);
   const [showPhoneNumberPrompt, setShowPhoneNumberPrompt] = useState(false);
 
-
+  const isMobile = useIsMobile();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -268,6 +269,7 @@ export default function HomePage() {
         bloodType: bloodType,
         sendDocumentsConfirmed: sendDocumentsConfirmed,
         isDeaf: isDeaf,
+        isDesktop: !isMobile,
       };
       const result = await generateSosMessage(input);
       setSosMessage(result.sosMessage);
