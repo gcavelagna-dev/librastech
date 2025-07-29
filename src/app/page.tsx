@@ -33,6 +33,9 @@ const LOCAL_STORAGE_DOCUMENT_TYPE_KEY = 'LibrasTech_DocumentType';
 const LOCAL_STORAGE_DOCUMENT_NUMBER_KEY = 'LibrasTech_DocumentNumber';
 const LOCAL_STORAGE_CITY_KEY = 'LibrasTech_City';
 const LOCAL_STORAGE_TRUSTED_CONTACTS_KEY = 'LibrasTech_TrustedContacts';
+const LOCAL_STORAGE_BLOOD_TYPE_KEY = 'LibrasTech_BloodType';
+const LOCAL_STORAGE_SEND_DOCUMENTS_KEY = 'LibrasTech_SendDocuments';
+
 
 // Deprecated keys for migration
 const OLD_LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY = 'LibrasTech_TrustedContactName';
@@ -48,6 +51,8 @@ export default function HomePage() {
   const [documentNumber, setDocumentNumber] = useState<string>('');
   const [city, setCity] = useState<string>('');
   const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>([]);
+  const [bloodType, setBloodType] = useState<string | undefined>(undefined);
+  const [sendDocumentsConfirmed, setSendDocumentsConfirmed] = useState<boolean>(true);
 
   const [emergencyType, setEmergencyType] = useState<string>('');
   const [subEmergencyType, setSubEmergencyType] = useState<string>('');
@@ -89,6 +94,14 @@ export default function HomePage() {
     
     const storedCity = localStorage.getItem(LOCAL_STORAGE_CITY_KEY);
     if (storedCity) setCity(storedCity);
+
+    const storedBloodType = localStorage.getItem(LOCAL_STORAGE_BLOOD_TYPE_KEY);
+    if (storedBloodType) setBloodType(storedBloodType);
+
+    const storedSendDocuments = localStorage.getItem(LOCAL_STORAGE_SEND_DOCUMENTS_KEY);
+    if (storedSendDocuments) {
+        setSendDocumentsConfirmed(JSON.parse(storedSendDocuments));
+    }
     
     // Handle trusted contacts (new array format with migration from old format)
     const storedContacts = localStorage.getItem(LOCAL_STORAGE_TRUSTED_CONTACTS_KEY);
@@ -136,7 +149,9 @@ export default function HomePage() {
     newDocType?: string, 
     newDocNumber?: string, 
     newCity?: string,
-    newDob?: Date
+    newDob?: Date,
+    newBloodType?: string,
+    newSendDocuments?: boolean
   ) => {
     localStorage.setItem(LOCAL_STORAGE_USER_NAME_KEY, newName);
     setUserName(newName);
@@ -182,6 +197,17 @@ export default function HomePage() {
         setDateOfBirth('');
     }
 
+    if (newBloodType) {
+        localStorage.setItem(LOCAL_STORAGE_BLOOD_TYPE_KEY, newBloodType);
+        setBloodType(newBloodType);
+    } else {
+        localStorage.removeItem(LOCAL_STORAGE_BLOOD_TYPE_KEY);
+        setBloodType(undefined);
+    }
+
+    localStorage.setItem(LOCAL_STORAGE_SEND_DOCUMENTS_KEY, JSON.stringify(newSendDocuments));
+    setSendDocumentsConfirmed(newSendDocuments ?? true);
+
     setCurrentStep('emergency');
   };
 
@@ -219,6 +245,8 @@ export default function HomePage() {
         documentType: documentType,
         documentNumber: documentNumber,
         city: city,
+        bloodType: bloodType,
+        sendDocumentsConfirmed: sendDocumentsConfirmed,
       };
       const result = await generateSosMessage(input);
       setSosMessage(result.sosMessage);
@@ -307,6 +335,8 @@ export default function HomePage() {
             initialDocumentNumber={documentNumber}
             initialCity={city}
             initialDateOfBirth={dateOfBirth}
+            initialBloodType={bloodType}
+            initialSendDocuments={sendDocumentsConfirmed}
           />
         );
       case 'emergency':
@@ -330,6 +360,8 @@ export default function HomePage() {
             documentNumber={documentNumber}
             city={city}
             dateOfBirth={dateOfBirth}
+            bloodType={bloodType}
+            sendDocumentsConfirmed={sendDocumentsConfirmed}
             sosMessage={sosMessage}
             onGenerateSos={handleGenerateSos}
             isLoading={isLoading}

@@ -9,20 +9,36 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Lock } from 'lucide-react';
+import { CalendarIcon, Lock, Droplet, ShieldCheck } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
 
 interface WelcomeScreenProps {
-  onNameSave: (name: string, gender?: string, documentType?: string, documentNumber?: string, city?: string, dateOfBirth?: Date) => void;
+  onNameSave: (
+    name: string,
+    gender?: string,
+    documentType?: string,
+    documentNumber?: string,
+    city?: string,
+    dateOfBirth?: Date,
+    bloodType?: string,
+    sendDocuments?: boolean
+  ) => void;
   initialName?: string;
   initialGender?: string;
   initialDocumentType?: string;
   initialDocumentNumber?: string;
   initialCity?: string;
   initialDateOfBirth?: string;
+  initialBloodType?: string;
+  initialSendDocuments?: boolean;
 }
+
+const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 export function WelcomeScreen({
   onNameSave,
@@ -31,7 +47,9 @@ export function WelcomeScreen({
   initialDocumentType,
   initialDocumentNumber = '',
   initialCity = '',
-  initialDateOfBirth
+  initialDateOfBirth,
+  initialBloodType,
+  initialSendDocuments = true,
 }: WelcomeScreenProps) {
   const [name, setName] = useState(initialName);
   const [gender, setGender] = useState<string | undefined>(initialGender);
@@ -39,6 +57,8 @@ export function WelcomeScreen({
   const [documentNumber, setDocumentNumber] = useState(initialDocumentNumber);
   const [city, setCity] = useState(initialCity);
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>();
+  const [bloodType, setBloodType] = useState<string | undefined>(initialBloodType);
+  const [sendDocuments, setSendDocuments] = useState<boolean>(initialSendDocuments);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -48,8 +68,15 @@ export function WelcomeScreen({
     if (initialDocumentType) setDocumentType(initialDocumentType);
     if (initialDocumentNumber) setDocumentNumber(initialDocumentNumber);
     if (initialCity) setCity(initialCity);
-    if (initialDateOfBirth) setDateOfBirth(new Date(initialDateOfBirth));
-  }, [initialName, initialGender, initialDocumentType, initialDocumentNumber, initialCity, initialDateOfBirth]);
+    if (initialDateOfBirth) {
+        const [day, month, year] = initialDateOfBirth.split('/');
+        if(day && month && year) {
+            setDateOfBirth(new Date(parseInt(year), parseInt(month) - 1, parseInt(day)));
+        }
+    }
+    if (initialBloodType) setBloodType(initialBloodType);
+    setSendDocuments(initialSendDocuments);
+  }, [initialName, initialGender, initialDocumentType, initialDocumentNumber, initialCity, initialDateOfBirth, initialBloodType, initialSendDocuments]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +86,9 @@ export function WelcomeScreen({
       documentType,
       documentNumber.trim(),
       city.trim(),
-      dateOfBirth
+      dateOfBirth,
+      bloodType,
+      sendDocuments
     );
   };
 
@@ -133,40 +162,51 @@ export function WelcomeScreen({
               </div>
             </div>
             
-            <div className="space-y-2">
-              <Label>Data de Nascimento</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !dateOfBirth && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateOfBirth ? format(dateOfBirth, "PPP", { locale: ptBR }) : <span>Escolha uma data</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={dateOfBirth}
-                    onSelect={setDateOfBirth}
-                    initialFocus
-                    captionLayout="dropdown-buttons"
-                    fromYear={1920}
-                    toYear={new Date().getFullYear()}
-                    locale={ptBR}
-                    disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-                  />
-                </PopoverContent>
-              </Popover>
-               <p id="dob-helper-text" className="text-xs text-muted-foreground px-1">
-                Sua idade pode ser uma informação crucial para o socorro.
-              </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Data de Nascimento</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !dateOfBirth && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {dateOfBirth ? format(dateOfBirth, "PPP", { locale: ptBR }) : <span>Escolha uma data</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={dateOfBirth}
+                        onSelect={setDateOfBirth}
+                        initialFocus
+                        captionLayout="dropdown-buttons"
+                        fromYear={1920}
+                        toYear={new Date().getFullYear()}
+                        locale={ptBR}
+                        disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="bloodType">Tipo Sanguíneo</Label>
+                    <Select onValueChange={setBloodType} value={bloodType}>
+                        <SelectTrigger id="bloodType">
+                            <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {bloodTypes.map(type => (
+                                <SelectItem key={type} value={type}>{type}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
-
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -199,6 +239,28 @@ export function WelcomeScreen({
                    Útil para os serviços de emergência.
                 </p>
               </div>
+            </div>
+            
+            <Separator />
+            
+            <div className="space-y-3">
+                <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                     <div className='flex items-center'>
+                         <ShieldCheck className="w-5 h-5 mr-3 text-primary" />
+                        <div>
+                             <Label htmlFor="send-documents" className="font-semibold">Enviar meu documento na mensagem?</Label>
+                             <p className="text-xs text-muted-foreground">
+                                Confirme para incluir seu RG/CPF na mensagem SOS.
+                             </p>
+                        </div>
+                    </div>
+                    <Switch
+                        id="send-documents"
+                        checked={sendDocuments}
+                        onCheckedChange={setSendDocuments}
+                        disabled={!documentType || !documentNumber}
+                    />
+                </div>
             </div>
 
             <div className="!mt-6">

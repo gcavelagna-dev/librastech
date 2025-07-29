@@ -25,6 +25,8 @@ const GenerateSosMessageInputSchema = z.object({
   documentType: z.string().optional().describe('The type of document provided by the user (e.g., RG, CPF).'),
   documentNumber: z.string().optional().describe('The number of the document provided by the user.'),
   city: z.string().optional().describe('The city of the user.'),
+  bloodType: z.string().optional().describe('The blood type of the user.'),
+  sendDocumentsConfirmed: z.boolean().optional().describe('Whether the user confirmed sending document info.'),
 });
 export type GenerateSosMessageInput = z.infer<typeof GenerateSosMessageInputSchema>;
 
@@ -58,7 +60,8 @@ Exemplo de dados:
 {{#if userPhoneNumber}}- Número de contato: {{userPhoneNumber}}{{/if}}
 {{#if gender}}- Sexo: {{gender}}{{/if}}
 {{#if dateOfBirth}}- Data de Nascimento: {{dateOfBirth}}{{/if}}
-{{#if documentType}}- Documento: {{documentType}} - {{documentNumber}}{{/if}}
+{{#if bloodType}}- Tipo Sanguíneo: {{bloodType}}{{/if}}
+{{#if sendDocumentsConfirmed}}{{#if documentType}}- Documento: {{documentType}} - {{documentNumber}}{{/if}}{{/if}}
 {{#if city}}- Cidade: {{city}}{{/if}}
 
 Baseado nos dados acima, gere a mensagem SOS.`,

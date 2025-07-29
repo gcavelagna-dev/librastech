@@ -5,7 +5,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building, VenetianMask, Cake, Siren } from 'lucide-react';
+import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building, VenetianMask, Cake, Siren, Droplet } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from '@/components/ui/separator';
 
@@ -19,6 +19,8 @@ interface SosMessageScreenProps {
   documentNumber?: string;
   city?: string;
   dateOfBirth?: string;
+  bloodType?: string;
+  sendDocumentsConfirmed?: boolean;
   sosMessage: string | null;
   onGenerateSos: () => void;
   isLoading: boolean;
@@ -43,6 +45,8 @@ export function SosMessageScreen({
   documentNumber,
   city,
   dateOfBirth,
+  bloodType,
+  sendDocumentsConfirmed,
   sosMessage,
   onGenerateSos,
   isLoading,
@@ -141,7 +145,15 @@ export function SosMessageScreen({
                   <p className="text-foreground">{gender}</p>
                 </div>
               )}
-              {documentType && documentNumber && (
+              {bloodType && (
+                <div className="space-y-1">
+                    <h3 className="font-semibold flex items-center text-muted-foreground"><Droplet className="w-4 h-4 mr-1.5"/>Tipo Sanguíneo:</h3>
+                    <p className="text-foreground">{bloodType}</p>
+                </div>
+              )}
+            </div>
+             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {documentType && documentNumber && sendDocumentsConfirmed && (
                 <div className="space-y-1">
                   <h3 className="font-semibold flex items-center text-muted-foreground"><FileText className="w-4 h-4 mr-1.5"/>Documento:</h3>
                   <p className="text-foreground">{documentType}: {documentNumber}</p>
