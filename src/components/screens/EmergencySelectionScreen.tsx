@@ -31,7 +31,7 @@ const emergencyTypes = [
   { 
     id: 'PublicSafety', 
     name: 'Polícia Militar', 
-    imageUrl: 'https://placehold.co/100x100.png',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Bras%C3%A3o_da_PMPR.png',
     dataAiHint: "police siren",
     tooltipText: "Para crimes, violência, assaltos e perturbação da ordem.",
     colorClass: "text-primary"
@@ -63,7 +63,7 @@ export function EmergencySelectionScreen({ onSelectEmergency }: EmergencySelecti
                       alt={`${emergency.name} icon`}
                       width={80}
                       height={80}
-                      className="mb-2 rounded-md"
+                      className="mb-2 rounded-md object-contain"
                       data-ai-hint={emergency.dataAiHint}
                     />
                     <span className="font-semibold">{emergency.name}</span>
