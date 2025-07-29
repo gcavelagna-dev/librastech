@@ -2,10 +2,10 @@
 "use client";
 
 import React from 'react';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Flame, Ambulance, Siren } from 'lucide-react';
 
 interface EmergencySelectionScreenProps {
   onSelectEmergency: (type: string) => void;
@@ -15,24 +15,21 @@ const emergencyTypes = [
   { 
     id: 'Fire', 
     name: 'Bombeiros', 
-    imageUrl: 'https://placehold.co/100x100.png',
-    dataAiHint: "fire truck",
+    Icon: Flame,
     tooltipText: "Para incêndios, desabamentos, resgates e afogamentos.",
     colorClass: "text-accent"
   },
   { 
     id: 'Medical', 
     name: 'SAMU', 
-    imageUrl: 'https://placehold.co/100x100.png',
-    dataAiHint: "ambulance medical",
+    Icon: Ambulance,
     tooltipText: "Para emergências médicas, acidentes e mal súbito.",
     colorClass: "text-destructive"
   },
   { 
     id: 'PublicSafety', 
     name: 'Polícia Militar', 
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e0/Bras%C3%A3o_da_PMPR.png',
-    dataAiHint: "police siren",
+    Icon: Siren,
     tooltipText: "Para crimes, violência, assaltos e perturbação da ordem.",
     colorClass: "text-primary"
   },
@@ -58,14 +55,7 @@ export function EmergencySelectionScreen({ onSelectEmergency }: EmergencySelecti
                     className="w-full h-auto py-4 flex flex-col items-center justify-center space-y-2 text-lg hover:bg-accent/10 hover:border-primary/50 transition-all duration-200"
                     onClick={() => onSelectEmergency(emergency.id)}
                   >
-                    <Image
-                      src={emergency.imageUrl}
-                      alt={`${emergency.name} icon`}
-                      width={80}
-                      height={80}
-                      className="mb-2 rounded-md object-contain"
-                      data-ai-hint={emergency.dataAiHint}
-                    />
+                    <emergency.Icon className={`w-16 h-16 mb-2 ${emergency.colorClass}`} />
                     <span className="font-semibold">{emergency.name}</span>
                   </Button>
                 </TooltipTrigger>
