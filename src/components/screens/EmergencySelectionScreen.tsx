@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Flame, Ambulance } from 'lucide-react';
 
 interface EmergencySelectionScreenProps {
-  onSelectEmergency: (type: string) => void;
+  onSelectEmergency: (type: string, colorClass: string) => void;
 }
 
 const emergencyTypes = [
@@ -54,7 +54,7 @@ export function EmergencySelectionScreen({ onSelectEmergency }: EmergencySelecti
                 <TooltipTrigger asChild>
                   <Button
                     className={`w-full h-auto py-4 flex flex-col items-center justify-center space-y-2 text-lg transition-all duration-200 ${emergency.colorClass}`}
-                    onClick={() => onSelectEmergency(emergency.id)}
+                    onClick={() => onSelectEmergency(emergency.id, emergency.colorClass)}
                   >
                     {emergency.Icon ? (
                       <emergency.Icon className="w-20 h-20 mb-2 text-white" />
@@ -83,3 +83,5 @@ export function EmergencySelectionScreen({ onSelectEmergency }: EmergencySelecti
     </div>
   );
 }
+
+    

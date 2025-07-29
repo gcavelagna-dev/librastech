@@ -5,10 +5,13 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
 
 interface SubEmergencySelectionScreenProps {
   emergencyType: string;
   onSelectSubEmergency: (subType: string) => void;
+  colorClass: string;
 }
 
 const subEmergencyOptions: Record<string, string[]> = {
@@ -24,10 +27,14 @@ const emergencyTypeMap: Record<string, string> = {
 };
 
 
-export function SubEmergencySelectionScreen({ emergencyType, onSelectSubEmergency }: SubEmergencySelectionScreenProps) {
+export function SubEmergencySelectionScreen({ emergencyType, onSelectSubEmergency, colorClass }: SubEmergencySelectionScreenProps) {
   const options = subEmergencyOptions[emergencyType] || [];
   const displayEmergencyType = emergencyTypeMap[emergencyType] || emergencyType;
 
+  // Extrai a cor base da classe para usar no hover
+  const baseColor = colorClass.split(' ')[0]; // ex: "bg-[#E53935]"
+  const hoverClass = baseColor.replace('bg-', 'hover:bg-'); // ex: "hover:bg-[#E53935]/90"
+  
   return (
     <div className="flex flex-col items-center">
       <Card className="w-full max-w-md text-center">
@@ -41,12 +48,15 @@ export function SubEmergencySelectionScreen({ emergencyType, onSelectSubEmergenc
           {options.map((option) => (
             <Button
               key={option}
-              variant="outline"
-              className="w-full h-auto py-3 text-base justify-between hover:bg-accent/10 hover:border-primary/50 transition-all duration-200"
+              className={cn(
+                "w-full h-auto py-3 text-base justify-between text-white transition-all duration-200",
+                baseColor, // Cor de fundo principal
+                hoverClass // Cor de fundo no hover
+              )}
               onClick={() => onSelectSubEmergency(option)}
             >
               <span className="text-left">{option}</span>
-              <ArrowRight className="w-5 h-5 text-primary ml-2" />
+              <ArrowRight className="w-5 h-5 text-white/80 ml-2" />
             </Button>
           ))}
         </CardContent>
@@ -54,3 +64,5 @@ export function SubEmergencySelectionScreen({ emergencyType, onSelectSubEmergenc
     </div>
   );
 }
+
+    

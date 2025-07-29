@@ -55,6 +55,7 @@ export default function HomePage() {
   const [sendDocumentsConfirmed, setSendDocumentsConfirmed] = useState<boolean>(true);
 
   const [emergencyType, setEmergencyType] = useState<string>('');
+  const [emergencyColor, setEmergencyColor] = useState<string>('');
   const [subEmergencyType, setSubEmergencyType] = useState<string>('');
   const [location, setLocation] = useState<string>('Obtendo localização...');
   const [coordinates, setCoordinates] = useState<{latitude: number; longitude: number} | null>(null);
@@ -216,8 +217,9 @@ export default function HomePage() {
     setCurrentStep('emergency');
   };
 
-  const handleSelectEmergency = (type: string) => {
+  const handleSelectEmergency = (type: string, colorClass: string) => {
     setEmergencyType(type);
+    setEmergencyColor(colorClass);
     setCurrentStep('sub-emergency');
   };
 
@@ -346,6 +348,7 @@ export default function HomePage() {
           <SubEmergencySelectionScreen
             emergencyType={emergencyType}
             onSelectSubEmergency={handleSelectSubEmergency}
+            colorClass={emergencyColor}
           />
         );
       case 'sos':
@@ -424,4 +427,6 @@ export default function HomePage() {
 }
 
     
+    
+
     
