@@ -190,9 +190,6 @@ export function WelcomeScreen({
                         selected={dateOfBirth}
                         onSelect={setDateOfBirth}
                         initialFocus
-                        captionLayout="dropdown-buttons"
-                        fromYear={1920}
-                        toYear={new Date().getFullYear()}
                         locale={ptBR}
                         disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                       />

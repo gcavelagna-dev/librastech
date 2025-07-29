@@ -3,12 +3,10 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker, DropdownProps } from "react-day-picker"
+import { DayPicker } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select"
-import { ScrollArea } from "./scroll-area"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
@@ -27,7 +25,6 @@ function Calendar({
         month: "space-y-4",
         caption: "flex justify-center pt-1 relative items-center",
         caption_label: "text-sm font-medium",
-        caption_dropdowns: "flex justify-center gap-1",
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
@@ -50,7 +47,7 @@ function Calendar({
           "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
         day_today: "bg-accent text-accent-foreground",
         day_outside:
-          "day-outside text-muted-foreground aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
+          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground",
         day_disabled: "text-muted-foreground opacity-50",
         day_range_middle:
           "aria-selected:bg-accent aria-selected:text-accent-foreground",
@@ -58,61 +55,8 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("h-4 w-4", className)} {...props} />
-        ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("h-4 w-4", className)} {...props} />
-        ),
-        Dropdown: (props: DropdownProps) => {
-            const { fromYear, fromMonth, fromDate, toYear, toMonth, toDate, caption } = props;
-            const options: React.ReactElement[] = [];
-            let selectValue: string | undefined;
-
-            const currentDate = (props.value ? new Date(props.value) : new Date()) as Date;
-            
-            if (props.name === "months") {
-                selectValue = currentDate.getMonth().toString();
-                for (let i = 0; i < 12; i++) {
-                    options.push(
-                        <SelectItem key={`${i}`} value={`${i}`}>
-                            {new Date(2023, i).toLocaleString('default', { month: 'long' })}
-                        </SelectItem>
-                    );
-                }
-            } else if (props.name === "years") {
-                selectValue = currentDate.getFullYear().toString();
-                const years = [];
-                for (let i = fromYear!; i <= toYear!; i++) {
-                    years.push(i);
-                }
-                for (const year of years) {
-                    options.push(<SelectItem key={`${year}`} value={`${year}`}>{year}</SelectItem>);
-                }
-            }
-
-            return (
-                <Select
-                    onValueChange={(newValue) => {
-                        const newDate = props.value ? new Date(props.value) : new Date();
-                        if (props.name === "months") {
-                            newDate.setMonth(parseInt(newValue));
-                        } else if (props.name === "years") {
-                            newDate.setFullYear(parseInt(newValue));
-                        }
-                        props.onChange?.(newDate);
-                    }}
-                    value={selectValue}
-                >
-                    <SelectTrigger>{caption}</SelectTrigger>
-                    <SelectContent>
-                        <ScrollArea className="h-80">
-                           {options}
-                        </ScrollArea>
-                    </SelectContent>
-                </Select>
-            )
-        }
+        IconLeft: ({ ...props }) => <ChevronLeft className="h-4 w-4" />,
+        IconRight: ({ ...props }) => <ChevronRight className="h-4 w-4" />,
       }}
       {...props}
     />
