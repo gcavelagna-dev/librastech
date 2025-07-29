@@ -69,10 +69,10 @@ function Calendar({
             const options: React.ReactElement[] = [];
             let selectValue: string | undefined;
 
-            const newDate = new Date();
+            const currentDate = (props.value ? new Date(props.value) : new Date()) as Date;
             
             if (props.name === "months") {
-                selectValue = props.value?.toString();
+                selectValue = currentDate.getMonth().toString();
                 for (let i = 0; i < 12; i++) {
                     options.push(
                         <SelectItem key={`${i}`} value={`${i}`}>
@@ -81,7 +81,7 @@ function Calendar({
                     );
                 }
             } else if (props.name === "years") {
-                selectValue = props.value?.toString();
+                selectValue = currentDate.getFullYear().toString();
                 const years = [];
                 for (let i = fromYear!; i <= toYear!; i++) {
                     years.push(i);
@@ -94,7 +94,7 @@ function Calendar({
             return (
                 <Select
                     onValueChange={(newValue) => {
-                        const newDate = new Date(props.value as Date);
+                        const newDate = props.value ? new Date(props.value) : new Date();
                         if (props.name === "months") {
                             newDate.setMonth(parseInt(newValue));
                         } else if (props.name === "years") {
