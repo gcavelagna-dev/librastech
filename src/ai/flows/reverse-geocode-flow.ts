@@ -35,7 +35,7 @@ const reverseGeocodeFlow = ai.defineFlow(
     outputSchema: ReverseGeocodeOutputSchema,
   },
   async ({ latitude, longitude }) => {
-    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`;
     
     try {
       const response = await fetch(url, {
@@ -46,10 +46,28 @@ const reverseGeocodeFlow = ai.defineFlow(
       });
       const data = await response.json();
 
-      if (data && data.display_name) {
-        return { address: data.display_name };
+      if (data && data.address) {
+        const { address } = data;
+        // Try to find a point of interest (amenity, shop, etc.)
+        const poi = address.amenity || address.shop || address.historic || address.leisure || address.office || address.tourism;
+        const road = address.road || '';
+        const houseNumber = address.house_number || '';
+        
+        let formattedAddress = '';
+        
+        if (poi) {
+            formattedAddress += `${poi}`;
+            if (road) formattedAddress += `, ${road}`;
+            if (houseNumber) formattedAddress += `, ${houseNumber}`;
+        } else if (data.display_name) {
+             formattedAddress = data.display_name;
+        } else {
+            formattedAddress = `Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`;
+        }
+
+        return { address: formattedAddress };
       } else {
-        console.error("Reverse geocoding with Nominatim failed:", data.error);
+        console.error("Reverse geocoding with Nominatim failed:", data.error || "No address found");
         // Fallback to coordinates if API fails
         return { address: `Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}` };
       }
