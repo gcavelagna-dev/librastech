@@ -23,7 +23,6 @@ import { reverseGeocode } from '@/ai/flows/reverse-geocode-flow';
 import { useToast } from "@/hooks/use-toast";
 
 type AppStep = 'welcome' | 'emergency' | 'sub-emergency' | 'sos';
-type Theme = 'light' | 'dark';
 type TrustedContact = { name: string; phone: string };
 
 const LOCAL_STORAGE_USER_NAME_KEY = 'LibrasTech_UserName';
@@ -34,7 +33,6 @@ const LOCAL_STORAGE_DOCUMENT_TYPE_KEY = 'LibrasTech_DocumentType';
 const LOCAL_STORAGE_DOCUMENT_NUMBER_KEY = 'LibrasTech_DocumentNumber';
 const LOCAL_STORAGE_CITY_KEY = 'LibrasTech_City';
 const LOCAL_STORAGE_TRUSTED_CONTACTS_KEY = 'LibrasTech_TrustedContacts';
-const LOCAL_STORAGE_THEME_KEY = 'LibrasTech_Theme';
 
 // Deprecated keys for migration
 const OLD_LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY = 'LibrasTech_TrustedContactName';
@@ -59,7 +57,6 @@ export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
   const [isSettingsDialogVisible, setIsSettingsDialogVisible] = useState(false);
   const [showPhoneNumberPrompt, setShowPhoneNumberPrompt] = useState(false);
-  const [theme, setTheme] = useState<Theme>('light');
 
 
   const { toast } = useToast();
@@ -109,13 +106,6 @@ export default function HomePage() {
       }
     }
      
-    // Handle theme
-    const storedTheme = localStorage.getItem(LOCAL_STORAGE_THEME_KEY) as Theme;
-    if (storedTheme) {
-      setTheme(storedTheme);
-      document.documentElement.classList.toggle('dark', storedTheme === 'dark');
-    }
-
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
@@ -298,12 +288,6 @@ export default function HomePage() {
     window.open(whatsappUrl, '_blank');
   };
   
-  const handleThemeChange = (newTheme: Theme) => {
-    setTheme(newTheme);
-    localStorage.setItem(LOCAL_STORAGE_THEME_KEY, newTheme);
-    document.documentElement.classList.toggle('dark', newTheme === 'dark');
-  };
-  
   const handleEditProfile = () => {
     setIsSettingsDialogVisible(false);
     setCurrentStep('welcome');
@@ -381,8 +365,6 @@ export default function HomePage() {
         currentPhoneNumber={userPhoneNumber}
         currentTrustedContacts={trustedContacts}
         onSaveTrustedContacts={handleSaveTrustedContacts}
-        currentTheme={theme}
-        onThemeChange={handleThemeChange}
         onEditProfile={handleEditProfile}
       />
       

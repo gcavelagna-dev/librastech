@@ -15,11 +15,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
-import { Smartphone, UserCog, CheckCircle, Settings, Moon, Sun, Edit } from 'lucide-react';
+import { Smartphone, UserCog, CheckCircle, Settings, Edit } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
 
-type Theme = 'light' | 'dark';
 type TrustedContact = { name: string; phone: string };
 
 interface SettingsDialogProps {
@@ -29,8 +27,6 @@ interface SettingsDialogProps {
   currentPhoneNumber: string;
   currentTrustedContacts: TrustedContact[];
   onSaveTrustedContacts: (contacts: TrustedContact[]) => void;
-  currentTheme: Theme;
-  onThemeChange: (theme: Theme) => void;
   onEditProfile: () => void;
 }
 
@@ -41,8 +37,6 @@ export function SettingsDialog({
   currentPhoneNumber,
   currentTrustedContacts,
   onSaveTrustedContacts,
-  currentTheme,
-  onThemeChange,
   onEditProfile
 }: SettingsDialogProps) {
   const [phoneNumber, setPhoneNumber] = useState(currentPhoneNumber);
@@ -154,29 +148,6 @@ export function SettingsDialog({
             </Button>
         </div>
         
-        <Separator className="my-2" />
-
-        <div className="space-y-4 py-2">
-            <DialogTitle className="flex items-center text-base font-semibold">
-                {currentTheme === 'dark' ? <Moon className="w-5 h-5 mr-2" /> : <Sun className="w-5 h-5 mr-2" />}
-                Aparência
-            </DialogTitle>
-            <div className="flex items-center justify-between rounded-lg border p-3 shadow-sm">
-                <Label htmlFor="dark-mode" className="flex flex-col space-y-1">
-                    <span>Modo Noturno</span>
-                    <span className="font-normal leading-snug text-muted-foreground">
-                        Relaxe seus olhos com um tema mais escuro.
-                    </span>
-                </Label>
-                <Switch
-                    id="dark-mode"
-                    checked={currentTheme === 'dark'}
-                    onCheckedChange={(checked) => onThemeChange(checked ? 'dark' : 'light')}
-                    aria-label="Ativar modo noturno"
-                />
-            </div>
-        </div>
-
         <Separator className="my-2" />
 
         <div className="space-y-4 py-2">
