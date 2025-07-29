@@ -191,6 +191,9 @@ export function WelcomeScreen({
                         onSelect={setDateOfBirth}
                         initialFocus
                         locale={ptBR}
+                        captionLayout="dropdown-buttons"
+                        fromYear={1900}
+                        toYear={new Date().getFullYear()}
                         disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
                       />
                     </PopoverContent>
