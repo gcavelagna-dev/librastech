@@ -101,122 +101,98 @@ export default function HomePage() {
       const oldName = localStorage.getItem(OLD_LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY);
       const oldPhone = localStorage.getItem(OLD_LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY);
       if (oldName && oldPhone) {
-        const migratedContacts = [{ name: oldName, phone: oldPhone }];
-        setTrustedContacts(migratedContacts);
-        localStorage.setItem(LOCAL_STORAGE_TRUSTED_CONTACTS_KEY, JSON.stringify(migratedContacts));
+        const migratedContact = { name: oldName, phone: oldPhone };
+        setTrustedContacts([migratedContact]);
+        localStorage.setItem(LOCAL_STORAGE_TRUSTED_CONTACTS_KEY, JSON.stringify([migratedContact]));
         localStorage.removeItem(OLD_LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY);
         localStorage.removeItem(OLD_LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY);
       }
     }
-
-    const storedTheme = localStorage.getItem(LOCAL_STORAGE_THEME_KEY) as Theme | null;
+     
+    // Handle theme
+    const storedTheme = localStorage.getItem(LOCAL_STORAGE_THEME_KEY) as Theme;
     if (storedTheme) {
       setTheme(storedTheme);
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
+      document.documentElement.classList.toggle('dark', storedTheme === 'dark');
     }
 
-    if (navigator.geolocation) {
+    if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
-          
           try {
-            const result = await reverseGeocode({ latitude: lat, longitude: lon });
+            const result = await reverseGeocode({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            });
             setLocation(result.address);
           } catch (error) {
-            console.error("Error fetching address, falling back to coords:", error);
-            const coordsString = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
-            setLocation(coordsString);
-            toast({
-              title: "Erro na Localização",
-              description: "Não foi possível obter o endereço. Usando coordenadas.",
-              variant: "destructive",
-            });
+            console.error("Erro na geocodificação reversa:", error);
+            setLocation(`Lat: ${position.coords.latitude}, Lon: ${position.coords.longitude}`);
           }
         },
-        () => {
-          setLocation('Não foi possível obter a localização');
-          toast({
-            title: "Erro de Localização",
-            description: "Não foi possível obter sua localização. Verifique as permissões do navegador.",
-            variant: "destructive",
-          });
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        (error) => {
+          console.error("Erro na geolocalização:", error);
+          setLocation('Não foi possível obter a localização. Verifique as permissões.');
+        }
       );
     } else {
       setLocation('Geolocalização não suportada neste navegador');
-      toast({
-        title: "Erro de Localização",
-        description: "Geolocalização não é suportada pelo seu navegador.",
-        variant: "destructive",
-      });
     }
-  }, [toast]);
+  }, []);
 
-  useEffect(() => {
-    if (isMounted) {
-      if (theme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      localStorage.setItem(LOCAL_STORAGE_THEME_KEY, theme);
-    }
-  }, [theme, isMounted]);
+  const handleSaveName = (
+    newName: string, 
+    newGender?: string, 
+    newDocType?: string, 
+    newDocNumber?: string, 
+    newCity?: string,
+    newDob?: Date
+  ) => {
+    localStorage.setItem(LOCAL_STORAGE_USER_NAME_KEY, newName);
+    setUserName(newName);
 
-
-  const handleNameSave = (name: string, userGender?: string, docType?: string, docNumber?: string, userCity?: string, dob?: Date) => {
-    const trimmedName = name.trim();
-    setUserName(trimmedName);
-    localStorage.setItem(LOCAL_STORAGE_USER_NAME_KEY, trimmedName);
-
-    if (userGender) {
-      setGender(userGender);
-      localStorage.setItem(LOCAL_STORAGE_GENDER_KEY, userGender);
+    if (newGender) {
+        localStorage.setItem(LOCAL_STORAGE_GENDER_KEY, newGender);
+        setGender(newGender);
     } else {
-      localStorage.removeItem(LOCAL_STORAGE_GENDER_KEY);
-      setGender(undefined);
+        localStorage.removeItem(LOCAL_STORAGE_GENDER_KEY);
+        setGender(undefined);
+    }
+    
+    if (newDocType) {
+        localStorage.setItem(LOCAL_STORAGE_DOCUMENT_TYPE_KEY, newDocType);
+        setDocumentType(newDocType);
+    } else {
+        localStorage.removeItem(LOCAL_STORAGE_DOCUMENT_TYPE_KEY);
+        setDocumentType(undefined);
     }
 
-    if (docType) {
-      setDocumentType(docType);
-      localStorage.setItem(LOCAL_STORAGE_DOCUMENT_TYPE_KEY, docType);
+    if (newDocNumber) {
+        localStorage.setItem(LOCAL_STORAGE_DOCUMENT_NUMBER_KEY, newDocNumber);
+        setDocumentNumber(newDocNumber);
     } else {
-      localStorage.removeItem(LOCAL_STORAGE_DOCUMENT_TYPE_KEY);
-      setDocumentType(undefined);
+        localStorage.removeItem(LOCAL_STORAGE_DOCUMENT_NUMBER_KEY);
+        setDocumentNumber('');
     }
-    if (docNumber) {
-      setDocumentNumber(docNumber);
-      localStorage.setItem(LOCAL_STORAGE_DOCUMENT_NUMBER_KEY, docNumber);
+    
+    if (newCity) {
+        localStorage.setItem(LOCAL_STORAGE_CITY_KEY, newCity);
+        setCity(newCity);
     } else {
-      localStorage.removeItem(LOCAL_STORAGE_DOCUMENT_NUMBER_KEY);
-      setDocumentNumber('');
-    }
-    if (userCity) {
-      setCity(userCity);
-      localStorage.setItem(LOCAL_STORAGE_CITY_KEY, userCity);
-    } else {
-      localStorage.removeItem(LOCAL_STORAGE_CITY_KEY);
-      setCity('');
+        localStorage.removeItem(LOCAL_STORAGE_CITY_KEY);
+        setCity('');
     }
 
-    if (dob) {
-      const dobISOString = dob.toISOString();
-      setDateOfBirth(dobISOString);
-      localStorage.setItem(LOCAL_STORAGE_DATE_OF_BIRTH_KEY, dobISOString);
+    if (newDob) {
+        const formattedDob = newDob.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        localStorage.setItem(LOCAL_STORAGE_DATE_OF_BIRTH_KEY, formattedDob);
+        setDateOfBirth(formattedDob);
     } else {
-      localStorage.removeItem(LOCAL_STORAGE_DATE_OF_BIRTH_KEY);
-      setDateOfBirth('');
+        localStorage.removeItem(LOCAL_STORAGE_DATE_OF_BIRTH_KEY);
+        setDateOfBirth('');
     }
 
     setCurrentStep('emergency');
-    const storedPhoneNumber = localStorage.getItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
-    if (!storedPhoneNumber) {
-      setShowPhoneNumberPrompt(true);
-    }
   };
 
   const handleSelectEmergency = (type: string) => {
@@ -226,15 +202,15 @@ export default function HomePage() {
 
   const handleSelectSubEmergency = (subType: string) => {
     setSubEmergencyType(subType);
-    setSosMessage(null); 
     setCurrentStep('sos');
+    setSosMessage(null); // Clear previous message
   };
 
   const handleGenerateSos = async () => {
-    if (!userName || !emergencyType || !subEmergencyType || location === 'Obtendo localização...' || location.startsWith('Não foi possível')) {
+    if (!userName || !location || !emergencyType || !subEmergencyType) {
       toast({
         title: "Dados Incompletos",
-        description: "Nome e tipo de emergência são obrigatórios. Aguarde a obtenção da localização ou verifique as permissões.",
+        description: "Por favor, preencha todas as informações antes de gerar a mensagem.",
         variant: "destructive",
       });
       return;
@@ -247,142 +223,95 @@ export default function HomePage() {
         location,
         emergencyType,
         subEmergencyType,
-        ...(gender && { gender }),
-        ...(dateOfBirth && { dateOfBirth: new Date(dateOfBirth).toLocaleDateString('pt-BR') }),
-        ...(userPhoneNumber && { userPhoneNumber: userPhoneNumber.replace(/\D/g, '') }),
-        ...(documentType && { documentType }),
-        ...(documentNumber && { documentNumber }),
-        ...(city && { city }),
+        gender: gender,
+        dateOfBirth: dateOfBirth,
+        userPhoneNumber: userPhoneNumber,
+        documentType: documentType,
+        documentNumber: documentNumber,
+        city: city,
       };
       const result = await generateSosMessage(input);
       setSosMessage(result.sosMessage);
-
     } catch (error) {
-      console.error("Error generating SOS message:", error);
-      const errorMessage = "Erro ao gerar mensagem SOS. Verifique sua conexão e tente novamente.";
-      setSosMessage(errorMessage);
+      console.error('Erro ao gerar mensagem SOS:', error);
+      setSosMessage('Erro: Não foi possível gerar a mensagem. Tente novamente.');
       toast({
-        title: "Erro na Geração",
-        description: errorMessage,
+        title: "Erro de Geração",
+        description: "Ocorreu um erro ao tentar gerar a mensagem de SOS.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
-
-  const handleSendToEmergency = (message: string) => {
-    if (!message || message.startsWith("Erro")) {
-      toast({
-        title: "Mensagem Inválida",
-        description: "Não é possível enviar uma mensagem de erro ou vazia.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const emergencyPhoneNumber = "5543999054151"; // Central de emergência simulada
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${emergencyPhoneNumber.replace(/\D/g, '')}&text=${encodedMessage}`;
-
-    window.open(whatsappUrl, '_blank');
-  };
-
-  const handleSendToTrustedContact = (phone: string, message: string) => {
-     if (!message || message.startsWith("Erro")) {
-      toast({
-        title: "Mensagem Inválida",
-        description: "Gere uma mensagem SOS válida antes de enviar.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://api.whatsapp.com/send?phone=${phone.replace(/\D/g, '')}&text=${encodedMessage}`;
-    window.open(whatsappUrl, '_blank');
-  }
 
   const handleBack = () => {
-    setSosMessage(null);
     if (currentStep === 'sos') {
       setCurrentStep('sub-emergency');
     } else if (currentStep === 'sub-emergency') {
-        setCurrentStep('emergency');
-    } else if (currentStep === 'emergency') {
-      setCurrentStep('welcome');
+      setCurrentStep('emergency');
     }
-  };
-
-  const handleConfig = () => {
-    setIsSettingsDialogVisible(true);
-  };
-
-  const handleSavePhoneNumber = (phoneNumber: string) => {
-    setUserPhoneNumber(phoneNumber);
-    localStorage.setItem(LOCAL_STORAGE_PHONE_NUMBER_KEY, phoneNumber);
-    toast({
-      title: "Número Salvo",
-      description: "Seu número de telefone foi salvo para futuras emergências.",
-    });
-    setShowPhoneNumberPrompt(false); 
   };
   
-  const handleSaveTrustedContacts = (contacts: TrustedContact[]) => {
-    setTrustedContacts(contacts);
-    if (contacts.length > 0) {
-      localStorage.setItem(LOCAL_STORAGE_TRUSTED_CONTACTS_KEY, JSON.stringify(contacts));
-      toast({
-        title: "Contatos de Confiança Salvos",
-        description: "As informações dos seus contatos de confiança foram atualizadas.",
-      });
+  const handleSavePhoneNumber = (phoneNumber: string) => {
+    if (phoneNumber) {
+      localStorage.setItem(LOCAL_STORAGE_PHONE_NUMBER_KEY, phoneNumber);
+      setUserPhoneNumber(phoneNumber);
+      toast({ title: "Sucesso!", description: "Seu número de telefone foi salvo." });
     } else {
-      localStorage.removeItem(LOCAL_STORAGE_TRUSTED_CONTACTS_KEY);
-      toast({
-        title: "Contatos de Confiança Removidos",
-        description: "Todas as informações de contato de confiança foram removidas.",
-      });
+      localStorage.removeItem(LOCAL_STORAGE_PHONE_NUMBER_KEY);
+      setUserPhoneNumber('');
+      toast({ title: "Telefone Removido", description: "Seu número foi removido com sucesso." });
     }
+  };
+
+  const handleSaveTrustedContacts = (contacts: TrustedContact[]) => {
+    const filteredContacts = contacts.filter(c => c.name.trim() !== '' && c.phone.trim() !== '');
+    localStorage.setItem(LOCAL_STORAGE_TRUSTED_CONTACTS_KEY, JSON.stringify(filteredContacts));
+    setTrustedContacts(filteredContacts);
+    toast({
+      title: "Contatos Salvos!",
+      description: "Sua lista de contatos de confiança foi atualizada.",
+    });
+  };
+
+  const handleSendToEmergency = (message: string) => {
+    let phoneNumber = '';
+    switch (emergencyType) {
+        case 'Fire': phoneNumber = '193'; break;
+        case 'Medical': phoneNumber = '192'; break;
+        case 'PublicSafety': phoneNumber = '190'; break;
+    }
+     if (phoneNumber) {
+        // For mobile, this might open the dialer. On desktop, it might do nothing.
+        window.open(`tel:${phoneNumber}`);
+        toast({
+            title: "Ligando para Emergência",
+            description: `Abriu o discador com o número ${phoneNumber}. Cole a mensagem se necessário.`,
+        });
+    }
+  };
+  
+  const handleSendToTrustedContact = (phone: string, message: string) => {
+    const cleanPhone = phone.replace(/\D/g, '');
+    const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
   };
   
   const handleThemeChange = (newTheme: Theme) => {
     setTheme(newTheme);
+    localStorage.setItem(LOCAL_STORAGE_THEME_KEY, newTheme);
+    document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
 
-  const getScreenTitle = () => {
+  const renderStep = () => {
+    if (!isMounted) return null;
+
     switch (currentStep) {
       case 'welcome':
-        return 'Cadastro Rápido';
-      case 'emergency':
-        return 'Tipo de Emergência';
-      case 'sub-emergency':
-        return 'Detalhes da Emergência';
-      case 'sos':
-        return 'Mensagem de Socorro';
-      default:
-        return 'LibrasTech';
-    }
-  };
-
-  if (!isMounted) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <p>Carregando...</p>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <AppLayout
-        title={getScreenTitle()}
-        showBack={currentStep !== 'welcome' && (currentStep !== 'emergency' || !!localStorage.getItem(LOCAL_STORAGE_USER_NAME_KEY))}
-        onBack={handleBack}
-        onConfig={handleConfig}
-        showConfig={true}
-      >
-        {currentStep === 'welcome' && (
+        return (
           <WelcomeScreen
-            onNameSave={handleNameSave}
+            onNameSave={handleSaveName}
             initialName={userName}
             initialGender={gender}
             initialDocumentType={documentType}
@@ -390,17 +319,18 @@ export default function HomePage() {
             initialCity={city}
             initialDateOfBirth={dateOfBirth}
           />
-        )}
-        {currentStep === 'emergency' && (
-          <EmergencySelectionScreen onSelectEmergency={handleSelectEmergency} />
-        )}
-        {currentStep === 'sub-emergency' && (
-           <SubEmergencySelectionScreen 
-             emergencyType={emergencyType}
-             onSelectSubEmergency={handleSelectSubEmergency}
-           />
-        )}
-        {currentStep === 'sos' && (
+        );
+      case 'emergency':
+        return <EmergencySelectionScreen onSelectEmergency={handleSelectEmergency} />;
+      case 'sub-emergency':
+        return (
+          <SubEmergencySelectionScreen
+            emergencyType={emergencyType}
+            onSelectSubEmergency={handleSelectSubEmergency}
+          />
+        );
+      case 'sos':
+        return (
           <SosMessageScreen
             userName={userName}
             location={location}
@@ -410,7 +340,7 @@ export default function HomePage() {
             documentType={documentType}
             documentNumber={documentNumber}
             city={city}
-            dateOfBirth={dateOfBirth ? new Date(dateOfBirth).toLocaleDateString('pt-BR') : undefined}
+            dateOfBirth={dateOfBirth}
             sosMessage={sosMessage}
             onGenerateSos={handleGenerateSos}
             isLoading={isLoading}
@@ -418,9 +348,28 @@ export default function HomePage() {
             onSendToTrustedContact={handleSendToTrustedContact}
             trustedContacts={trustedContacts}
           />
-        )}
+        );
+      default:
+        return <WelcomeScreen onNameSave={handleSaveName} />;
+    }
+  };
+  
+  const handlePhoneNumberSave = (number: string) => {
+      handleSavePhoneNumber(number);
+      setShowPhoneNumberPrompt(false);
+  }
+
+  return (
+    <>
+      <AppLayout
+        title={currentStep === 'welcome' ? 'Bem-Vindo(a)' : 'LibrasTech'}
+        showBack={currentStep === 'sos' || currentStep === 'sub-emergency'}
+        onBack={handleBack}
+        onConfig={() => setIsSettingsDialogVisible(true)}
+      >
+        {renderStep()}
       </AppLayout>
-      <SettingsDialog
+      <SettingsDialog 
         isOpen={isSettingsDialogVisible}
         onClose={() => setIsSettingsDialogVisible(false)}
         onSavePhoneNumber={handleSavePhoneNumber}
@@ -430,22 +379,25 @@ export default function HomePage() {
         currentTheme={theme}
         onThemeChange={handleThemeChange}
       />
-       <AlertDialog open={showPhoneNumberPrompt} onOpenChange={setShowPhoneNumberPrompt}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Adicionar Número de Telefone?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Adicionar seu número de telefone permite que ele seja incluído automaticamente nas mensagens SOS, agilizando o contato em uma emergência.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowPhoneNumberPrompt(false)}>Lembrar Depois</AlertDialogCancel>
-            <AlertDialogAction onClick={() => {
-              setShowPhoneNumberPrompt(false);
-              setIsSettingsDialogVisible(true);
-            }}>Adicionar Agora</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+      
+      <AlertDialog open={showPhoneNumberPrompt} onOpenChange={setShowPhoneNumberPrompt}>
+          <AlertDialogContent>
+              <AlertDialogHeader>
+                  <AlertDialogTitle>Adicionar seu telefone?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                      Vimos que você não tem um número de telefone salvo. Adicioná-lo agora pode agilizar o envio de mensagens de emergência. Você pode fazer isso mais tarde nas configurações.
+                  </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                  <AlertDialogCancel>Agora não</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => {
+                      setShowPhoneNumberPrompt(false);
+                      setIsSettingsDialogVisible(true);
+                  }}>
+                      Adicionar
+                  </AlertDialogAction>
+              </AlertDialogFooter>
+          </AlertDialogContent>
       </AlertDialog>
     </>
   );
