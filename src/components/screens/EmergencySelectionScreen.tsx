@@ -2,42 +2,20 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Ambulance, Siren } from 'lucide-react';
 
 interface EmergencySelectionScreenProps {
   onSelectEmergency: (type: string) => void;
 }
 
-const FireTruckIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    strokeWidth="2"
-    stroke="currentColor"
-    fill="none"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="5" cy="17" r="2"></circle>
-    <circle cx="17" cy="17" r="2"></circle>
-    <path d="M7 17h8"></path>
-    <path d="M7 12h11a2 2 0 0 1 2 2v2"></path>
-    <path d="M7 12v-5h4"></path>
-    <path d="M11 7l3 -3l3 3"></path>
-  </svg>
-);
-
 const emergencyTypes = [
   { 
     id: 'Fire', 
     name: 'Bombeiros', 
-    icon: FireTruckIcon,
+    imageUrl: 'https://placehold.co/100x100.png',
     dataAiHint: "fire truck",
     tooltipText: "Para incêndios, desabamentos, resgates e afogamentos.",
     colorClass: "text-accent"
@@ -45,7 +23,7 @@ const emergencyTypes = [
   { 
     id: 'Medical', 
     name: 'SAMU', 
-    icon: Ambulance, 
+    imageUrl: 'https://placehold.co/100x100.png',
     dataAiHint: "ambulance medical",
     tooltipText: "Para emergências médicas, acidentes e mal súbito.",
     colorClass: "text-destructive"
@@ -53,7 +31,7 @@ const emergencyTypes = [
   { 
     id: 'PublicSafety', 
     name: 'Polícia Militar', 
-    icon: Siren, 
+    imageUrl: 'https://placehold.co/100x100.png',
     dataAiHint: "police siren",
     tooltipText: "Para crimes, violência, assaltos e perturbação da ordem.",
     colorClass: "text-primary"
@@ -79,9 +57,15 @@ export function EmergencySelectionScreen({ onSelectEmergency }: EmergencySelecti
                     variant="outline"
                     className="w-full h-auto py-4 flex flex-col items-center justify-center space-y-2 text-lg hover:bg-accent/10 hover:border-primary/50 transition-all duration-200"
                     onClick={() => onSelectEmergency(emergency.id)}
-                    data-ai-hint={emergency.dataAiHint}
                   >
-                    <emergency.icon className={`w-20 h-20 mb-2 ${emergency.colorClass}`} />
+                    <Image
+                      src={emergency.imageUrl}
+                      alt={`${emergency.name} icon`}
+                      width={80}
+                      height={80}
+                      className="mb-2 rounded-md"
+                      data-ai-hint={emergency.dataAiHint}
+                    />
                     <span className="font-semibold">{emergency.name}</span>
                   </Button>
                 </TooltipTrigger>
