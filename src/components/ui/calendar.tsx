@@ -65,9 +65,14 @@ function Calendar({
           <ChevronRight className={cn("h-4 w-4", className)} {...props} />
         ),
         Dropdown: (props: DropdownProps) => {
-            const { fromYear, fromMonth, fromDate, toYear, toMonth, toDate } = props;
+            const { fromYear, fromMonth, fromDate, toYear, toMonth, toDate, caption } = props;
             const options: React.ReactElement[] = [];
+            let selectValue: string | undefined;
+
+            const newDate = new Date();
+            
             if (props.name === "months") {
+                selectValue = props.value?.toString();
                 for (let i = 0; i < 12; i++) {
                     options.push(
                         <SelectItem key={`${i}`} value={`${i}`}>
@@ -76,6 +81,7 @@ function Calendar({
                     );
                 }
             } else if (props.name === "years") {
+                selectValue = props.value?.toString();
                 const years = [];
                 for (let i = fromYear!; i <= toYear!; i++) {
                     years.push(i);
@@ -96,9 +102,9 @@ function Calendar({
                         }
                         props.onChange?.(newDate);
                     }}
-                    value={props.value?.toString()}
+                    value={selectValue}
                 >
-                    <SelectTrigger>{props.caption}</SelectTrigger>
+                    <SelectTrigger>{caption}</SelectTrigger>
                     <SelectContent>
                         <ScrollArea className="h-80">
                            {options}
