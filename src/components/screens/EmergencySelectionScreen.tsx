@@ -18,14 +18,14 @@ const emergencyTypes = [
     name: 'Bombeiros', 
     Icon: Flame,
     tooltipText: "Para incêndios, desabamentos, resgates e afogamentos.",
-    colorClass: "text-[#FF4500]"
+    colorClass: "bg-[#FF4500] hover:bg-[#FF4500]/90 text-white"
   },
   { 
     id: 'Medical', 
     name: 'SAMU', 
     Icon: Ambulance,
     tooltipText: "Para emergências médicas, acidentes e mal súbito.",
-    colorClass: "text-[#E53935]"
+    colorClass: "bg-[#E53935] hover:bg-[#E53935]/90 text-white"
   },
   { 
     id: 'PublicSafety', 
@@ -33,7 +33,7 @@ const emergencyTypes = [
     Icon: null,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/PMPR.png/819px-PMPR.png',
     tooltipText: "Para crimes, violência, assaltos e perturbação da ordem.",
-    colorClass: "text-[#003366]"
+    colorClass: "bg-[#003366] hover:bg-[#003366]/90 text-white"
   },
 ];
 
@@ -53,12 +53,11 @@ export function EmergencySelectionScreen({ onSelectEmergency }: EmergencySelecti
               <Tooltip key={emergency.id}>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="outline"
-                    className="w-full h-auto py-4 flex flex-col items-center justify-center space-y-2 text-lg hover:bg-accent/10 hover:border-primary/50 transition-all duration-200"
+                    className={`w-full h-auto py-4 flex flex-col items-center justify-center space-y-2 text-lg transition-all duration-200 ${emergency.colorClass}`}
                     onClick={() => onSelectEmergency(emergency.id)}
                   >
                     {emergency.Icon ? (
-                      <emergency.Icon className={`w-20 h-20 mb-2 ${emergency.colorClass}`} />
+                      <emergency.Icon className="w-20 h-20 mb-2 text-white" />
                     ) : (
                       <div className="w-20 h-20 mb-2 relative">
                         <Image
