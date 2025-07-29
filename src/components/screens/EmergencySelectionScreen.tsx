@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Flame, Ambulance, Siren } from 'lucide-react';
+import { Flame, Ambulance } from 'lucide-react';
 
 interface EmergencySelectionScreenProps {
   onSelectEmergency: (type: string) => void;
@@ -18,14 +18,14 @@ const emergencyTypes = [
     name: 'Bombeiros', 
     Icon: Flame,
     tooltipText: "Para incêndios, desabamentos, resgates e afogamentos.",
-    colorClass: "text-accent"
+    colorClass: "text-[#FF4500]"
   },
   { 
     id: 'Medical', 
     name: 'SAMU', 
     Icon: Ambulance,
     tooltipText: "Para emergências médicas, acidentes e mal súbito.",
-    colorClass: "text-destructive"
+    colorClass: "text-[#E53935]"
   },
   { 
     id: 'PublicSafety', 
@@ -33,7 +33,7 @@ const emergencyTypes = [
     Icon: null,
     imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/PMPR.png/819px-PMPR.png',
     tooltipText: "Para crimes, violência, assaltos e perturbação da ordem.",
-    colorClass: "text-primary"
+    colorClass: "text-[#003366]"
   },
 ];
 
