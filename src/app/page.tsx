@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { generateSosMessage, type GenerateSosMessageInput } from '@/ai/flows/generate-sos-message';
+import { reverseGeocode } from '@/ai/flows/reverse-geocode-flow';
 import { useToast } from "@/hooks/use-toast";
 
 type AppStep = 'welcome' | 'emergency' | 'sub-emergency' | 'sos';
@@ -115,14 +116,25 @@ export default function HomePage() {
       setTheme('dark');
     }
 
-
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
-          const coordsString = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
-          setLocation(coordsString);
+          
+          try {
+            const result = await reverseGeocode({ latitude: lat, longitude: lon });
+            setLocation(result.address);
+          } catch (error) {
+            console.error("Error fetching address, falling back to coords:", error);
+            const coordsString = `Lat: ${lat.toFixed(4)}, Lon: ${lon.toFixed(4)}`;
+            setLocation(coordsString);
+            toast({
+              title: "Erro na Localização",
+              description: "Não foi possível obter o endereço. Usando coordenadas.",
+              variant: "destructive",
+            });
+          }
         },
         () => {
           setLocation('Não foi possível obter a localização');
