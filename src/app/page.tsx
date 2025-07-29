@@ -301,7 +301,7 @@ export default function HomePage() {
   };
 
   const handleSendToEmergency = (message: string) => {
-    const targetPhoneNumber = "55999054151";
+    const targetPhoneNumber = "554399054151";
     const whatsappUrl = `https://wa.me/${targetPhoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     toast({
@@ -311,7 +311,7 @@ export default function HomePage() {
   };
   
   const handleSendToTrustedContact = (phone: string, message: string) => {
-    const targetPhoneNumber = "55999054151";
+    const targetPhoneNumber = "554399054151";
     const whatsappUrl = `https://wa.me/${targetPhoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -423,4 +423,5 @@ export default function HomePage() {
   );
 }
 
+    
     
