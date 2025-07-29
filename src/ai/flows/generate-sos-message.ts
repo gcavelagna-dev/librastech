@@ -17,6 +17,8 @@ import {z} from 'genkit';
 const GenerateSosMessageInputSchema = z.object({
   userName: z.string().describe('The name of the user sending the SOS message.'),
   location: z.string().describe('The current location of the user.'),
+  latitude: z.number().optional().describe('The latitude of the user.'),
+  longitude: z.number().optional().describe('The longitude of the user.'),
   emergencyType: z.string().describe('The type of emergency (e.g., Fire, Medical).'),
   subEmergencyType: z.string().describe('The specific sub-type of the emergency (e.g., Roubo, Incêndio).'),
   gender: z.string().optional().describe('The gender of the user.'),
@@ -50,12 +52,13 @@ const prompt = ai.definePrompt({
   input: {schema: GenerateSosMessageInputSchema},
   output: {schema: GenerateSosMessageOutputSchema},
   prompt: `Você está criando uma mensagem de SOS para o usuário {{userName}}.
-A mensagem deve incluir o nome do usuário, a localização atual e o tipo de emergência detalhado.
-A mensagem deve ser concisa e clara, em Português do Brasil. Use no máximo 250 caracteres.
+A mensagem deve incluir o nome do usuário, a localização atual, o link do Google Maps e o tipo de emergência detalhado.
+A mensagem deve ser concisa e clara, em Português do Brasil. Use no máximo 300 caracteres.
 
 Exemplo de dados:
 - Nome do usuário: {{userName}}
 - Localização: {{location}}
+{{#if latitude}}- Localização no mapa: https://www.google.com/maps?q={{latitude}},{{longitude}}{{/if}}
 - Tipo de emergência: {{emergencyType}} - {{subEmergencyType}}
 {{#if userPhoneNumber}}- Número de contato: {{userPhoneNumber}}{{/if}}
 {{#if gender}}- Sexo: {{gender}}{{/if}}

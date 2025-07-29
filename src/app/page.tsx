@@ -57,6 +57,7 @@ export default function HomePage() {
   const [emergencyType, setEmergencyType] = useState<string>('');
   const [subEmergencyType, setSubEmergencyType] = useState<string>('');
   const [location, setLocation] = useState<string>('Obtendo localização...');
+  const [coordinates, setCoordinates] = useState<{latitude: number; longitude: number} | null>(null);
   const [sosMessage, setSosMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -122,6 +123,10 @@ export default function HomePage() {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
+          setCoordinates({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
           try {
             const result = await reverseGeocode({
               latitude: position.coords.latitude,
@@ -237,6 +242,8 @@ export default function HomePage() {
       const input: GenerateSosMessageInput = {
         userName,
         location,
+        latitude: coordinates?.latitude,
+        longitude: coordinates?.longitude,
         emergencyType,
         subEmergencyType,
         gender: gender,
