@@ -49,24 +49,19 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateSosMessageOutputSchema},
   prompt: `Você está criando uma mensagem de SOS para o usuário {{userName}}.
 A mensagem deve incluir o nome do usuário, a localização atual e o tipo de emergência detalhado.
-{{#if gender}}Sexo: {{gender}}.{{/if}}
-{{#if dateOfBirth}}Data de Nascimento: {{dateOfBirth}}.{{/if}}
-{{#if userPhoneNumber}}Inclua também o número de telefone registrado: {{userPhoneNumber}}.{{/if}}
-{{#if documentType}}Tipo de Documento: {{documentType}}.{{/if}}
-{{#if documentNumber}}Número do Documento: {{documentNumber}}.{{/if}}
-{{#if city}}Cidade: {{city}}.{{/if}}
 A mensagem deve ser concisa e clara, em Português do Brasil. Use no máximo 250 caracteres.
 
-Nome do usuário: {{userName}}
-Localização: {{location}}
-Tipo de emergência: {{emergencyType}} - {{subEmergencyType}}
-{{#if gender}}Sexo: {{gender}}{{/if}}
-{{#if dateOfBirth}}Data de Nascimento: {{dateOfBirth}}{{/if}}
-{{#if userPhoneNumber}}Número de contato: {{userPhoneNumber}}{{/if}}
-{{#if documentType}}Documento: {{documentType}} - {{documentNumber}}{{/if}}
-{{#if city}}Cidade: {{city}}{{/if}}
+Exemplo de dados:
+- Nome do usuário: {{userName}}
+- Localização: {{location}}
+- Tipo de emergência: {{emergencyType}} - {{subEmergencyType}}
+{{#if userPhoneNumber}}- Número de contato: {{userPhoneNumber}}{{/if}}
+{{#if gender}}- Sexo: {{gender}}{{/if}}
+{{#if dateOfBirth}}- Data de Nascimento: {{dateOfBirth}}{{/if}}
+{{#if documentType}}- Documento: {{documentType}} - {{documentNumber}}{{/if}}
+{{#if city}}- Cidade: {{city}}{{/if}}
 
-Mensagem SOS:`,
+Baseado nos dados acima, gere a mensagem SOS.`,
 });
 
 const generateSosMessageFlow = ai.defineFlow(
