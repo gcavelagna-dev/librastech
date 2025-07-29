@@ -301,25 +301,18 @@ export default function HomePage() {
   };
 
   const handleSendToEmergency = (message: string) => {
-    let phoneNumber = '';
-    switch (emergencyType) {
-        case 'Fire': phoneNumber = '193'; break;
-        case 'Medical': phoneNumber = '192'; break;
-        case 'PublicSafety': phoneNumber = '190'; break;
-    }
-     if (phoneNumber) {
-        // For mobile, this might open the dialer. On desktop, it might do nothing.
-        window.open(`tel:${phoneNumber}`);
-        toast({
-            title: "Ligando para Emergência",
-            description: `Abriu o discador com o número ${phoneNumber}. Cole a mensagem se necessário.`,
-        });
-    }
+    const targetPhoneNumber = "55999054151";
+    const whatsappUrl = `https://wa.me/${targetPhoneNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+    toast({
+        title: "Enviando para o WhatsApp",
+        description: `Abrindo conversa para enviar a mensagem.`,
+    });
   };
   
   const handleSendToTrustedContact = (phone: string, message: string) => {
-    const cleanPhone = phone.replace(/\D/g, '');
-    const whatsappUrl = `https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`;
+    const targetPhoneNumber = "55999054151";
+    const whatsappUrl = `https://wa.me/${targetPhoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
   
@@ -429,3 +422,5 @@ export default function HomePage() {
     </>
   );
 }
+
+    
