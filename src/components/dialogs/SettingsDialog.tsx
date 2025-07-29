@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
-import { Smartphone, UserCog, CheckCircle, Settings, Edit } from 'lucide-react';
+import { Smartphone, UserCog, CheckCircle, Settings, Edit, Users } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 type TrustedContact = { name: string; phone: string };
@@ -178,7 +178,7 @@ export function SettingsDialog({
 
         <div className="space-y-4 py-2">
             <DialogTitle className="flex items-center text-base font-semibold">
-              <UserCog className="w-5 h-5 mr-2" /> Contatos de Confiança
+              <Users className="w-5 h-5 mr-2" /> Contatos de Confiança
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
               Adicione até 5 pessoas para serem notificadas em caso de emergência.
