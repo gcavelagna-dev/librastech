@@ -29,6 +29,7 @@ const GenerateSosMessageInputSchema = z.object({
   city: z.string().optional().describe('The city of the user.'),
   bloodType: z.string().optional().describe('The blood type of the user.'),
   sendDocumentsConfirmed: z.boolean().optional().describe('Whether the user confirmed sending document info.'),
+  isDeaf: z.boolean().optional().describe('Whether the user is deaf.'),
 });
 export type GenerateSosMessageInput = z.infer<typeof GenerateSosMessageInputSchema>;
 
@@ -52,10 +53,12 @@ const prompt = ai.definePrompt({
   input: {schema: GenerateSosMessageInputSchema},
   output: {schema: GenerateSosMessageOutputSchema},
   prompt: `Você está criando uma mensagem de SOS para o usuário {{userName}}.
+{{#if isDeaf}}A mensagem DEVE começar com: "ATENÇÃO: Vítima surda.".{{/if}}
 A mensagem deve incluir o nome do usuário, a localização atual, o link do Google Maps e o tipo de emergência detalhado.
 A mensagem deve ser concisa e clara, em Português do Brasil. Use no máximo 300 caracteres.
 
 Exemplo de dados:
+{{#if isDeaf}}- Alerta: Vítima surda.{{/if}}
 - Nome do usuário: {{userName}}
 - Localização: {{location}}
 {{#if latitude}}- Localização no mapa: https://www.google.com/maps?q={{latitude}},{{longitude}}{{/if}}

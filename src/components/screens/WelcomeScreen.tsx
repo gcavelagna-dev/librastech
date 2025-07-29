@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Lock, Droplet, ShieldCheck } from 'lucide-react';
+import { CalendarIcon, Lock, Droplet, ShieldCheck, Ear } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
@@ -26,7 +26,8 @@ interface WelcomeScreenProps {
     city?: string,
     dateOfBirth?: Date,
     bloodType?: string,
-    sendDocuments?: boolean
+    sendDocuments?: boolean,
+    isDeaf?: boolean
   ) => void;
   initialName?: string;
   initialGender?: string;
@@ -36,6 +37,7 @@ interface WelcomeScreenProps {
   initialDateOfBirth?: string;
   initialBloodType?: string;
   initialSendDocuments?: boolean;
+  initialIsDeaf?: boolean;
 }
 
 const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
@@ -50,6 +52,7 @@ export function WelcomeScreen({
   initialDateOfBirth,
   initialBloodType,
   initialSendDocuments = true,
+  initialIsDeaf = false,
 }: WelcomeScreenProps) {
   const [name, setName] = useState(initialName);
   const [gender, setGender] = useState<string | undefined>(initialGender);
@@ -59,6 +62,7 @@ export function WelcomeScreen({
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>();
   const [bloodType, setBloodType] = useState<string | undefined>(initialBloodType);
   const [sendDocuments, setSendDocuments] = useState<boolean>(initialSendDocuments);
+  const [isDeaf, setIsDeaf] = useState<boolean>(initialIsDeaf);
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -76,7 +80,8 @@ export function WelcomeScreen({
     }
     if (initialBloodType) setBloodType(initialBloodType);
     setSendDocuments(initialSendDocuments);
-  }, [initialName, initialGender, initialDocumentType, initialDocumentNumber, initialCity, initialDateOfBirth, initialBloodType, initialSendDocuments]);
+    setIsDeaf(initialIsDeaf);
+  }, [initialName, initialGender, initialDocumentType, initialDocumentNumber, initialCity, initialDateOfBirth, initialBloodType, initialSendDocuments, initialIsDeaf]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +93,8 @@ export function WelcomeScreen({
       city.trim(),
       dateOfBirth,
       bloodType,
-      sendDocuments
+      sendDocuments,
+      isDeaf
     );
   };
 
@@ -259,6 +265,22 @@ export function WelcomeScreen({
                         checked={sendDocuments}
                         onCheckedChange={setSendDocuments}
                         disabled={!documentType || !documentNumber}
+                    />
+                </div>
+                 <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                     <div className='flex items-center'>
+                         <Ear className="w-5 h-5 mr-3 text-primary" />
+                        <div>
+                             <Label htmlFor="is-deaf" className="font-semibold">Você é uma pessoa surda?</Label>
+                             <p className="text-xs text-muted-foreground">
+                                Marque para alertar os serviços de emergência.
+                             </p>
+                        </div>
+                    </div>
+                    <Switch
+                        id="is-deaf"
+                        checked={isDeaf}
+                        onCheckedChange={setIsDeaf}
                     />
                 </div>
             </div>

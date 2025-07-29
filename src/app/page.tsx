@@ -35,6 +35,7 @@ const LOCAL_STORAGE_CITY_KEY = 'LibrasTech_City';
 const LOCAL_STORAGE_TRUSTED_CONTACTS_KEY = 'LibrasTech_TrustedContacts';
 const LOCAL_STORAGE_BLOOD_TYPE_KEY = 'LibrasTech_BloodType';
 const LOCAL_STORAGE_SEND_DOCUMENTS_KEY = 'LibrasTech_SendDocuments';
+const LOCAL_STORAGE_IS_DEAF_KEY = 'LibrasTech_IsDeaf';
 
 
 // Deprecated keys for migration
@@ -53,6 +54,7 @@ export default function HomePage() {
   const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>([]);
   const [bloodType, setBloodType] = useState<string | undefined>(undefined);
   const [sendDocumentsConfirmed, setSendDocumentsConfirmed] = useState<boolean>(true);
+  const [isDeaf, setIsDeaf] = useState<boolean>(false);
 
   const [emergencyType, setEmergencyType] = useState<string>('');
   const [emergencyColor, setEmergencyColor] = useState<string>('');
@@ -105,6 +107,11 @@ export default function HomePage() {
         setSendDocumentsConfirmed(JSON.parse(storedSendDocuments));
     }
     
+    const storedIsDeaf = localStorage.getItem(LOCAL_STORAGE_IS_DEAF_KEY);
+    if (storedIsDeaf) {
+        setIsDeaf(JSON.parse(storedIsDeaf));
+    }
+
     // Handle trusted contacts (new array format with migration from old format)
     const storedContacts = localStorage.getItem(LOCAL_STORAGE_TRUSTED_CONTACTS_KEY);
     if (storedContacts) {
@@ -157,7 +164,8 @@ export default function HomePage() {
     newCity?: string,
     newDob?: Date,
     newBloodType?: string,
-    newSendDocuments?: boolean
+    newSendDocuments?: boolean,
+    newIsDeaf?: boolean
   ) => {
     localStorage.setItem(LOCAL_STORAGE_USER_NAME_KEY, newName);
     setUserName(newName);
@@ -211,8 +219,11 @@ export default function HomePage() {
         setBloodType(undefined);
     }
 
-    localStorage.setItem(LOCAL_STORAGE_SEND_DOCUMENTS_KEY, JSON.stringify(newSendDocuments));
+    localStorage.setItem(LOCAL_STORAGE_SEND_DOCUMENTS_KEY, JSON.stringify(newSendDocuments ?? true));
     setSendDocumentsConfirmed(newSendDocuments ?? true);
+    
+    localStorage.setItem(LOCAL_STORAGE_IS_DEAF_KEY, JSON.stringify(newIsDeaf ?? false));
+    setIsDeaf(newIsDeaf ?? false);
 
     setCurrentStep('emergency');
   };
@@ -256,6 +267,7 @@ export default function HomePage() {
         city: city,
         bloodType: bloodType,
         sendDocumentsConfirmed: sendDocumentsConfirmed,
+        isDeaf: isDeaf,
       };
       const result = await generateSosMessage(input);
       setSosMessage(result.sosMessage);
@@ -339,6 +351,7 @@ export default function HomePage() {
             initialDateOfBirth={dateOfBirth}
             initialBloodType={bloodType}
             initialSendDocuments={sendDocumentsConfirmed}
+            initialIsDeaf={isDeaf}
           />
         );
       case 'emergency':
@@ -365,6 +378,7 @@ export default function HomePage() {
             dateOfBirth={dateOfBirth}
             bloodType={bloodType}
             sendDocumentsConfirmed={sendDocumentsConfirmed}
+            isDeaf={isDeaf}
             sosMessage={sosMessage}
             onGenerateSos={handleGenerateSos}
             isLoading={isLoading}

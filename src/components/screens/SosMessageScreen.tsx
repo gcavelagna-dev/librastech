@@ -5,7 +5,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building, VenetianMask, Cake, Siren, Droplet } from 'lucide-react';
+import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building, VenetianMask, Cake, Siren, Droplet, EarOff } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from '@/components/ui/separator';
 
@@ -21,6 +21,7 @@ interface SosMessageScreenProps {
   dateOfBirth?: string;
   bloodType?: string;
   sendDocumentsConfirmed?: boolean;
+  isDeaf?: boolean;
   sosMessage: string | null;
   onGenerateSos: () => void;
   isLoading: boolean;
@@ -47,6 +48,7 @@ export function SosMessageScreen({
   dateOfBirth,
   bloodType,
   sendDocumentsConfirmed,
+  isDeaf,
   sosMessage,
   onGenerateSos,
   isLoading,
@@ -128,6 +130,15 @@ export function SosMessageScreen({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
+           {isDeaf && (
+             <Alert variant="destructive" className="flex items-center">
+                <EarOff className="w-5 h-5 mr-3"/>
+                <div>
+                  <AlertTitle>Atenção</AlertTitle>
+                  <AlertDescription>Você se identificou como pessoa surda. Esta informação será incluída na mensagem.</AlertDescription>
+                </div>
+              </Alert>
+           )}
            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <h3 className="font-semibold flex items-center text-muted-foreground"><User className="w-4 h-4 mr-1.5"/>Nome:</h3>
