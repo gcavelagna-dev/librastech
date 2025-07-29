@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
-import { Smartphone, UserCog, CheckCircle, Settings, Moon, Sun } from 'lucide-react';
+import { Smartphone, UserCog, CheckCircle, Settings, Moon, Sun, Edit } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 
@@ -31,6 +31,7 @@ interface SettingsDialogProps {
   onSaveTrustedContacts: (contacts: TrustedContact[]) => void;
   currentTheme: Theme;
   onThemeChange: (theme: Theme) => void;
+  onEditProfile: () => void;
 }
 
 export function SettingsDialog({ 
@@ -41,7 +42,8 @@ export function SettingsDialog({
   currentTrustedContacts,
   onSaveTrustedContacts,
   currentTheme,
-  onThemeChange
+  onThemeChange,
+  onEditProfile
 }: SettingsDialogProps) {
   const [phoneNumber, setPhoneNumber] = useState(currentPhoneNumber);
   const [contacts, setContacts] = useState<TrustedContact[]>([]);
@@ -138,6 +140,21 @@ export function SettingsDialog({
             <Settings className="w-5 h-5 mr-2" /> Configurações
           </DialogTitle>
         </DialogHeader>
+        
+        <div className="space-y-4 py-2">
+            <DialogTitle className="flex items-center text-base font-semibold">
+                <UserCog className="w-5 h-5 mr-2" /> Meus Dados
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
+                Clique no botão abaixo para editar suas informações pessoais salvas no aplicativo.
+            </DialogDescription>
+             <Button onClick={onEditProfile} variant="outline" className="w-full">
+                <Edit className="w-4 h-4 mr-2" />
+                Editar Perfil
+            </Button>
+        </div>
+        
+        <Separator className="my-2" />
 
         <div className="space-y-4 py-2">
             <DialogTitle className="flex items-center text-base font-semibold">

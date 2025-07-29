@@ -303,6 +303,11 @@ export default function HomePage() {
     localStorage.setItem(LOCAL_STORAGE_THEME_KEY, newTheme);
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
+  
+  const handleEditProfile = () => {
+    setIsSettingsDialogVisible(false);
+    setCurrentStep('welcome');
+  };
 
   const renderStep = () => {
     if (!isMounted) return null;
@@ -378,6 +383,7 @@ export default function HomePage() {
         onSaveTrustedContacts={handleSaveTrustedContacts}
         currentTheme={theme}
         onThemeChange={handleThemeChange}
+        onEditProfile={handleEditProfile}
       />
       
       <AlertDialog open={showPhoneNumberPrompt} onOpenChange={setShowPhoneNumberPrompt}>
