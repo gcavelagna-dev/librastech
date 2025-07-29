@@ -3,7 +3,7 @@
 'use server';
 
 /**
- * @fileOverview Converts latitude and longitude coordinates into a human-readable address.
+ * @fileOverview Converts latitude and longitude coordinates into a human-readable address using Nominatim.
  *
  * - reverseGeocode - A function that handles the reverse geocoding process.
  * - ReverseGeocodeInput - The input type for the reverseGeocode function.
@@ -35,26 +35,26 @@ const reverseGeocodeFlow = ai.defineFlow(
     outputSchema: ReverseGeocodeOutputSchema,
   },
   async ({ latitude, longitude }) => {
-    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
-    if (!apiKey) {
-      throw new Error("Google Maps API key is not configured.");
-    }
-    
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
     
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+            // Nominatim requires a user-agent
+            'User-Agent': 'LibrasTechApp/1.0 (https://librastech.firebaseapp.com)'
+        }
+      });
       const data = await response.json();
 
-      if (data.status === 'OK' && data.results[0]) {
-        return { address: data.results[0].formatted_address };
+      if (data && data.display_name) {
+        return { address: data.display_name };
       } else {
-        console.error("Reverse geocoding failed:", data.status, data.error_message);
+        console.error("Reverse geocoding with Nominatim failed:", data.error);
         // Fallback to coordinates if API fails
         return { address: `Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}` };
       }
     } catch (error) {
-      console.error("Error calling Geocoding API:", error);
+      console.error("Error calling Nominatim API:", error);
       // Fallback to coordinates on network error
       return { address: `Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}` };
     }
