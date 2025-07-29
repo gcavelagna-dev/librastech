@@ -1,11 +1,14 @@
+
 "use client"
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import { DayPicker, DropdownProps } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select"
+import { ScrollArea } from "./scroll-area"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
@@ -24,6 +27,7 @@ function Calendar({
         month: "space-y-4",
         caption: "flex justify-center pt-1 relative items-center",
         caption_label: "text-sm font-medium",
+        caption_dropdowns: "flex justify-center gap-1",
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
@@ -60,6 +64,49 @@ function Calendar({
         IconRight: ({ className, ...props }) => (
           <ChevronRight className={cn("h-4 w-4", className)} {...props} />
         ),
+        Dropdown: (props: DropdownProps) => {
+            const { fromYear, fromMonth, fromDate, toYear, toMonth, toDate } = props;
+            const options: React.ReactElement[] = [];
+            if (props.name === "months") {
+                for (let i = 0; i < 12; i++) {
+                    options.push(
+                        <SelectItem key={`${i}`} value={`${i}`}>
+                            {new Date(2023, i).toLocaleString('default', { month: 'long' })}
+                        </SelectItem>
+                    );
+                }
+            } else if (props.name === "years") {
+                const years = [];
+                for (let i = fromYear!; i <= toYear!; i++) {
+                    years.push(i);
+                }
+                for (const year of years) {
+                    options.push(<SelectItem key={`${year}`} value={`${year}`}>{year}</SelectItem>);
+                }
+            }
+
+            return (
+                <Select
+                    onValueChange={(newValue) => {
+                        const newDate = new Date(props.value as Date);
+                        if (props.name === "months") {
+                            newDate.setMonth(parseInt(newValue));
+                        } else if (props.name === "years") {
+                            newDate.setFullYear(parseInt(newValue));
+                        }
+                        props.onChange?.(newDate);
+                    }}
+                    value={props.value?.toString()}
+                >
+                    <SelectTrigger>{props.caption}</SelectTrigger>
+                    <SelectContent>
+                        <ScrollArea className="h-80">
+                           {options}
+                        </ScrollArea>
+                    </SelectContent>
+                </Select>
+            )
+        }
       }}
       {...props}
     />
