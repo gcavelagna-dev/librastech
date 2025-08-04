@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Flame, Ambulance } from 'lucide-react';
+import { Flame, Ambulance, Shield } from 'lucide-react';
 
 interface EmergencySelectionScreenProps {
   onSelectEmergency: (type: string, colorClass: string) => void;
@@ -30,8 +30,7 @@ const emergencyTypes = [
   { 
     id: 'PublicSafety', 
     name: 'Polícia Militar', 
-    Icon: null,
-    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/PMPR.png/819px-PMPR.png',
+    Icon: Shield,
     tooltipText: "Para crimes, violência, assaltos e perturbação da ordem.",
     colorClass: "bg-[#003366] hover:bg-[#003366]/90 text-white"
   },
@@ -61,7 +60,7 @@ export function EmergencySelectionScreen({ onSelectEmergency }: EmergencySelecti
                     ) : (
                       <div className="w-20 h-20 mb-2 relative">
                         <Image
-                            src={emergency.imageUrl!}
+                            src={''}
                             alt={`${emergency.name} icon`}
                             fill
                             style={{ objectFit: 'contain' }}
