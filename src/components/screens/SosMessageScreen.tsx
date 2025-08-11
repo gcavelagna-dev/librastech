@@ -5,7 +5,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building, VenetianMask, Cake, Siren, Droplet, EarOff } from 'lucide-react';
+import { Loader2, Send, Info, MapPin, ClipboardCopy, User, FileText, Building, VenetianMask, Cake, Siren, Droplet, EarOff, AlertTriangle, HeartPulse } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from '@/components/ui/separator';
 
@@ -22,6 +22,8 @@ interface SosMessageScreenProps {
   bloodType?: string;
   sendDocumentsConfirmed?: boolean;
   isDeaf?: boolean;
+  isVictim?: boolean;
+  isBleeding?: boolean;
   sosMessage: string | null;
   onGenerateSos: () => void;
   isLoading: boolean;
@@ -49,6 +51,8 @@ export function SosMessageScreen({
   bloodType,
   sendDocumentsConfirmed,
   isDeaf,
+  isVictim,
+  isBleeding,
   sosMessage,
   onGenerateSos,
   isLoading,
@@ -139,30 +143,33 @@ export function SosMessageScreen({
                 </div>
               </Alert>
            )}
+           <div className="space-y-1">
+              <h3 className="font-semibold flex items-center text-muted-foreground"><User className="w-4 h-4 mr-1.5"/>Solicitante:</h3>
+              <p className="text-foreground">{userName} ({isVictim ? 'Vítima' : 'Relatando para terceiro'})</p>
+            </div>
            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <h3 className="font-semibold flex items-center text-muted-foreground"><User className="w-4 h-4 mr-1.5"/>Nome:</h3>
-                <p className="text-foreground">{userName}</p>
-              </div>
-               <div className="space-y-1">
                 <h3 className="font-semibold flex items-center text-muted-foreground"><Cake className="w-4 h-4 mr-1.5"/>Nascimento:</h3>
                 <p className="text-foreground">{dateOfBirth || 'N/A'}</p>
               </div>
-            </div>
-             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-               {gender && (
+              {gender && (
                 <div className="space-y-1">
                   <h3 className="font-semibold flex items-center text-muted-foreground"><VenetianMask className="w-4 h-4 mr-1.5"/>Sexo:</h3>
                   <p className="text-foreground">{gender}</p>
                 </div>
               )}
-              {bloodType && (
-                <div className="space-y-1">
-                    <h3 className="font-semibold flex items-center text-muted-foreground"><Droplet className="w-4 h-4 mr-1.5"/>Tipo Sanguíneo:</h3>
-                    <p className="text-foreground">{bloodType}</p>
-                </div>
-              )}
             </div>
+            {isBleeding && (
+              <Alert variant="destructive" className="flex items-center">
+                <AlertTriangle className="w-5 h-5 mr-3"/>
+                <div>
+                  <AlertTitle>Informação Crítica</AlertTitle>
+                  <AlertDescription>
+                    Há sangramento no local. {bloodType ? `Tipo sanguíneo informado: ${bloodType}` : 'Tipo sanguíneo não informado.'}
+                  </AlertDescription>
+                </div>
+              </Alert>
+            )}
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {documentType && documentNumber && sendDocumentsConfirmed && (
                 <div className="space-y-1">

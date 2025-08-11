@@ -1,17 +1,19 @@
 
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, User, Users, Droplets, ShieldBan } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
+import { Separator } from '@/components/ui/separator';
+import { Label } from '@/components/ui/label';
 
 interface SubEmergencySelectionScreenProps {
   emergencyType: string;
-  onSelectSubEmergency: (subType: string) => void;
+  onSelectSubEmergency: (subType: string, isVictim: boolean, isBleeding: boolean) => void;
   colorClass: string;
+  hasBloodType: boolean;
 }
 
 const subEmergencyOptions: Record<string, string[]> = {
@@ -27,13 +29,96 @@ const emergencyTypeMap: Record<string, string> = {
 };
 
 
-export function SubEmergencySelectionScreen({ emergencyType, onSelectSubEmergency, colorClass }: SubEmergencySelectionScreenProps) {
+export function SubEmergencySelectionScreen({ emergencyType, onSelectSubEmergency, colorClass, hasBloodType }: SubEmergencySelectionScreenProps) {
   const options = subEmergencyOptions[emergencyType] || [];
   const displayEmergencyType = emergencyTypeMap[emergencyType] || emergencyType;
+  
+  const [selectedSubType, setSelectedSubType] = useState<string | null>(null);
+  const [isVictim, setIsVictim] = useState<boolean | null>(null);
+  const [isBleeding, setIsBleeding] = useState<boolean | null>(null);
+
+  const handleNext = (subType: string) => {
+    setSelectedSubType(subType);
+  }
+
+  const handleFinalSelection = () => {
+    if (selectedSubType && isVictim !== null && isBleeding !== null) {
+      onSelectSubEmergency(selectedSubType, isVictim, isBleeding);
+    }
+  }
 
   // Extrai a cor base da classe para usar no hover
-  const baseColor = colorClass.split(' ')[0]; // ex: "bg-[#E53935]"
-  const hoverClass = baseColor.replace('bg-', 'hover:bg-'); // ex: "hover:bg-[#E53935]/90"
+  const baseColor = colorClass.split(' ')[0]; 
+  const hoverClass = baseColor.replace('bg-', 'hover:bg-'); 
+
+  if (selectedSubType) {
+    return (
+       <div className="flex flex-col items-center">
+        <Card className="w-full max-w-md text-center">
+          <CardHeader>
+            <CardTitle className="text-2xl font-headline">Mais detalhes</CardTitle>
+            <CardDescription>
+              Forneça mais algumas informações para agilizar o atendimento.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-6 p-6 pt-0">
+            <div className='space-y-3 text-left'>
+                <Label>Quem é a vítima?</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Button
+                        variant={isVictim === true ? 'default' : 'outline'}
+                        onClick={() => setIsVictim(true)}
+                        className="h-auto py-3 text-base justify-center"
+                    >
+                        <User className="mr-2" /> Eu sou a vítima
+                    </Button>
+                    <Button
+                         variant={isVictim === false ? 'default' : 'outline'}
+                         onClick={() => setIsVictim(false)}
+                         className="h-auto py-3 text-base justify-center"
+                    >
+                        <Users className="mr-2" /> Outra pessoa
+                    </Button>
+                </div>
+            </div>
+            <div className='space-y-3 text-left'>
+                <Label>Há sangramento no local?</Label>
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Button
+                         variant={isBleeding === true ? 'destructive' : 'outline'}
+                         onClick={() => setIsBleeding(true)}
+                         className="h-auto py-3 text-base justify-center"
+                    >
+                        <Droplets className="mr-2" /> Sim
+                    </Button>
+                    <Button
+                         variant={isBleeding === false ? 'default' : 'outline'}
+                         onClick={() => setIsBleeding(false)}
+                         className="h-auto py-3 text-base justify-center"
+                    >
+                        <ShieldBan className="mr-2" /> Não
+                    </Button>
+                </div>
+                {isBleeding && hasBloodType && (
+                    <p className="text-xs text-muted-foreground px-1 pt-1 text-center">
+                        Seu tipo sanguíneo será adicionado à mensagem.
+                    </p>
+                )}
+            </div>
+
+            <Button 
+              onClick={handleFinalSelection}
+              disabled={isVictim === null || isBleeding === null}
+              className={cn("w-full h-auto py-3 text-base justify-center mt-4", baseColor, hoverClass, "text-white")}
+            >
+              Confirmar e Gerar Mensagem
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
   return (
     <div className="flex flex-col items-center">
@@ -50,10 +135,10 @@ export function SubEmergencySelectionScreen({ emergencyType, onSelectSubEmergenc
               key={option}
               className={cn(
                 "w-full h-auto py-3 text-base justify-between text-white transition-all duration-200",
-                baseColor, // Cor de fundo principal
-                hoverClass // Cor de fundo no hover
+                baseColor, 
+                hoverClass 
               )}
-              onClick={() => onSelectSubEmergency(option)}
+              onClick={() => handleNext(option)}
             >
               <span className="text-left">{option}</span>
               <ArrowRight className="w-5 h-5 text-white/80 ml-2" />
@@ -64,5 +149,3 @@ export function SubEmergencySelectionScreen({ emergencyType, onSelectSubEmergenc
     </div>
   );
 }
-
-    

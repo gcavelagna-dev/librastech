@@ -60,6 +60,8 @@ export default function HomePage() {
   const [emergencyType, setEmergencyType] = useState<string>('');
   const [emergencyColor, setEmergencyColor] = useState<string>('');
   const [subEmergencyType, setSubEmergencyType] = useState<string>('');
+  const [isVictim, setIsVictim] = useState<boolean>(true);
+  const [isBleeding, setIsBleeding] = useState<boolean>(false);
   const [location, setLocation] = useState<string>('Obtendo localização...');
   const [coordinates, setCoordinates] = useState<{latitude: number; longitude: number} | null>(null);
   const [sosMessage, setSosMessage] = useState<string | null>(null);
@@ -235,8 +237,10 @@ export default function HomePage() {
     setCurrentStep('sub-emergency');
   };
 
-  const handleSelectSubEmergency = (subType: string) => {
+  const handleSelectSubEmergency = (subType: string, isVictim: boolean, isBleeding: boolean) => {
     setSubEmergencyType(subType);
+    setIsVictim(isVictim);
+    setIsBleeding(isBleeding);
     setCurrentStep('sos');
     setSosMessage(null); // Clear previous message
   };
@@ -270,6 +274,8 @@ export default function HomePage() {
         sendDocumentsConfirmed: sendDocumentsConfirmed,
         isDeaf: isDeaf,
         isDesktop: !isMobile,
+        isVictim: isVictim,
+        isBleeding: isBleeding,
       };
       const result = await generateSosMessage(input);
       setSosMessage(result.sosMessage);
@@ -364,6 +370,7 @@ export default function HomePage() {
             emergencyType={emergencyType}
             onSelectSubEmergency={handleSelectSubEmergency}
             colorClass={emergencyColor}
+            hasBloodType={!!bloodType}
           />
         );
       case 'sos':
@@ -381,6 +388,8 @@ export default function HomePage() {
             bloodType={bloodType}
             sendDocumentsConfirmed={sendDocumentsConfirmed}
             isDeaf={isDeaf}
+            isVictim={isVictim}
+            isBleeding={isBleeding}
             sosMessage={sosMessage}
             onGenerateSos={handleGenerateSos}
             isLoading={isLoading}
@@ -441,8 +450,3 @@ export default function HomePage() {
     </>
   );
 }
-
-    
-    
-
-    
