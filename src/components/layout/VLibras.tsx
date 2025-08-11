@@ -1,23 +1,22 @@
-"use client";
 
-import React, { useEffect } from 'react';
+'use client';
 
-export function VLibras() {
-  const vlibrasContainerId = 'vlibras-widget-container';
+import { useEffect, useRef } from 'react';
+
+export default function VLibras() {
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Evita a duplicação do widget se o componente for remontado.
-    if (document.getElementById(vlibrasContainerId)?.children.length > 0) {
-      return;
+    if (document.querySelector('[vw-access-button]')) {
+        return;
     }
-
-    const container = document.getElementById(vlibrasContainerId);
-    if (container) {
-      // Injeta o HTML necessário para o widget, incluindo os atributos não-padrão.
-      container.innerHTML = `
-        <div vw="true" class="enabled">
-          <div vw-access-button="true" class="active"></div>
-          <div vw-plugin-wrapper="true">
+      
+    if (containerRef.current) {
+      containerRef.current.innerHTML = `
+        <div vw class="enabled">
+          <div vw-access-button class="active"></div>
+          <div vw-plugin-wrapper>
             <div class="vw-plugin-top-wrapper"></div>
           </div>
         </div>
@@ -36,19 +35,17 @@ export function VLibras() {
     };
     document.body.appendChild(script);
 
-    // Função de limpeza para remover o script quando o componente for desmontado.
     return () => {
-      const existingScript = document.querySelector('script[src="https://vlibras.gov.br/app/vlibras-plugin.js"]');
-      if (existingScript) {
-        document.body.removeChild(existingScript);
-      }
-      const widget = document.querySelector('[vw="true"]');
-      if(widget) {
-        widget.parentElement?.remove();
-      }
+        const vlibrasScript = document.querySelector('script[src="https://vlibras.gov.br/app/vlibras-plugin.js"]');
+        if (vlibrasScript) {
+            document.body.removeChild(vlibrasScript);
+        }
+        const widget = document.querySelector('[vw]');
+        if (widget && widget.parentElement === containerRef.current) {
+            containerRef.current?.removeChild(widget);
+        }
     };
   }, []);
 
-  // O container será preenchido pelo useEffect.
-  return <div id={vlibrasContainerId} />;
+  return <div ref={containerRef} />;
 }
