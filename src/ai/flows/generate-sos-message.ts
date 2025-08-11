@@ -66,7 +66,7 @@ Exemplo de dados:
 - Localização: {{#if isDesktop}}aproximadamente {{/if}}{{location}}
 {{#if latitude}}- Localização no mapa: https://www.google.com/maps?q={{latitude}},{{longitude}}{{/if}}
 - Tipo de emergência: {{emergencyType}} - {{subEmergencyType}}
-{{#if isBleeding}}{{#if bloodType}}- INFORMAÇÃO CRÍTICA: Há sangramento! Tipo sanguíneo da vítima (se for o solicitante): {{bloodType}}.{{else}}- INFORMAÇÃO CRÍTICA: Há sangramento no local.{{/if}}{{/if}}
+{{#if isBleeding}}{{#if isVictim}}{{#if bloodType}}- INFORMAÇÃO CRÍTICA: Há sangramento! Tipo sanguíneo da vítima: {{bloodType}}.{{else}}- INFORMAÇÃO CRÍTICA: Há sangramento no local.{{/if}}{{else}}- INFORMAÇÃO CRÍTICA: Há sangramento no local.{{/if}}{{/if}}
 {{#if userPhoneNumber}}- Número de contato: {{userPhoneNumber}}{{/if}}
 {{#if gender}}- Sexo: {{gender}}{{/if}}
 {{#if dateOfBirth}}- Data de Nascimento: {{dateOfBirth}}{{/if}}
