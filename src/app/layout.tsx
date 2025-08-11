@@ -1,7 +1,9 @@
+
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import { VLibras } from '@/components/layout/VLibras';
 
 export const metadata: Metadata = {
   title: 'LibrasTech',
@@ -23,16 +25,7 @@ export default function RootLayout({
       <body className="font-body antialiased">
         {children}
         <Toaster />
-        <div vw="true" className="enabled">
-          <div vw-access-button="true" className="active"></div>
-          <div vw-plugin-wrapper="true">
-            <div className="vw-plugin-top-wrapper"></div>
-          </div>
-        </div>
-        <Script src="https://vlibras.gov.br/app/vlibras-plugin.js" strategy="afterInteractive" />
-        <Script id="vlibras-init" strategy="afterInteractive">
-          {`new window.VLibras.Widget('https://vlibras.gov.br/app');`}
-        </Script>
+        <VLibras />
       </body>
     </html>
   );
