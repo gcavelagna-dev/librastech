@@ -42,8 +42,9 @@ export function VLibras() {
       if (existingScript) {
         document.body.removeChild(existingScript);
       }
-      if (container) {
-          container.innerHTML = '';
+      const widget = document.querySelector('[vw="true"]');
+      if(widget) {
+        widget.parentElement?.remove();
       }
     };
   }, []);
