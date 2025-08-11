@@ -5,13 +5,14 @@ import { useEffect, useRef } from 'react';
 
 export default function VLibras() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const scriptRef = useRef<HTMLScriptElement | null>(null);
 
   useEffect(() => {
-    // Evita a duplicação do widget se o componente for remontado.
-    if (document.querySelector('[vw-access-button]')) {
+    // Se o script já foi adicionado, não faz nada.
+    if (scriptRef.current) {
         return;
     }
-      
+
     if (containerRef.current) {
       containerRef.current.innerHTML = `
         <div vw class="enabled">
@@ -34,15 +35,16 @@ export default function VLibras() {
       }
     };
     document.body.appendChild(script);
+    scriptRef.current = script;
 
     return () => {
-        const vlibrasScript = document.querySelector('script[src="https://vlibras.gov.br/app/vlibras-plugin.js"]');
-        if (vlibrasScript) {
-            document.body.removeChild(vlibrasScript);
+        if (scriptRef.current && document.body.contains(scriptRef.current)) {
+            document.body.removeChild(scriptRef.current);
+            scriptRef.current = null;
         }
         const widget = document.querySelector('[vw]');
-        if (widget && widget.parentElement === containerRef.current) {
-            containerRef.current?.removeChild(widget);
+        if (widget) {
+            widget.remove();
         }
     };
   }, []);
