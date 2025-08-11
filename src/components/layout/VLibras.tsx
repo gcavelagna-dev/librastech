@@ -8,11 +8,7 @@ export default function VLibras() {
   const scriptRef = useRef<HTMLScriptElement | null>(null);
 
   useEffect(() => {
-    // Se o script já foi adicionado, não faz nada.
-    if (scriptRef.current) {
-        return;
-    }
-
+    // Injeta o HTML do widget no container
     if (containerRef.current) {
       containerRef.current.innerHTML = `
         <div vw class="enabled">
@@ -24,6 +20,7 @@ export default function VLibras() {
       `;
     }
 
+    // Cria e adiciona o script do VLibras
     const script = document.createElement('script');
     script.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
     script.async = true;
@@ -38,14 +35,16 @@ export default function VLibras() {
     scriptRef.current = script;
 
     return () => {
-        if (scriptRef.current && document.body.contains(scriptRef.current)) {
-            document.body.removeChild(scriptRef.current);
-            scriptRef.current = null;
-        }
-        const widget = document.querySelector('[vw]');
-        if (widget) {
-            widget.remove();
-        }
+      // Remove o script quando o componente desmontar
+      if (scriptRef.current && document.body.contains(scriptRef.current)) {
+          document.body.removeChild(scriptRef.current);
+          scriptRef.current = null;
+      }
+      // Remove o widget para evitar duplicações
+      const vlibrasElement = document.querySelector('div[vw]');
+      if (vlibrasElement) {
+        vlibrasElement.remove();
+      }
     };
   }, []);
 
