@@ -200,7 +200,7 @@ export function WelcomeScreen({
                   </Popover>
                 </div>
                  <div className="space-y-2">
-                    <Label htmlFor="bloodType">Tipo Sanguíneo</Label>
+                    <Label htmlFor="bloodType">Tipo Sanguíneo (Opcional)</Label>
                     <Select onValueChange={setBloodType} value={bloodType}>
                         <SelectTrigger id="bloodType">
                             <SelectValue placeholder="Selecione" />
