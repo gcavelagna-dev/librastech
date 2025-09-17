@@ -59,6 +59,7 @@ const prompt = ai.definePrompt({
 {{#if isDeaf}}A mensagem DEVE começar com: "ATENÇÃO: Vítima surda.".{{/if}}
 A mensagem deve incluir o nome do usuário, a localização atual, o link do Google Maps e o tipo de emergência detalhado.
 A mensagem deve ser concisa e clara, em Português do Brasil. Use no máximo 300 caracteres.
+A mensagem DEVE terminar com "Comunicação via App LibrasTech.".
 
 Exemplo de dados:
 {{#if isDeaf}}- Alerta: Vítima surda.{{/if}}
@@ -72,6 +73,7 @@ Exemplo de dados:
 {{#if dateOfBirth}}- Data de Nascimento: {{dateOfBirth}}{{/if}}
 {{#if sendDocumentsConfirmed}}{{#if documentType}}- Documento: {{documentType}} - {{documentNumber}}{{/if}}{{/if}}
 {{#if city}}- Cidade: {{city}}{{/if}}
+- Comunicação via App LibrasTech.
 
 Baseado nos dados acima, gere a mensagem SOS.`,
 });
