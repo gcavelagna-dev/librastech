@@ -17,8 +17,8 @@ interface SubEmergencySelectionScreenProps {
 }
 
 const subEmergencyOptions: Record<string, string[]> = {
-  Fire: ["Incêndio em vegetação", "Incêndio em edificação", "Desabamento", "Resgate em altura", "Afogamento", "Vazamento de gás", "Outros"],
-  Medical: ["Acidente de trânsito", "Engasgo", "Infarto / Dor no peito", "Convulsão", "Queda", "Mal súbito", "Outros"],
+  Fire: ["Incêndio (Vegetação)", "Incêndio (Edificação)", "Acidente de trânsito com vítima presa", "Queda de altura", "Desabamento / Soterramento", "Afogamento", "Choque elétrico", "Outros"],
+  Medical: ["Engasgo", "Infarto / Dor no peito", "Convulsão", "Mal súbito", "Outros"],
   PublicSafety: ["Roubo / Furto", "Violência doméstica", "Agressão", "Sequestro", "Perturbação da ordem", "Atitude suspeita", "Outros"],
 };
 
