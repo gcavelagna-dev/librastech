@@ -96,13 +96,13 @@ export function SubEmergencySelectionScreen({
               <Button
                 key={option}
                 className={cn(
-                  "w-full h-auto py-3 text-base justify-between text-white transition-all duration-200",
+                  "w-full h-auto py-3 text-base justify-start items-center text-white transition-all duration-200",
                   baseColor, 
                   hoverClass 
                 )}
                 onClick={() => handleSubStepSelection(option)}
               >
-                <span className="text-left">{option}</span>
+                <span className="text-left flex-1 whitespace-normal break-words">{option}</span>
                 <ArrowRight className="w-5 h-5 text-white/80 ml-2" />
               </Button>
             ))}
@@ -195,14 +195,14 @@ export function SubEmergencySelectionScreen({
             <Button
               key={option}
               className={cn(
-                "w-full h-auto py-3 text-base justify-between text-white transition-all duration-200",
+                "w-full h-auto py-3 text-base justify-start items-center text-white transition-all duration-200",
                 baseColor, 
                 hoverClass 
               )}
               onClick={() => handleNext(option)}
             >
-              <span className="text-left">{option}</span>
-              <ArrowRight className="w-5 h-5 text-white/80 ml-2" />
+              <span className="text-left flex-1 whitespace-normal break-words">{option}</span>
+              <ArrowRight className="w-5 h-5 text-white/80 ml-2 shrink-0" />
             </Button>
           ))}
         </CardContent>
