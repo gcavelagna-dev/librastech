@@ -69,7 +69,7 @@ export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
   const [isSettingsDialogVisible, setIsSettingsDialogVisible] = useState(false);
   const [showPhoneNumberPrompt, setShowPhoneNumberPrompt] = useState(false);
-  const [isSubEmergencyStepTwo, setIsSubEmergencyStepTwo] = useState(false);
+  const [subEmergencyStep, setSubEmergencyStep] = useState<string>('main');
 
 
   const isMobile = useIsMobile();
@@ -236,6 +236,7 @@ export default function HomePage() {
   const handleSelectEmergency = (type: string, colorClass: string) => {
     setEmergencyType(type);
     setEmergencyColor(colorClass);
+    setSubEmergencyStep('main'); // Reset sub-emergency step on new emergency selection
     setCurrentStep('sub-emergency');
   };
 
@@ -298,8 +299,8 @@ export default function HomePage() {
     if (currentStep === 'sos') {
       setCurrentStep('sub-emergency');
     } else if (currentStep === 'sub-emergency') {
-        if (isSubEmergencyStepTwo) {
-            setIsSubEmergencyStepTwo(false);
+        if (subEmergencyStep !== 'main') {
+            setSubEmergencyStep('main');
         } else {
             setCurrentStep('emergency');
         }
@@ -377,8 +378,8 @@ export default function HomePage() {
             onSelectSubEmergency={handleSelectSubEmergency}
             colorClass={emergencyColor}
             hasBloodType={!!bloodType}
-            isStepTwo={isSubEmergencyStepTwo}
-            setIsStepTwo={setIsSubEmergencyStepTwo}
+            step={subEmergencyStep}
+            setStep={setSubEmergencyStep}
           />
         );
       case 'sos':

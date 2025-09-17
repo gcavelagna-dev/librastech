@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, User, Users, Droplets, ShieldBan } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 
 interface SubEmergencySelectionScreenProps {
@@ -14,18 +13,26 @@ interface SubEmergencySelectionScreenProps {
   onSelectSubEmergency: (subType: string, isVictim: boolean, isBleeding: boolean) => void;
   colorClass: string;
   hasBloodType: boolean;
-  isStepTwo: boolean;
-  setIsStepTwo: (isStepTwo: boolean) => void;
+  step: string;
+  setStep: (step: string) => void;
 }
 
 const subEmergencyOptions: Record<string, string[]> = {
-  Fire: ["Incêndio", "Acidente de trânsito com vítima presa", "Queda de altura", "Desabamento / Soterramento", "Afogamento", "Choque elétrico", "Outros"],
+  Fire: ["Incêndio", "Acidente", "Queda de altura", "Desabamento / Soterramento", "Afogamento", "Choque elétrico", "Outros"],
   Medical: ["Engasgo", "Infarto / Dor no peito", "Convulsão", "Mal súbito", "Outros"],
   PublicSafety: ["Roubo / Furto", "Violência doméstica", "Agressão", "Sequestro", "Perturbação da ordem", "Atitude suspeita", "Outros"],
 };
 
-const fireSubOptions = ["Incêndio (Vegetação)", "Incêndio (Edificação)"];
-
+const subSteps: Record<string, { title: string; options: string[] }> = {
+  incendio: {
+    title: "Qual tipo de Incêndio?",
+    options: ["Incêndio (Vegetação)", "Incêndio (Edificação)"],
+  },
+  acidente: {
+    title: "Qual tipo de Acidente?",
+    options: ["Acidente de Carro", "Acidente de Moto", "Acidente de Caminhão", "Óleo na pista", "Árvore na pista"],
+  },
+};
 
 const emergencyTypeMap: Record<string, string> = {
   Fire: "Bombeiros",
@@ -39,8 +46,8 @@ export function SubEmergencySelectionScreen({
     onSelectSubEmergency, 
     colorClass, 
     hasBloodType,
-    isStepTwo,
-    setIsStepTwo,
+    step,
+    setStep,
 }: SubEmergencySelectionScreenProps) {
   const options = subEmergencyOptions[emergencyType] || [];
   const displayEmergencyType = emergencyTypeMap[emergencyType] || emergencyType;
@@ -51,15 +58,17 @@ export function SubEmergencySelectionScreen({
 
   const handleNext = (subType: string) => {
     if (subType === 'Incêndio') {
-      setIsStepTwo(true);
+      setStep('incendio');
+    } else if (subType === 'Acidente') {
+      setStep('acidente');
     } else {
       setSelectedSubType(subType);
     }
   }
 
-  const handleFireSubTypeSelection = (fireSubType: string) => {
-      setSelectedSubType(fireSubType);
-      setIsStepTwo(false); // Go back to showing the victim/bleeding questions
+  const handleSubStepSelection = (subType: string) => {
+      setSelectedSubType(subType);
+      setStep('main'); 
   }
 
   const handleFinalSelection = () => {
@@ -68,22 +77,22 @@ export function SubEmergencySelectionScreen({
     }
   }
 
-  // Extrai a cor base da classe para usar no hover
   const baseColor = colorClass.split(' ')[0]; 
   const hoverClass = baseColor.replace('bg-', 'hover:bg-'); 
 
-  if (isStepTwo && emergencyType === 'Fire') {
+  if (step === 'incendio' || step === 'acidente') {
+     const currentSubStep = subSteps[step];
      return (
        <div className="flex flex-col items-center">
         <Card className="w-full max-w-md text-center">
           <CardHeader>
-            <CardTitle className="text-2xl font-headline">Qual tipo de Incêndio?</CardTitle>
+            <CardTitle className="text-2xl font-headline">{currentSubStep.title}</CardTitle>
             <CardDescription>
-              Selecione o tipo de incêndio para os <span className="font-semibold text-foreground">"{displayEmergencyType}"</span>.
+              Selecione uma opção para os <span className="font-semibold text-foreground">"{displayEmergencyType}"</span>.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-6 pt-0">
-            {fireSubOptions.map((option) => (
+            {currentSubStep.options.map((option) => (
               <Button
                 key={option}
                 className={cn(
@@ -91,7 +100,7 @@ export function SubEmergencySelectionScreen({
                   baseColor, 
                   hoverClass 
                 )}
-                onClick={() => handleFireSubTypeSelection(option)}
+                onClick={() => handleSubStepSelection(option)}
               >
                 <span className="text-left">{option}</span>
                 <ArrowRight className="w-5 h-5 text-white/80 ml-2" />
