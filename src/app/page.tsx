@@ -69,6 +69,8 @@ export default function HomePage() {
   const [isMounted, setIsMounted] = useState(false);
   const [isSettingsDialogVisible, setIsSettingsDialogVisible] = useState(false);
   const [showPhoneNumberPrompt, setShowPhoneNumberPrompt] = useState(false);
+  const [isSubEmergencyStepTwo, setIsSubEmergencyStepTwo] = useState(false);
+
 
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -296,7 +298,11 @@ export default function HomePage() {
     if (currentStep === 'sos') {
       setCurrentStep('sub-emergency');
     } else if (currentStep === 'sub-emergency') {
-      setCurrentStep('emergency');
+        if (isSubEmergencyStepTwo) {
+            setIsSubEmergencyStepTwo(false);
+        } else {
+            setCurrentStep('emergency');
+        }
     }
   };
   
@@ -371,6 +377,8 @@ export default function HomePage() {
             onSelectSubEmergency={handleSelectSubEmergency}
             colorClass={emergencyColor}
             hasBloodType={!!bloodType}
+            isStepTwo={isSubEmergencyStepTwo}
+            setIsStepTwo={setIsSubEmergencyStepTwo}
           />
         );
       case 'sos':

@@ -14,13 +14,18 @@ interface SubEmergencySelectionScreenProps {
   onSelectSubEmergency: (subType: string, isVictim: boolean, isBleeding: boolean) => void;
   colorClass: string;
   hasBloodType: boolean;
+  isStepTwo: boolean;
+  setIsStepTwo: (isStepTwo: boolean) => void;
 }
 
 const subEmergencyOptions: Record<string, string[]> = {
-  Fire: ["Incêndio (Vegetação)", "Incêndio (Edificação)", "Acidente de trânsito com vítima presa", "Queda de altura", "Desabamento / Soterramento", "Afogamento", "Choque elétrico", "Outros"],
+  Fire: ["Incêndio", "Acidente de trânsito com vítima presa", "Queda de altura", "Desabamento / Soterramento", "Afogamento", "Choque elétrico", "Outros"],
   Medical: ["Engasgo", "Infarto / Dor no peito", "Convulsão", "Mal súbito", "Outros"],
   PublicSafety: ["Roubo / Furto", "Violência doméstica", "Agressão", "Sequestro", "Perturbação da ordem", "Atitude suspeita", "Outros"],
 };
+
+const fireSubOptions = ["Incêndio (Vegetação)", "Incêndio (Edificação)"];
+
 
 const emergencyTypeMap: Record<string, string> = {
   Fire: "Bombeiros",
@@ -29,7 +34,14 @@ const emergencyTypeMap: Record<string, string> = {
 };
 
 
-export function SubEmergencySelectionScreen({ emergencyType, onSelectSubEmergency, colorClass, hasBloodType }: SubEmergencySelectionScreenProps) {
+export function SubEmergencySelectionScreen({ 
+    emergencyType, 
+    onSelectSubEmergency, 
+    colorClass, 
+    hasBloodType,
+    isStepTwo,
+    setIsStepTwo,
+}: SubEmergencySelectionScreenProps) {
   const options = subEmergencyOptions[emergencyType] || [];
   const displayEmergencyType = emergencyTypeMap[emergencyType] || emergencyType;
   
@@ -38,7 +50,16 @@ export function SubEmergencySelectionScreen({ emergencyType, onSelectSubEmergenc
   const [isBleeding, setIsBleeding] = useState<boolean | null>(null);
 
   const handleNext = (subType: string) => {
-    setSelectedSubType(subType);
+    if (subType === 'Incêndio') {
+      setIsStepTwo(true);
+    } else {
+      setSelectedSubType(subType);
+    }
+  }
+
+  const handleFireSubTypeSelection = (fireSubType: string) => {
+      setSelectedSubType(fireSubType);
+      setIsStepTwo(false); // Go back to showing the victim/bleeding questions
   }
 
   const handleFinalSelection = () => {
@@ -50,6 +71,37 @@ export function SubEmergencySelectionScreen({ emergencyType, onSelectSubEmergenc
   // Extrai a cor base da classe para usar no hover
   const baseColor = colorClass.split(' ')[0]; 
   const hoverClass = baseColor.replace('bg-', 'hover:bg-'); 
+
+  if (isStepTwo && emergencyType === 'Fire') {
+     return (
+       <div className="flex flex-col items-center">
+        <Card className="w-full max-w-md text-center">
+          <CardHeader>
+            <CardTitle className="text-2xl font-headline">Qual tipo de Incêndio?</CardTitle>
+            <CardDescription>
+              Selecione o tipo de incêndio para os <span className="font-semibold text-foreground">"{displayEmergencyType}"</span>.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-6 pt-0">
+            {fireSubOptions.map((option) => (
+              <Button
+                key={option}
+                className={cn(
+                  "w-full h-auto py-3 text-base justify-between text-white transition-all duration-200",
+                  baseColor, 
+                  hoverClass 
+                )}
+                onClick={() => handleFireSubTypeSelection(option)}
+              >
+                <span className="text-left">{option}</span>
+                <ArrowRight className="w-5 h-5 text-white/80 ml-2" />
+              </Button>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+     )
+  }
 
   if (selectedSubType) {
     return (
