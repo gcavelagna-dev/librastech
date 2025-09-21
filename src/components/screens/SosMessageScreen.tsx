@@ -165,7 +165,7 @@ export function SosMessageScreen({
                 <div>
                   <AlertTitle>Informação Crítica</AlertTitle>
                   <AlertDescription>
-                    Há sangramento no local. {bloodType ? `Tipo sanguíneo informado: ${bloodType}` : 'Tipo sanguíneo não informado.'}
+                    Há sangramento no local. {bloodType && isVictim ? `Tipo sanguíneo informado: ${bloodType}` : 'Tipo sanguíneo não informado ou a vítima é outra pessoa.'}
                   </AlertDescription>
                 </div>
               </Alert>
