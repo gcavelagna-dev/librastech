@@ -24,7 +24,7 @@ const emergencyTypes = [
     id: 'Medical', 
     name: 'SAMU', 
     Icon: null,
-    imageUrl: 'https://i.postimg.cc/Xv9m6hJj/samu-icon.png',
+    imageUrl: 'https://i.postimg.cc/YCyHdSyF/Whats-App-Image-2025-06-30-at-10-54-29-AM-1-removebg-preview-1.png',
     tooltipText: "Para emergências médicas, acidentes e mal súbito.",
     colorClass: "bg-[#E53935] hover:bg-[#E53935]/90 text-white"
   },
