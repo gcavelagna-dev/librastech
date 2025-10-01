@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
 import { Smartphone, UserCog, CheckCircle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 type TrustedContact = { name: string; phone: string };
 
@@ -131,66 +132,68 @@ export function SettingsDialog({
             Gerencie seu número de telefone e contatos de confiança.
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-6 py-4">
-            
-          <div className="space-y-4">
-            <h3 className="font-semibold flex items-center"><UserCog className="w-5 h-5 mr-2" /> Meu Perfil</h3>
-            <p className="text-sm text-muted-foreground">
-                Para alterar seu nome, data de nascimento ou outras informações pessoais, clique abaixo.
-            </p>
-            <Button onClick={onEditProfile} variant="outline" className="w-full">
-                Editar Minhas Informações
-            </Button>
-          </div>
-            
-          <Separator />
-            
-          <div className="space-y-4">
-             <h3 className="font-semibold flex items-center"><Smartphone className="w-5 h-5 mr-2" /> Meu Telefone</h3>
-            <div className="space-y-2">
-              <Label htmlFor="phoneNumber">Seu Telefone (com DDD)</Label>
-              <Input
-                id="phoneNumber"
-                type="tel"
-                placeholder="(XX) XXXXX-XXXX"
-                value={phoneNumber}
-                onChange={handlePhoneNumberChange}
-              />
-            </div>
-          </div>
-          
-          <Separator />
-
-          <div className="space-y-4">
-            <h3 className="font-semibold">Contatos de Confiança</h3>
-            {contacts.map((contact, index) => (
-              <div key={index} className="space-y-3 p-3 border rounded-md">
-                <p className="text-sm font-medium text-muted-foreground">Contato {index + 1}</p>
+        <ScrollArea className="max-h-[60vh] pr-6">
+            <div className="space-y-6 py-4">
+                
+              <div className="space-y-4">
+                <h3 className="font-semibold flex items-center"><UserCog className="w-5 h-5 mr-2" /> Meu Perfil</h3>
+                <p className="text-sm text-muted-foreground">
+                    Para alterar seu nome, data de nascimento ou outras informações pessoais, clique abaixo.
+                </p>
+                <Button onClick={onEditProfile} variant="outline" className="w-full">
+                    Editar Minhas Informações
+                </Button>
+              </div>
+                
+              <Separator />
+                
+              <div className="space-y-4">
+                 <h3 className="font-semibold flex items-center"><Smartphone className="w-5 h-5 mr-2" /> Meu Telefone</h3>
                 <div className="space-y-2">
-                  <Label htmlFor={`trustedName-${index}`}>Nome do Contato</Label>
+                  <Label htmlFor="phoneNumber">Seu Telefone (com DDD)</Label>
                   <Input
-                    id={`trustedName-${index}`}
-                    type="text"
-                    placeholder="Nome completo"
-                    value={contact.name}
-                    onChange={(e) => handleContactChange(index, 'name', e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor={`trustedPhone-${index}`}>Telefone (com DDD)</Label>
-                  <Input
-                    id={`trustedPhone-${index}`}
+                    id="phoneNumber"
                     type="tel"
                     placeholder="(XX) XXXXX-XXXX"
-                    value={contact.phone}
-                    onChange={(e) => handleTrustedPhoneInputChange(index, e)}
+                    value={phoneNumber}
+                    onChange={handlePhoneNumberChange}
                   />
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-        <DialogFooter className="sm:justify-between">
+              
+              <Separator />
+
+              <div className="space-y-4">
+                <h3 className="font-semibold">Contatos de Confiança</h3>
+                {contacts.map((contact, index) => (
+                  <div key={index} className="space-y-3 p-3 border rounded-md">
+                    <p className="text-sm font-medium text-muted-foreground">Contato {index + 1}</p>
+                    <div className="space-y-2">
+                      <Label htmlFor={`trustedName-${index}`}>Nome do Contato</Label>
+                      <Input
+                        id={`trustedName-${index}`}
+                        type="text"
+                        placeholder="Nome completo"
+                        value={contact.name}
+                        onChange={(e) => handleContactChange(index, 'name', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor={`trustedPhone-${index}`}>Telefone (com DDD)</Label>
+                      <Input
+                        id={`trustedPhone-${index}`}
+                        type="tel"
+                        placeholder="(XX) XXXXX-XXXX"
+                        value={contact.phone}
+                        onChange={(e) => handleTrustedPhoneInputChange(index, e)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+        </ScrollArea>
+        <DialogFooter className="sm:justify-between pt-4">
           <DialogClose asChild>
             <Button type="button" variant="ghost">
               Cancelar
