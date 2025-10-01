@@ -369,8 +369,8 @@ export default function HomePage() {
   };
   
   const handleSendToTrustedContact = (phone: string, message: string) => {
-    const targetPhoneNumber = "554399054151";
-    const whatsappUrl = `https://wa.me/${targetPhoneNumber}?text=${encodeURIComponent(message)}`;
+    const cleanPhone = phone.replace(/\D/g, '');
+    const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
