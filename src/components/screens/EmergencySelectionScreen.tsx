@@ -17,7 +17,7 @@ const emergencyTypes = [
     id: 'Fire', 
     name: 'Bombeiros', 
     Icon: null,
-    imageUrl: 'https://i.postimg.cc/Pq80553t/Chat-GPT-Image-8-de-set-de-2025-16-33-20.png',
+    imageUrl: 'https://i.postimg.cc/nh1NsWpr/download.png',
     tooltipText: "Para incêndios, desabamentos, resgates e afogamentos.",
     colorClass: "bg-[#FF4500] hover:bg-[#FF4500]/90 text-white"
   },
@@ -85,5 +85,3 @@ export function EmergencySelectionScreen({ onSelectEmergency }: EmergencySelecti
     </div>
   );
 }
-
-    
