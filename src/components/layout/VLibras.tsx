@@ -1,30 +1,31 @@
 
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 export default function VLibras() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const scriptRef = useRef<HTMLScriptElement | null>(null);
-
   useEffect(() => {
-    // Injeta o HTML do widget no container
-    if (containerRef.current) {
-      containerRef.current.innerHTML = `
-        <div vw class="enabled">
-          <div vw-access-button class="active"></div>
-          <div vw-plugin-wrapper>
-            <div class="vw-plugin-top-wrapper"></div>
-          </div>
+    // 1. Cria o contêiner do widget se não existir
+    let vwContainer = document.querySelector('div[vw]');
+    if (!vwContainer) {
+      vwContainer = document.createElement('div');
+      vwContainer.setAttribute('vw', '');
+      vwContainer.classList.add('enabled');
+      vwContainer.innerHTML = `
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper>
+          <div class="vw-plugin-top-wrapper"></div>
         </div>
       `;
+      document.body.appendChild(vwContainer);
     }
 
-    // Cria e adiciona o script do VLibras
+    // 2. Adiciona o script do VLibras
     const script = document.createElement('script');
     script.src = 'https://vlibras.gov.br/app/vlibras-plugin.js';
     script.async = true;
     script.onload = () => {
+      // 3. Inicializa o widget
       // @ts-ignore
       if (window.VLibras) {
         // @ts-ignore
@@ -32,21 +33,19 @@ export default function VLibras() {
       }
     };
     document.body.appendChild(script);
-    scriptRef.current = script;
 
+    // 4. Função de limpeza para remover script e widget ao desmontar
     return () => {
-      // Remove o script quando o componente desmontar
-      if (scriptRef.current && document.body.contains(scriptRef.current)) {
-          document.body.removeChild(scriptRef.current);
-          scriptRef.current = null;
+      const existingScript = document.querySelector('script[src="https://vlibras.gov.br/app/vlibras-plugin.js"]');
+      if (existingScript) {
+        document.body.removeChild(existingScript);
       }
-      // Remove o widget para evitar duplicações
-      const vlibrasElement = document.querySelector('div[vw]');
-      if (vlibrasElement) {
-        vlibrasElement.remove();
+      const widgetElement = document.querySelector('div[vw]');
+      if (widgetElement) {
+        document.body.removeChild(widgetElement);
       }
     };
   }, []);
 
-  return <div ref={containerRef} />;
+  return null; // O componente não renderiza nada diretamente
 }
