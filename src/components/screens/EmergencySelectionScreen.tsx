@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Ambulance } from 'lucide-react';
 
 interface EmergencySelectionScreenProps {
   onSelectEmergency: (type: string, colorClass: string) => void;
@@ -24,8 +23,8 @@ const emergencyTypes = [
   { 
     id: 'Medical', 
     name: 'SAMU', 
-    Icon: Ambulance,
-    imageUrl: null,
+    Icon: null,
+    imageUrl: 'https://i.postimg.cc/W1ynWRmT/Whats-App-Image-2025-06-30-at-10-54-29-AM-1.jpg',
     tooltipText: "Para emergências médicas, acidentes e mal súbito.",
     colorClass: "bg-[#E53935] hover:bg-[#E53935]/90 text-white"
   },
