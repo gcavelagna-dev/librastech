@@ -464,7 +464,7 @@ export default function HomePage() {
                   <AlertDialogTitle>Adicionar seu telefone?</AlertDialogTitle>
                   <AlertDialogDescription>
                       Vimos que você não tem um número de telefone salvo. Adicioná-lo agora pode agilizar o envio de mensagens de emergência. Você pode fazer isso mais tarde nas configurações.
-                  </d-alert-dialog-description>
+                  </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                   <AlertDialogCancel>Agora não</AlertDialogCancel>
@@ -480,3 +480,5 @@ export default function HomePage() {
     </>
   );
 }
+
+    
