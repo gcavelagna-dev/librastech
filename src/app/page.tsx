@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { HelpCircle } from 'lucide-react';
+import { UserProfile } from '@/lib/types';
 
 type AppStep = 'welcome' | 'emergency' | 'sub-emergency' | 'sos';
 type TrustedContact = { name: string; phone: string };
@@ -176,43 +177,62 @@ export default function HomePage() {
     newSendDocuments?: boolean,
     newIsDeaf?: boolean
   ) => {
-    localStorage.setItem(LOCAL_STORAGE_USER_NAME_KEY, newName);
-    setUserName(newName);
+    handleSaveProfile({
+      name: newName,
+      gender: newGender,
+      documentType: newDocType,
+      documentNumber: newDocNumber,
+      city: newCity,
+      dateOfBirth: newDob,
+      bloodType: newBloodType,
+      sendDocuments: newSendDocuments,
+      isDeaf: newIsDeaf
+    });
+    setCurrentStep('emergency');
+  };
 
-    if (newGender) {
-        localStorage.setItem(LOCAL_STORAGE_GENDER_KEY, newGender);
-        setGender(newGender);
+  const handleSaveProfile = (profile: UserProfile) => {
+    if (profile.name) {
+        localStorage.setItem(LOCAL_STORAGE_USER_NAME_KEY, profile.name);
+        setUserName(profile.name);
+    }
+
+    if (profile.gender) {
+        localStorage.setItem(LOCAL_STORAGE_GENDER_KEY, profile.gender);
+        setGender(profile.gender);
     } else {
         localStorage.removeItem(LOCAL_STORAGE_GENDER_KEY);
         setGender(undefined);
     }
     
-    if (newDocType) {
-        localStorage.setItem(LOCAL_STORAGE_DOCUMENT_TYPE_KEY, newDocType);
-        setDocumentType(newDocType);
+    if (profile.documentType) {
+        localStorage.setItem(LOCAL_STORAGE_DOCUMENT_TYPE_KEY, profile.documentType);
+        setDocumentType(profile.documentType);
     } else {
         localStorage.removeItem(LOCAL_STORAGE_DOCUMENT_TYPE_KEY);
         setDocumentType(undefined);
     }
 
-    if (newDocNumber) {
-        localStorage.setItem(LOCAL_STORAGE_DOCUMENT_NUMBER_KEY, newDocNumber);
-        setDocumentNumber(newDocNumber);
+    if (profile.documentNumber) {
+        localStorage.setItem(LOCAL_STORAGE_DOCUMENT_NUMBER_KEY, profile.documentNumber);
+        setDocumentNumber(profile.documentNumber);
     } else {
         localStorage.removeItem(LOCAL_STORAGE_DOCUMENT_NUMBER_KEY);
         setDocumentNumber('');
     }
     
-    if (newCity) {
-        localStorage.setItem(LOCAL_STORAGE_CITY_KEY, newCity);
-        setCity(newCity);
+    if (profile.city) {
+        localStorage.setItem(LOCAL_STORAGE_CITY_KEY, profile.city);
+        setCity(profile.city);
     } else {
         localStorage.removeItem(LOCAL_STORAGE_CITY_KEY);
         setCity('');
     }
 
-    if (newDob) {
-        const formattedDob = newDob.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    if (profile.dateOfBirth) {
+        const formattedDob = profile.dateOfBirth instanceof Date 
+            ? profile.dateOfBirth.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+            : profile.dateOfBirth;
         localStorage.setItem(LOCAL_STORAGE_DATE_OF_BIRTH_KEY, formattedDob);
         setDateOfBirth(formattedDob);
     } else {
@@ -220,22 +240,22 @@ export default function HomePage() {
         setDateOfBirth('');
     }
 
-    if (newBloodType) {
-        localStorage.setItem(LOCAL_STORAGE_BLOOD_TYPE_KEY, newBloodType);
-        setBloodType(newBloodType);
+    if (profile.bloodType) {
+        localStorage.setItem(LOCAL_STORAGE_BLOOD_TYPE_KEY, profile.bloodType);
+        setBloodType(profile.bloodType);
     } else {
         localStorage.removeItem(LOCAL_STORAGE_BLOOD_TYPE_KEY);
         setBloodType(undefined);
     }
 
-    localStorage.setItem(LOCAL_STORAGE_SEND_DOCUMENTS_KEY, JSON.stringify(newSendDocuments ?? true));
-    setSendDocumentsConfirmed(newSendDocuments ?? true);
+    localStorage.setItem(LOCAL_STORAGE_SEND_DOCUMENTS_KEY, JSON.stringify(profile.sendDocuments ?? true));
+    setSendDocumentsConfirmed(profile.sendDocuments ?? true);
     
-    localStorage.setItem(LOCAL_STORAGE_IS_DEAF_KEY, JSON.stringify(newIsDeaf ?? false));
-    setIsDeaf(newIsDeaf ?? false);
+    localStorage.setItem(LOCAL_STORAGE_IS_DEAF_KEY, JSON.stringify(profile.isDeaf ?? false));
+    setIsDeaf(profile.isDeaf ?? false);
 
-    setCurrentStep('emergency');
-  };
+    toast({ title: "Sucesso!", description: "Seu perfil foi atualizado." });
+  }
 
   const handleSelectEmergency = (type: string, colorClass: string) => {
     setEmergencyType(type);
@@ -348,11 +368,6 @@ export default function HomePage() {
     const whatsappUrl = `https://wa.me/${targetPhoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
-  
-  const handleEditProfile = () => {
-    setIsSettingsDialogVisible(false);
-    setCurrentStep('welcome');
-  };
 
   const renderStep = () => {
     if (!isMounted) return null;
@@ -421,6 +436,19 @@ export default function HomePage() {
       setShowPhoneNumberPrompt(false);
   }
 
+  const userProfile: UserProfile = {
+    name: userName,
+    gender,
+    dateOfBirth,
+    documentType,
+    documentNumber,
+    city,
+    bloodType,
+    sendDocuments: sendDocumentsConfirmed,
+    isDeaf,
+  };
+
+
   return (
     <>
       <AppLayout
@@ -450,7 +478,8 @@ export default function HomePage() {
         currentPhoneNumber={userPhoneNumber}
         currentTrustedContacts={trustedContacts}
         onSaveTrustedContacts={handleSaveTrustedContacts}
-        onEditProfile={handleEditProfile}
+        onSaveProfile={handleSaveProfile}
+        currentUserProfile={userProfile}
       />
       
       <TutorialDialog 
