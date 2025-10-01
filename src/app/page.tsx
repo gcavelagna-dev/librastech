@@ -352,6 +352,11 @@ export default function HomePage() {
       description: "Sua lista de contatos de confiança foi atualizada.",
     });
   };
+  
+  const handleEditProfile = () => {
+    setCurrentStep('welcome');
+    setIsSettingsDialogVisible(false);
+  }
 
   const handleSendToEmergency = (message: string) => {
     const targetPhoneNumber = "554399054151";
@@ -436,19 +441,6 @@ export default function HomePage() {
       setShowPhoneNumberPrompt(false);
   }
 
-  const userProfile: UserProfile = {
-    name: userName,
-    gender,
-    dateOfBirth,
-    documentType,
-    documentNumber,
-    city,
-    bloodType,
-    sendDocuments: sendDocumentsConfirmed,
-    isDeaf,
-  };
-
-
   return (
     <>
       <AppLayout
@@ -478,8 +470,7 @@ export default function HomePage() {
         currentPhoneNumber={userPhoneNumber}
         currentTrustedContacts={trustedContacts}
         onSaveTrustedContacts={handleSaveTrustedContacts}
-        onSaveProfile={handleSaveProfile}
-        currentUserProfile={userProfile}
+        onEditProfile={handleEditProfile}
       />
       
       <TutorialDialog 
@@ -509,5 +500,3 @@ export default function HomePage() {
     </>
   );
 }
-
-    
