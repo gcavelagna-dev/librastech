@@ -8,6 +8,7 @@ import { EmergencySelectionScreen } from '@/components/screens/EmergencySelectio
 import { SubEmergencySelectionScreen } from '@/components/screens/SubEmergencySelectionScreen';
 import { SosMessageScreen } from '@/components/screens/SosMessageScreen';
 import { SettingsDialog } from '@/components/dialogs/SettingsDialog';
+import { TutorialDialog } from '@/components/dialogs/TutorialDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +23,8 @@ import { generateSosMessage, type GenerateSosMessageInput } from '@/ai/flows/gen
 import { reverseGeocode } from '@/ai/flows/reverse-geocode-flow';
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Button } from '@/components/ui/button';
+import { HelpCircle } from 'lucide-react';
 
 type AppStep = 'welcome' | 'emergency' | 'sub-emergency' | 'sos';
 type TrustedContact = { name: string; phone: string };
@@ -70,6 +73,7 @@ export default function HomePage() {
   const [isSettingsDialogVisible, setIsSettingsDialogVisible] = useState(false);
   const [showPhoneNumberPrompt, setShowPhoneNumberPrompt] = useState(false);
   const [subEmergencyStep, setSubEmergencyStep] = useState<string>('main');
+  const [isTutorialDialogVisible, setIsTutorialDialogVisible] = useState(false);
 
 
   const isMobile = useIsMobile();
@@ -427,6 +431,18 @@ export default function HomePage() {
       >
         {renderStep()}
       </AppLayout>
+
+      <div className="fixed bottom-20 right-4 z-20">
+        <Button 
+          onClick={() => setIsTutorialDialogVisible(true)}
+          variant="secondary"
+          className="rounded-full shadow-lg h-auto px-4 py-2"
+        >
+          <HelpCircle className="w-5 h-5 mr-2" />
+          Tutorial do App
+        </Button>
+      </div>
+
       <SettingsDialog 
         isOpen={isSettingsDialogVisible}
         onClose={() => setIsSettingsDialogVisible(false)}
@@ -437,13 +453,18 @@ export default function HomePage() {
         onEditProfile={handleEditProfile}
       />
       
+      <TutorialDialog 
+        isOpen={isTutorialDialogVisible}
+        onClose={() => setIsTutorialDialogVisible(false)}
+      />
+      
       <AlertDialog open={showPhoneNumberPrompt} onOpenChange={setShowPhoneNumberPrompt}>
           <AlertDialogContent>
               <AlertDialogHeader>
                   <AlertDialogTitle>Adicionar seu telefone?</AlertDialogTitle>
                   <AlertDialogDescription>
                       Vimos que você não tem um número de telefone salvo. Adicioná-lo agora pode agilizar o envio de mensagens de emergência. Você pode fazer isso mais tarde nas configurações.
-                  </AlertDialogDescription>
+                  </d-alert-dialog-description>
               </AlertDialogHeader>
               <AlertDialogFooter>
                   <AlertDialogCancel>Agora não</AlertDialogCancel>
