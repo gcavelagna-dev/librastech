@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Flame, Ambulance, Shield } from 'lucide-react';
+import { Ambulance, Shield } from 'lucide-react';
 
 interface EmergencySelectionScreenProps {
   onSelectEmergency: (type: string, colorClass: string) => void;
@@ -16,7 +16,8 @@ const emergencyTypes = [
   { 
     id: 'Fire', 
     name: 'Bombeiros', 
-    Icon: Flame,
+    Icon: null,
+    imageUrl: 'https://i.postimg.cc/Pq80553t/Chat-GPT-Image-8-de-set-de-2025-16-33-20.png',
     tooltipText: "Para incêndios, desabamentos, resgates e afogamentos.",
     colorClass: "bg-[#FF4500] hover:bg-[#FF4500]/90 text-white"
   },
@@ -24,6 +25,7 @@ const emergencyTypes = [
     id: 'Medical', 
     name: 'SAMU', 
     Icon: Ambulance,
+    imageUrl: null,
     tooltipText: "Para emergências médicas, acidentes e mal súbito.",
     colorClass: "bg-[#E53935] hover:bg-[#E53935]/90 text-white"
   },
@@ -31,6 +33,7 @@ const emergencyTypes = [
     id: 'PublicSafety', 
     name: 'Polícia Militar', 
     Icon: Shield,
+    imageUrl: null,
     tooltipText: "Para crimes, violência, assaltos e perturbação da ordem.",
     colorClass: "bg-[#003366] hover:bg-[#003366]/90 text-white"
   },
@@ -60,11 +63,11 @@ export function EmergencySelectionScreen({ onSelectEmergency }: EmergencySelecti
                     ) : (
                       <div className="w-20 h-20 mb-2 relative">
                         <Image
-                            src={''}
+                            src={emergency.imageUrl!}
                             alt={`${emergency.name} icon`}
                             fill
                             style={{ objectFit: 'contain' }}
-                            data-ai-hint="police shield"
+                            data-ai-hint="firefighter logo"
                         />
                       </div>
                     )}
