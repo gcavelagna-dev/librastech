@@ -32,7 +32,7 @@ const emergencyTypes = [
     id: 'PublicSafety', 
     name: 'Polícia Militar', 
     Icon: null,
-    imageUrl: 'https://i.postimg.cc/632FjLGs/Whats-App-Image-2025-06-30-at-10-54-29-AM.jpg',
+    imageUrl: 'https://i.postimg.cc/fyXcrkKL/Whats-App-Image-2025-06-30-at-10-54-29-AM-removebg-preview.png',
     tooltipText: "Para crimes, violência, assaltos e perturbação da ordem.",
     colorClass: "bg-[#003366] hover:bg-[#003366]/90 text-white"
   },
