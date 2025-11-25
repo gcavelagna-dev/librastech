@@ -469,7 +469,7 @@ export default function HomePage() {
       <div className="fixed bottom-20 right-4 z-20">
         <Button 
           onClick={() => setIsTutorialDialogVisible(true)}
-          variant="secondary"
+          variant="default"
           className="rounded-full shadow-lg h-auto px-4 py-2"
         >
           <HelpCircle className="w-5 h-5 mr-2" />
