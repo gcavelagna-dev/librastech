@@ -9,6 +9,7 @@ import { SubEmergencySelectionScreen } from '@/components/screens/SubEmergencySe
 import { SosMessageScreen } from '@/components/screens/SosMessageScreen';
 import { SettingsDialog } from '@/components/dialogs/SettingsDialog';
 import { TutorialDialog } from '@/components/dialogs/TutorialDialog';
+import { SplashScreen } from '@/components/screens/SplashScreen';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -75,10 +76,19 @@ export default function HomePage() {
   const [showPhoneNumberPrompt, setShowPhoneNumberPrompt] = useState(false);
   const [subEmergencyStep, setSubEmergencyStep] = useState<string>('main');
   const [isTutorialDialogVisible, setIsTutorialDialogVisible] = useState(false);
+  const [showSplashScreen, setShowSplashScreen] = useState(true);
 
 
   const isMobile = useIsMobile();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const splashTimer = setTimeout(() => {
+      setShowSplashScreen(false);
+    }, 3000); // 3 seconds
+
+    return () => clearTimeout(splashTimer);
+  }, []);
 
   useEffect(() => {
     setIsMounted(true);
@@ -439,6 +449,10 @@ export default function HomePage() {
   const handlePhoneNumberSave = (number: string) => {
       handleSavePhoneNumber(number);
       setShowPhoneNumberPrompt(false);
+  }
+
+  if (showSplashScreen) {
+    return <SplashScreen />;
   }
 
   return (
