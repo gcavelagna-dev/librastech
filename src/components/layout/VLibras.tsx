@@ -74,7 +74,7 @@ export default function VLibras() {
           }
         };
         script.onerror = () => {
-            console.error("Falha ao carregar o script do VLibras.");
+            console.warn("Falha ao carregar o script do VLibras.");
             cleanupVLibras(); // Limpa se o script não carregar
         }
         document.body.appendChild(script);
