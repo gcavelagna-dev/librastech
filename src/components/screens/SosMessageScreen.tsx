@@ -17,6 +17,7 @@ interface SosMessageScreenProps {
   gender?: string;
   documentType?: string;
   documentNumber?: string;
+  susCardNumber?: string;
   city?: string;
   dateOfBirth?: string;
   bloodType?: string;
@@ -46,6 +47,7 @@ export function SosMessageScreen({
   gender,
   documentType,
   documentNumber,
+  susCardNumber,
   city,
   dateOfBirth,
   bloodType,
@@ -170,6 +172,13 @@ export function SosMessageScreen({
                 </div>
               </Alert>
             )}
+            <div className="space-y-2">
+              {susCardNumber && (
+                <div className="space-y-1">
+                  <h3 className="font-semibold flex items-center text-muted-foreground"><HeartPulse className="w-4 h-4 mr-1.5"/>Cartão do SUS:</h3>
+                  <p className="text-foreground">{susCardNumber}</p>
+                </div>
+              )}
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {documentType && documentNumber && sendDocumentsConfirmed && (
                 <div className="space-y-1">
@@ -183,6 +192,7 @@ export function SosMessageScreen({
                   <p className="text-foreground">{city}</p>
                 </div>
               )}
+             </div>
             </div>
 
             <div className="space-y-1">
@@ -267,3 +277,5 @@ export function SosMessageScreen({
     </div>
   );
 }
+
+    

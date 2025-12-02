@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Lock, Droplet, ShieldCheck, Ear } from 'lucide-react';
+import { CalendarIcon, Lock, Droplet, ShieldCheck, Ear, UserPlus } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ptBR } from 'date-fns/locale';
@@ -23,6 +23,7 @@ interface WelcomeScreenProps {
     gender?: string,
     documentType?: string,
     documentNumber?: string,
+    susCardNumber?: string,
     city?: string,
     dateOfBirth?: Date,
     bloodType?: string,
@@ -33,6 +34,7 @@ interface WelcomeScreenProps {
   initialGender?: string;
   initialDocumentType?: string;
   initialDocumentNumber?: string;
+  initialSusCardNumber?: string;
   initialCity?: string;
   initialDateOfBirth?: string;
   initialBloodType?: string;
@@ -48,6 +50,7 @@ export function WelcomeScreen({
   initialGender,
   initialDocumentType,
   initialDocumentNumber = '',
+  initialSusCardNumber = '',
   initialCity = '',
   initialDateOfBirth,
   initialBloodType,
@@ -58,6 +61,7 @@ export function WelcomeScreen({
   const [gender, setGender] = useState<string | undefined>(initialGender);
   const [documentType, setDocumentType] = useState<string | undefined>(initialDocumentType);
   const [documentNumber, setDocumentNumber] = useState(initialDocumentNumber);
+  const [susCardNumber, setSusCardNumber] = useState(initialSusCardNumber);
   const [city, setCity] = useState(initialCity);
   const [dateOfBirth, setDateOfBirth] = useState<Date | undefined>();
   const [bloodType, setBloodType] = useState<string | undefined>(initialBloodType);
@@ -71,6 +75,7 @@ export function WelcomeScreen({
     if (initialGender) setGender(initialGender);
     if (initialDocumentType) setDocumentType(initialDocumentType);
     if (initialDocumentNumber) setDocumentNumber(initialDocumentNumber);
+    if (initialSusCardNumber) setSusCardNumber(initialSusCardNumber);
     if (initialCity) setCity(initialCity);
     if (initialDateOfBirth) {
         const [day, month, year] = initialDateOfBirth.split('/');
@@ -81,7 +86,7 @@ export function WelcomeScreen({
     if (initialBloodType) setBloodType(initialBloodType);
     setSendDocuments(initialSendDocuments);
     setIsDeaf(initialIsDeaf);
-  }, [initialName, initialGender, initialDocumentType, initialDocumentNumber, initialCity, initialDateOfBirth, initialBloodType, initialSendDocuments, initialIsDeaf]);
+  }, [initialName, initialGender, initialDocumentType, initialDocumentNumber, initialSusCardNumber, initialCity, initialDateOfBirth, initialBloodType, initialSendDocuments, initialIsDeaf]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,6 +95,7 @@ export function WelcomeScreen({
       gender,
       documentType,
       documentNumber.trim(),
+      susCardNumber.trim(),
       city.trim(),
       dateOfBirth,
       bloodType,
@@ -148,31 +154,6 @@ export function WelcomeScreen({
                   </div>
                 </RadioGroup>
               </div>
-              <div className="space-y-2">
-                <Label>Tipo de Documento</Label>
-                 <RadioGroup
-                  onValueChange={setDocumentType}
-                  value={documentType}
-                  className="flex flex-wrap gap-x-4 gap-y-2 pt-2"
-                  aria-label="Tipo de Documento"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Cartão do SUS" id="sus" />
-                    <Label htmlFor="sus">Cartão do SUS</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="RG" id="rg" />
-                    <Label htmlFor="rg">RG</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="CPF" id="cpf" />
-                    <Label htmlFor="cpf">CPF</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Data de Nascimento</Label>
                   <Popover>
@@ -203,6 +184,55 @@ export function WelcomeScreen({
                     </PopoverContent>
                   </Popover>
                 </div>
+            </div>
+            
+            <Separator />
+
+            <div className="space-y-2">
+                 <Label htmlFor="susCardNumber">Cartão do SUS (Opcional)</Label>
+                 <Input
+                   id="susCardNumber"
+                   type="text"
+                   placeholder="Número do Cartão Nacional de Saúde"
+                   value={susCardNumber}
+                   onChange={(e) => setSusCardNumber(e.target.value)}
+                   aria-describedby="sus-helper-text"
+                 />
+                 <p id="sus-helper-text" className="text-xs text-muted-foreground px-1">
+                   Informação prioritária para emergências médicas.
+                 </p>
+            </div>
+            
+            <div className="p-4 border rounded-md space-y-4">
+                 <div className="space-y-2">
+                    <Label>Documento de Identificação (Opcional)</Label>
+                     <Select onValueChange={setDocumentType} value={documentType}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo de documento" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="RG">RG (Registro Geral)</SelectItem>
+                            <SelectItem value="CPF">CPF (Cadastro de Pessoas Físicas)</SelectItem>
+                            <SelectItem value="CIN">Documento Unificado (CIN)</SelectItem>
+                        </SelectContent>
+                    </Select>
+                 </div>
+                 {documentType && (
+                     <div className="space-y-2">
+                         <Label htmlFor="documentNumber">Número do Documento</Label>
+                         <Input
+                           id="documentNumber"
+                           type="text"
+                           placeholder={`Digite o número do seu ${documentType}`}
+                           value={documentNumber}
+                           onChange={(e) => setDocumentNumber(e.target.value)}
+                           disabled={!documentType}
+                         />
+                    </div>
+                 )}
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                  <div className="space-y-2">
                     <Label htmlFor="bloodType">Tipo Sanguíneo (Opcional)</Label>
                     <Select onValueChange={setBloodType} value={bloodType}>
@@ -216,39 +246,16 @@ export function WelcomeScreen({
                         </SelectContent>
                     </Select>
                 </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="documentNumber">Número do Documento (Opcional)</Label>
-                <Input
-                  id="documentNumber"
-                  type="text"
-                  placeholder="Apenas números"
-                  value={documentNumber}
-                  onChange={(e) => setDocumentNumber(e.target.value)}
-                  disabled={!documentType}
-                  aria-describedby="document-helper-text"
-                />
-                 <p id="document-helper-text" className="text-xs text-muted-foreground px-1">
-                  Ajuda na identificação oficial.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="city">Cidade (Opcional)</Label>
-                <Input
-                  id="city"
-                  type="text"
-                  placeholder="Sua cidade"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  aria-describedby="city-helper-text"
-                />
-                <p id="city-helper-text" className="text-xs text-muted-foreground px-1">
-                   Útil para os serviços de emergência.
-                </p>
-              </div>
+                <div className="space-y-2">
+                    <Label htmlFor="city">Cidade (Opcional)</Label>
+                    <Input
+                      id="city"
+                      type="text"
+                      placeholder="Sua cidade"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                    />
+                </div>
             </div>
             
             <Separator />
@@ -310,3 +317,5 @@ export function WelcomeScreen({
     </div>
   );
 }
+
+    

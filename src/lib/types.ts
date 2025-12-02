@@ -5,8 +5,11 @@ export type UserProfile = {
   dateOfBirth?: Date | string;
   documentType?: string;
   documentNumber?: string;
+  susCardNumber?: string;
   city?: string;
   bloodType?: string;
   sendDocuments?: boolean;
   isDeaf?: boolean;
 };
+
+    

@@ -37,6 +37,7 @@ const LOCAL_STORAGE_DATE_OF_BIRTH_KEY = 'LibrasTech_DateOfBirth';
 const LOCAL_STORAGE_PHONE_NUMBER_KEY = 'LibrasTech_PhoneNumber';
 const LOCAL_STORAGE_DOCUMENT_TYPE_KEY = 'LibrasTech_DocumentType';
 const LOCAL_STORAGE_DOCUMENT_NUMBER_KEY = 'LibrasTech_DocumentNumber';
+const LOCAL_STORAGE_SUS_CARD_NUMBER_KEY = 'LibrasTech_SusCardNumber';
 const LOCAL_STORAGE_CITY_KEY = 'LibrasTech_City';
 const LOCAL_STORAGE_TRUSTED_CONTACTS_KEY = 'LibrasTech_TrustedContacts';
 const LOCAL_STORAGE_BLOOD_TYPE_KEY = 'LibrasTech_BloodType';
@@ -56,6 +57,7 @@ export default function HomePage() {
   const [userPhoneNumber, setUserPhoneNumber] = useState<string>('');
   const [documentType, setDocumentType] = useState<string | undefined>(undefined);
   const [documentNumber, setDocumentNumber] = useState<string>('');
+  const [susCardNumber, setSusCardNumber] = useState<string>('');
   const [city, setCity] = useState<string>('');
   const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>([]);
   const [bloodType, setBloodType] = useState<string | undefined>(undefined);
@@ -115,6 +117,9 @@ export default function HomePage() {
 
     const storedDocNumber = localStorage.getItem(LOCAL_STORAGE_DOCUMENT_NUMBER_KEY);
     if (storedDocNumber) setDocumentNumber(storedDocNumber);
+
+    const storedSusCardNumber = localStorage.getItem(LOCAL_STORAGE_SUS_CARD_NUMBER_KEY);
+    if (storedSusCardNumber) setSusCardNumber(storedSusCardNumber);
     
     const storedCity = localStorage.getItem(LOCAL_STORAGE_CITY_KEY);
     if (storedCity) setCity(storedCity);
@@ -181,6 +186,7 @@ export default function HomePage() {
     newGender?: string, 
     newDocType?: string, 
     newDocNumber?: string, 
+    newSusCardNumber?: string,
     newCity?: string,
     newDob?: Date,
     newBloodType?: string,
@@ -192,6 +198,7 @@ export default function HomePage() {
       gender: newGender,
       documentType: newDocType,
       documentNumber: newDocNumber,
+      susCardNumber: newSusCardNumber,
       city: newCity,
       dateOfBirth: newDob,
       bloodType: newBloodType,
@@ -229,6 +236,14 @@ export default function HomePage() {
     } else {
         localStorage.removeItem(LOCAL_STORAGE_DOCUMENT_NUMBER_KEY);
         setDocumentNumber('');
+    }
+
+    if (profile.susCardNumber) {
+        localStorage.setItem(LOCAL_STORAGE_SUS_CARD_NUMBER_KEY, profile.susCardNumber);
+        setSusCardNumber(profile.susCardNumber);
+    } else {
+        localStorage.removeItem(LOCAL_STORAGE_SUS_CARD_NUMBER_KEY);
+        setSusCardNumber('');
     }
     
     if (profile.city) {
@@ -306,6 +321,7 @@ export default function HomePage() {
         userPhoneNumber: userPhoneNumber,
         documentType: documentType,
         documentNumber: documentNumber,
+        susCardNumber: susCardNumber,
         city: city,
         bloodType: bloodType,
         sendDocumentsConfirmed: sendDocumentsConfirmed,
@@ -396,6 +412,7 @@ export default function HomePage() {
             initialGender={gender}
             initialDocumentType={documentType}
             initialDocumentNumber={documentNumber}
+            initialSusCardNumber={susCardNumber}
             initialCity={city}
             initialDateOfBirth={dateOfBirth}
             initialBloodType={bloodType}
@@ -426,6 +443,7 @@ export default function HomePage() {
             gender={gender}
             documentType={documentType}
             documentNumber={documentNumber}
+            susCardNumber={susCardNumber}
             city={city}
             dateOfBirth={dateOfBirth}
             bloodType={bloodType}
@@ -514,3 +532,5 @@ export default function HomePage() {
     </>
   );
 }
+
+    

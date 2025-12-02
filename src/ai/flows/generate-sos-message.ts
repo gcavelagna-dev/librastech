@@ -24,8 +24,9 @@ const GenerateSosMessageInputSchema = z.object({
   gender: z.string().optional().describe('The gender of the user.'),
   dateOfBirth: z.string().optional().describe("A data de nascimento do usuário no formato dd/MM/yyyy."),
   userPhoneNumber: z.string().optional().describe('The registered phone number of the user, if available.'),
-  documentType: z.string().optional().describe('The type of document provided by the user (e.g., RG, CPF, Cartão do SUS).'),
+  documentType: z.string().optional().describe('The type of document provided by the user (e.g., RG, CPF, CIN).'),
   documentNumber: z.string().optional().describe('The number of the document provided by the user.'),
+  susCardNumber: z.string().optional().describe('The National Health Card (Cartão do SUS) number of the user.'),
   city: z.string().optional().describe('The city of the user.'),
   bloodType: z.string().optional().describe('The blood type of the user.'),
   sendDocumentsConfirmed: z.boolean().optional().describe('Whether the user confirmed sending document info.'),
@@ -68,6 +69,7 @@ Exemplo de dados:
 {{#if latitude}}- Localização no mapa: https://www.google.com/maps?q={{latitude}},{{longitude}}{{/if}}
 - Tipo de emergência: {{emergencyType}} - {{subEmergencyType}}
 {{#if isBleeding}}{{#if isVictim}}{{#if bloodType}}- INFORMAÇÃO CRÍTICA: Há sangramento! Tipo sanguíneo da vítima: {{bloodType}}.{{else}}- INFORMAÇÃO CRÍTICA: Há sangramento no local.{{/if}}{{else}}- INFORMAÇÃO CRÍTICA: Há sangramento no local.{{/if}}{{/if}}
+{{#if susCardNumber}}- Cartão do SUS: {{susCardNumber}}{{/if}}
 {{#if userPhoneNumber}}- Número de contato: {{userPhoneNumber}}{{/if}}
 {{#if gender}}- Sexo: {{gender}}{{/if}}
 {{#if dateOfBirth}}- Data de Nascimento: {{dateOfBirth}}{{/if}}
@@ -94,3 +96,5 @@ const generateSosMessageFlow = ai.defineFlow(
     return output!;
   }
 );
+
+    
