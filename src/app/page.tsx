@@ -167,7 +167,7 @@ export default function HomePage() {
           }
         },
         (error) => {
-          console.error("Erro na geolocalização:", error.code, error.message);
+          console.warn("Erro na geolocalização:", error.code, error.message);
           setLocation('Não foi possível obter a localização. Verifique as permissões.');
         }
       );
