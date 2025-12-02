@@ -150,12 +150,16 @@ export function WelcomeScreen({
               </div>
               <div className="space-y-2">
                 <Label>Tipo de Documento</Label>
-                <RadioGroup
+                 <RadioGroup
                   onValueChange={setDocumentType}
                   value={documentType}
-                  className="flex space-x-4 pt-2"
+                  className="flex flex-wrap gap-x-4 gap-y-2 pt-2"
                   aria-label="Tipo de Documento"
                 >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Cartão do SUS" id="sus" />
+                    <Label htmlFor="sus">Cartão do SUS</Label>
+                  </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="RG" id="rg" />
                     <Label htmlFor="rg">RG</Label>
@@ -256,7 +260,7 @@ export function WelcomeScreen({
                         <div>
                              <Label htmlFor="send-documents" className="font-semibold">Enviar meu documento na mensagem?</Label>
                              <p className="text-xs text-muted-foreground">
-                                Confirme para incluir seu RG/CPF na mensagem SOS.
+                                Confirme para incluir seu documento na mensagem SOS.
                              </p>
                         </div>
                     </div>

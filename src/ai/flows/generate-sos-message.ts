@@ -24,7 +24,7 @@ const GenerateSosMessageInputSchema = z.object({
   gender: z.string().optional().describe('The gender of the user.'),
   dateOfBirth: z.string().optional().describe("A data de nascimento do usuário no formato dd/MM/yyyy."),
   userPhoneNumber: z.string().optional().describe('The registered phone number of the user, if available.'),
-  documentType: z.string().optional().describe('The type of document provided by the user (e.g., RG, CPF).'),
+  documentType: z.string().optional().describe('The type of document provided by the user (e.g., RG, CPF, Cartão do SUS).'),
   documentNumber: z.string().optional().describe('The number of the document provided by the user.'),
   city: z.string().optional().describe('The city of the user.'),
   bloodType: z.string().optional().describe('The blood type of the user.'),
