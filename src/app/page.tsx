@@ -44,8 +44,6 @@ const LOCAL_STORAGE_BLOOD_TYPE_KEY = 'LibrasTech_BloodType';
 const LOCAL_STORAGE_SEND_DOCUMENTS_KEY = 'LibrasTech_SendDocuments';
 const LOCAL_STORAGE_IS_DEAF_KEY = 'LibrasTech_IsDeaf';
 
-
-// Deprecated keys for migration
 const OLD_LOCAL_STORAGE_TRUSTED_CONTACT_NAME_KEY = 'LibrasTech_TrustedContactName';
 const OLD_LOCAL_STORAGE_TRUSTED_CONTACT_PHONE_KEY = 'LibrasTech_TrustedContactPhone';
 
@@ -80,14 +78,13 @@ export default function HomePage() {
   const [isTutorialDialogVisible, setIsTutorialDialogVisible] = useState(false);
   const [showSplashScreen, setShowSplashScreen] = useState(true);
 
-
   const isMobile = useIsMobile();
   const { toast } = useToast();
 
   useEffect(() => {
     const splashTimer = setTimeout(() => {
       setShowSplashScreen(false);
-    }, 3000); // 3 seconds
+    }, 3000);
 
     return () => clearTimeout(splashTimer);
   }, []);
@@ -98,7 +95,6 @@ export default function HomePage() {
     const storedName = localStorage.getItem(LOCAL_STORAGE_USER_NAME_KEY);
     if (storedName) {
       setUserName(storedName);
-      // Only proceed if the user is already set up
       setCurrentStep('emergency');
     }
 
@@ -137,7 +133,6 @@ export default function HomePage() {
         setIsDeaf(JSON.parse(storedIsDeaf));
     }
 
-    // Handle trusted contacts (new array format with migration from old format)
     const storedContacts = localStorage.getItem(LOCAL_STORAGE_TRUSTED_CONTACTS_KEY);
     if (storedContacts) {
       setTrustedContacts(JSON.parse(storedContacts));
@@ -180,6 +175,87 @@ export default function HomePage() {
       setLocation('Geolocalização não suportada neste navegador');
     }
   }, []);
+
+  const generateFallbackMessage = () => {
+    const emergencyMap: Record<string, string> = {
+      Fire: "Bombeiros",
+      Medical: "SAMU",
+      PublicSafety: "Polícia Militar",
+    };
+    
+    const translatedType = emergencyMap[emergencyType] || emergencyType;
+    const deafAlert = isDeaf ? "ATENÇÃO: Vítima surda.\n" : "";
+    const victimInfo = isVictim ? "Vítima" : "Relatando p/ terceiro";
+    const mapsLink = coordinates ? `\nLink do mapa: https://www.google.com/maps?q=${coordinates.latitude},${coordinates.longitude}` : "";
+    const bleedingInfo = isBleeding ? `\nHá SANGRAMENTO no local!${isVictim && bloodType ? ` Tipo: ${bloodType}` : ''}` : "";
+    const docInfo = (sendDocumentsConfirmed && documentType && documentNumber) ? `\nDocumento: ${documentType} - ${documentNumber}` : "";
+    const susInfo = susCardNumber ? `\nCartão SUS: ${susCardNumber}` : "";
+    
+    return `${deafAlert}SOLICITAÇÃO DE EMERGÊNCIA (${translatedType})
+Nome: ${userName} (${victimInfo})
+Local: ${location}${mapsLink}${bleedingInfo}${susInfo}${docInfo}
+Mensagem gerada via App LibrasTech.`;
+  };
+
+  const handleGenerateSos = async () => {
+    if (!userName || !location || !emergencyType || !subEmergencyType) {
+      toast({
+        title: "Dados Incompletos",
+        description: "Por favor, preencha todas as informações antes de gerar a mensagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsLoading(true);
+    setSosMessage(null); 
+    try {
+      const input: GenerateSosMessageInput = {
+        userName,
+        location,
+        latitude: coordinates?.latitude,
+        longitude: coordinates?.longitude,
+        emergencyType,
+        subEmergencyType,
+        gender: gender,
+        dateOfBirth: dateOfBirth,
+        userPhoneNumber: userPhoneNumber,
+        documentType: documentType,
+        documentNumber: documentNumber,
+        susCardNumber: susCardNumber,
+        city: city,
+        bloodType: bloodType,
+        sendDocumentsConfirmed: sendDocumentsConfirmed,
+        isDeaf: isDeaf,
+        isDesktop: !isMobile,
+        isVictim: isVictim,
+        isBleeding: isBleeding,
+      };
+      const result = await generateSosMessage(input);
+      setSosMessage(result.sosMessage);
+    } catch (error: any) {
+      console.warn('Erro ao gerar mensagem via IA (provável cota excedida):', error);
+      
+      const isQuotaError = error?.message?.includes('429') || error?.message?.toLowerCase().includes('quota');
+      
+      if (isQuotaError) {
+        const fallback = generateFallbackMessage();
+        setSosMessage(fallback);
+        toast({
+          title: "Aviso de Sistema",
+          description: "O sistema de IA está sobrecarregado. Geramos uma mensagem de segurança automática para você não ficar sem ajuda.",
+        });
+      } else {
+        setSosMessage(`Erro ao gerar mensagem. Tente novamente.`);
+        toast({
+          title: "Erro de Geração",
+          description: "Não foi possível gerar a mensagem. Verifique sua conexão.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSaveName = (
     newName: string, 
@@ -285,7 +361,7 @@ export default function HomePage() {
   const handleSelectEmergency = (type: string, colorClass: string) => {
     setEmergencyType(type);
     setEmergencyColor(colorClass);
-    setSubEmergencyStep('main'); // Reset sub-emergency step on new emergency selection
+    setSubEmergencyStep('main'); 
     setCurrentStep('sub-emergency');
   };
 
@@ -294,61 +370,7 @@ export default function HomePage() {
     setIsVictim(isVictim);
     setIsBleeding(isBleeding);
     setCurrentStep('sos');
-    setSosMessage(null); // Clear previous message
-  };
-
-  const handleGenerateSos = async () => {
-    if (!userName || !location || !emergencyType || !subEmergencyType) {
-      toast({
-        title: "Dados Incompletos",
-        description: "Por favor, preencha todas as informações antes de gerar a mensagem.",
-        variant: "destructive",
-      });
-      return;
-    }
-    setIsLoading(true);
     setSosMessage(null); 
-    try {
-      const input: GenerateSosMessageInput = {
-        userName,
-        location,
-        latitude: coordinates?.latitude,
-        longitude: coordinates?.longitude,
-        emergencyType,
-        subEmergencyType,
-        gender: gender,
-        dateOfBirth: dateOfBirth,
-        userPhoneNumber: userPhoneNumber,
-        documentType: documentType,
-        documentNumber: documentNumber,
-        susCardNumber: susCardNumber,
-        city: city,
-        bloodType: bloodType,
-        sendDocumentsConfirmed: sendDocumentsConfirmed,
-        isDeaf: isDeaf,
-        isDesktop: !isMobile,
-        isVictim: isVictim,
-        isBleeding: isBleeding,
-      };
-      const result = await generateSosMessage(input);
-      setSosMessage(result.sosMessage);
-    } catch (error: any) {
-      console.error('Erro ao gerar mensagem SOS:', error);
-      
-      let errorMsg = "Ocorreu um erro ao tentar gerar a mensagem.";
-      if (error?.message?.includes('429') || error?.message?.toLowerCase().includes('quota')) {
-        errorMsg = "O sistema de IA está sobrecarregado. Por favor, aguarde cerca de 30 segundos e tente novamente.";
-      }
-      
-      setSosMessage(`Erro: ${errorMsg}`);
-      toast({
-        title: "Erro de Geração",
-        description: errorMsg,
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handleBack = () => {
@@ -394,10 +416,6 @@ export default function HomePage() {
     const targetPhoneNumber = "554399054151";
     const whatsappUrl = `https://wa.me/${targetPhoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
-    toast({
-        title: "Enviando para o WhatsApp",
-        description: `Abrindo conversa para enviar a mensagem.`,
-    });
   };
   
   const handleSendToTrustedContact = (phone: string, message: string) => {
@@ -469,11 +487,6 @@ export default function HomePage() {
         return <WelcomeScreen onNameSave={handleSaveName} />;
     }
   };
-  
-  const handlePhoneNumberSave = (number: string) => {
-      handleSavePhoneNumber(number);
-      setShowPhoneNumberPrompt(false);
-  }
 
   if (showSplashScreen) {
     return <SplashScreen />;
