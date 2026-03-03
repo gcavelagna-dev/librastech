@@ -336,7 +336,7 @@ export default function HomePage() {
       console.error('Erro ao gerar mensagem SOS:', error);
       
       let errorMsg = "Ocorreu um erro ao tentar gerar a mensagem.";
-      if (error?.message?.includes('429')) {
+      if (error?.message?.includes('429') || error?.message?.toLowerCase().includes('quota')) {
         errorMsg = "O sistema de IA está sobrecarregado. Por favor, aguarde cerca de 30 segundos e tente novamente.";
       }
       
