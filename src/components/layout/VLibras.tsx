@@ -68,13 +68,13 @@ export default function VLibras() {
                 new window.VLibras.Widget('https://vlibras.gov.br/app');
                 isInitialized.current = true;
             } catch(e) {
-                console.error("Erro ao inicializar o widget VLibras", e);
+                console.warn("Erro ao inicializar o widget VLibras", e);
                 cleanupVLibras(); // Limpa se a inicialização falhar
             }
           }
         };
         script.onerror = () => {
-            console.warn("Falha ao carregar o script do VLibras.");
+            console.warn("Falha ao carregar o script do VLibras. O serviço pode estar instável.");
             cleanupVLibras(); // Limpa se o script não carregar
         }
         document.body.appendChild(script);
@@ -86,18 +86,16 @@ export default function VLibras() {
     // Configura um intervalo para verificar se o widget ainda está ativo.
     // Isso ajuda a recuperá-lo se ele for removido por alguma renderização do React.
     const intervalId = setInterval(() => {
-        if (isInitialized.current && !vLibrasIsActive()) {
-            console.log("VLibras widget não encontrado, tentando reinstalar.");
+        if (!vLibrasIsActive()) {
+            // Tenta reinstalar se não estiver ativo, independentemente de tentativas anteriores
             initVLibras();
         }
-    }, 3000); // Verifica a cada 3 segundos
+    }, 5000); // Verifica a cada 5 segundos
 
 
     // Função de limpeza para quando o componente for desmontado
     return () => {
       clearInterval(intervalId);
-      // Não removemos na desmontagem para persistir entre navegações de página
-      // cleanupVLibras(); 
     };
   }, []);
 

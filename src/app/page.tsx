@@ -167,7 +167,7 @@ export default function HomePage() {
             });
             setLocation(result.address);
           } catch (error) {
-            console.error("Erro na geocodificação reversa:", error);
+            console.warn("Erro na geocodificação reversa:", error);
             setLocation(`Lat: ${position.coords.latitude}, Lon: ${position.coords.longitude}`);
           }
         },
@@ -332,12 +332,18 @@ export default function HomePage() {
       };
       const result = await generateSosMessage(input);
       setSosMessage(result.sosMessage);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao gerar mensagem SOS:', error);
-      setSosMessage('Erro: Não foi possível gerar a mensagem. Tente novamente.');
+      
+      let errorMsg = "Ocorreu um erro ao tentar gerar a mensagem.";
+      if (error?.message?.includes('429')) {
+        errorMsg = "O sistema de IA está sobrecarregado. Por favor, aguarde cerca de 30 segundos e tente novamente.";
+      }
+      
+      setSosMessage(`Erro: ${errorMsg}`);
       toast({
         title: "Erro de Geração",
-        description: "Ocorreu um erro ao tentar gerar a mensagem de SOS.",
+        description: errorMsg,
         variant: "destructive",
       });
     } finally {
@@ -532,5 +538,3 @@ export default function HomePage() {
     </>
   );
 }
-
-    
